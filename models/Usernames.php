@@ -22,7 +22,7 @@ class Usernames extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'tlgrm_usernames';
+        return '{{%tlgrm_usernames}}';
     }
 
     /**

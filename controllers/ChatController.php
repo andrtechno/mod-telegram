@@ -1,12 +1,6 @@
 <?php
-/**
- * @copyright Copyright &copy; Alexandr Kozhevnikov (onmotion)
- * @package yii2-telegram
- * Date: 02.08.2016
- */
 
 namespace panix\mod\telegram\controllers;
-
 
 use panix\mod\telegram\Commands\YiiChatCommand;
 use panix\mod\telegram\models\Message;
@@ -22,7 +16,7 @@ class ChatController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'send-msg' => ['post'],
                     'get-all-messages' => ['post'],

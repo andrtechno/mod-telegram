@@ -22,7 +22,7 @@ class AuthorizedManagerChat extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'tlgrm_auth_mngr_chats';
+        return '{{%tlgrm_auth_mngr_chats}}';
     }
 
     /**
