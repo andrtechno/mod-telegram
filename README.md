@@ -1,5 +1,9 @@
 # **Telegram support Bot for Yii2**
-[![Latest Stable Version](https://poser.pugx.org/onmotion/yii2-telegram/v/stable)](https://packagist.org/packages/onmotion/yii2-telegram) [![Total Downloads](https://poser.pugx.org/onmotion/yii2-telegram/downloads)](https://packagist.org/packages/onmotion/yii2-telegram) [![License](https://poser.pugx.org/onmotion/yii2-telegram/license)](https://packagist.org/packages/onmotion/yii2-telegram) [![Daily Downloads](https://poser.pugx.org/onmotion/yii2-telegram/d/daily)](https://packagist.org/packages/onmotion/yii2-telegram) [![Monthly Downloads](https://poser.pugx.org/onmotion/yii2-telegram/d/monthly)](https://packagist.org/packages/onmotion/yii2-telegram)
+[![Latest Stable Version](https://poser.pugx.org/panix/mod-telegram/v/stable)](https://packagist.org/packages/panix/mod-telegram)
+[![Total Downloads](https://poser.pugx.org/panix/mod-telegram/downloads)](https://packagist.org/packages/panix/mod-telegram)
+[![License](https://poser.pugx.org/panix/mod-telegram/license)](https://packagist.org/packages/panix/mod-telegram)
+[![Daily Downloads](https://poser.pugx.org/panix/mod-telegram/d/daily)](https://packagist.org/packages/panix/mod-telegram)
+[![Monthly Downloads](https://poser.pugx.org/panix/mod-telegram/d/monthly)](https://packagist.org/packages/panix/mod-telegram)
 
 **Support chat for site based on Telegram bot**
 
@@ -15,7 +19,7 @@ The preferred way to install this extension is through [composer](http://getcomp
 Run
 
 
-    composer require onmotion/yii2-telegram
+    composer require panix/mod-telegram
 
  
  add to your web config:
@@ -82,15 +86,15 @@ Now you can place where you want
 
 in bottom right corner you can see:
 
-![chat button](https://github.com/onmotion/yii2-telegram/blob/wiki/_wiki/04.png?raw=true)
+![chat button](https://github.com/panix/mod-telegram/blob/wiki/_wiki/04.png?raw=true)
 
 if you click it:
 
-![client chat](https://github.com/onmotion/yii2-telegram/blob/wiki/_wiki/03.png?raw=true)
+![client chat](https://github.com/panix/mod-telegram/blob/wiki/_wiki/03.png?raw=true)
 
 and server side:
 
-![client chat](https://github.com/onmotion/yii2-telegram/blob/wiki/_wiki/02.png?raw=true)
+![client chat](https://github.com/panix/mod-telegram/blob/wiki/_wiki/02.png?raw=true)
 
 If you want to limit the storage period of messages history, add to you crontab:
 
