@@ -66,7 +66,7 @@ class YiiChatCommand
             if (empty($authChats)) {
                 $waitMessage = new Message();
                 $waitMessage->client_chat_id = $tlgrmChatId;
-                $waitMessage->message = Yii::t('tlgrm', 'At the moment, there are no available operators. Please, try to write later.');
+                $waitMessage->message = Yii::t('telegram/default', 'At the moment, there are no available operators. Please, try to write later.');
                 $waitMessage->direction = 1;
                 $waitMessage->time = date("Y-m-d H:i:s", time() + 1);
                 $waitMessage->save();
@@ -77,11 +77,11 @@ class YiiChatCommand
             } catch (\Exception $e){
                 $yiiUsername = 'guest';
             }
-            $data['text'] = $yiiUsername . Yii::t('tlgrm', " writes:") . "\r\n>" . $data['text'];
+            $data['text'] = $yiiUsername . Yii::t('telegram/default', " writes:") . "\r\n>" . $data['text'];
             foreach ($authChats as $authChat) {
                 $data['chat_id'] = $authChat->chat_id;
                 $inline_keyboard = [
-                    new InlineKeyboardButton(['text' => Yii::t('tlgrm', 'Start conversation'), 'callback_data' => 'client_chat_id ' . $tlgrmChatId]),
+                    new InlineKeyboardButton(['text' => Yii::t('telegram/default', 'Start conversation'), 'callback_data' => 'client_chat_id ' . $tlgrmChatId]),
                 ];
                 $data['reply_markup'] = new InlineKeyboardMarkup(
                     ['inline_keyboard' => [$inline_keyboard]]);

@@ -30,7 +30,7 @@ class HelpCommand extends UserCommand
 
     public function __construct($telegram, $update = NULL)
     {
-        $this->description = \Yii::t('tlgrm', 'Show bot commands help');
+        $this->description = \Yii::t('telegram/default', 'Show bot commands help');
         parent::__construct($telegram, $update);
     }
 

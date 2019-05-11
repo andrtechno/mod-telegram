@@ -43,21 +43,12 @@ class Module extends \yii\base\Module implements \yii\base\BootstrapInterface
 
         parent::init();
 
-        // set up i8n
-        if (empty(\Yii::$app->i18n->translations['tlgrm'])) {
-            \Yii::$app->i18n->translations['tlgrm'] = [
-                'class' => 'yii\i18n\PhpMessageSource',
-                'basePath' => __DIR__ . '/messages',
-                //'forceTranslation' => true,
-            ];
-        }
-
         $this->options = [
             'initChat' => Url::to(['/telegram/default/init-chat']),
             'destroyChat' => Url::to(['/telegram/default/destroy-chat']),
             'getAllMessages' => Url::to(['/telegram/chat/get-all-messages']),
             'getLastMessages' => Url::to(['/telegram/chat/get-last-messages']),
-            'initialMessage' => \Yii::t('tlgrm', 'Write your question...'),
+            'initialMessage' => \Yii::t('telegram/default', 'Write your question...'),
         ];
 
     }

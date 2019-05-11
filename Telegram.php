@@ -14,14 +14,6 @@ class Telegram extends \yii\base\Widget
 
     public function init()
     {
-        if (empty(\Yii::$app->i18n->translations['tlgrm'])) {
-            \Yii::$app->i18n->translations['tlgrm'] = [
-                'class' => 'yii\i18n\PhpMessageSource',
-                'basePath' => __DIR__ . '/messages',
-                //'forceTranslation' => true,
-            ];
-        }
-
         parent::init();
     }
 

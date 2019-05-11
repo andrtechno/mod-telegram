@@ -1,6 +1,6 @@
 <?php
 
-namespace Longman\TelegramBot\Commands\UserCommands;
+namespace panix\mod\telegram\Commands\UserCommands;
 
 use panix\mod\telegram\models\Actions;
 use panix\mod\telegram\models\AuthorizedManagerChat;
@@ -25,7 +25,7 @@ class LoginCommand extends UserCommand
     
     public function __construct($telegram, $update = NULL)
     {
-        $this->description = \Yii::t('tlgrm', 'Login to the support system');
+        $this->description = \Yii::t('telegram/default', 'Login to the support system');
         parent::__construct($telegram, $update);
     }
 
@@ -38,13 +38,13 @@ class LoginCommand extends UserCommand
         $chat = $message->getChat();
         $username = $chat->getFirstName() . ' ' . $chat->getLastName() . ' (@' . $chat->getUsername() . ')';
         $chat_id = $chat->getId();
-        $text = Yii::t('tlgrm', 'Enter passphrase:');
+        $text = Yii::t('telegram/default', 'Enter passphrase:');
         $userId = $message->getFrom()->getId();
         $authChat = AuthorizedManagerChat::findOne($chat_id);
         if ($authChat) {
             $data = [
                 'chat_id' => $chat_id,
-                'text' => Yii::t('tlgrm', 'You are already logged in as ') . $username,
+                'text' => Yii::t('telegram/default', 'You are already logged in as ') . $username,
             ];
             return Request::sendMessage($data);
         } else {

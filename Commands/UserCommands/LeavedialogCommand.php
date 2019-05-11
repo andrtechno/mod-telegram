@@ -31,7 +31,7 @@ class LeavedialogCommand extends UserCommand
 
     public function __construct($telegram, $update = NULL)
     {
-        $this->description = Yii::t('tlgrm', 'End the currently active conversation and switch to standby mode.');
+        $this->description = Yii::t('telegram/default', 'End the currently active conversation and switch to standby mode.');
         parent::__construct($telegram, $update);
     }
 
@@ -48,15 +48,15 @@ class LeavedialogCommand extends UserCommand
         ];
         $authChat = AuthorizedManagerChat::findOne($chat_id);
         if (!$authChat){
-            $data['text'] = Yii::t('tlgrm', 'You are not authorized!');
+            $data['text'] = Yii::t('telegram/default', 'You are not authorized!');
         }else {
             $currantChat = $authChat->client_chat_id;
             if ($currantChat) {
-                $data['text'] = Yii::t('tlgrm', 'Completed conversation in chat ') . $currantChat;
+                $data['text'] = Yii::t('telegram/default', 'Completed conversation in chat ') . $currantChat;
                 $authChat->client_chat_id = null;
                 $authChat->save();
             } else {
-                $data['text'] = Yii::t('tlgrm', 'You have no active conversations.');
+                $data['text'] = Yii::t('telegram/default', 'You have no active conversations.');
             }
         }
         return Request::sendMessage($data);

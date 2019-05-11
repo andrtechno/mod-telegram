@@ -51,7 +51,7 @@ class CallbackqueryCommand extends SystemCommand
             $authChat = AuthorizedManagerChat::findOne(intval($chatId));
             $authChat->client_chat_id = $callbackDataArr[1];
             if ($authChat->validate() && $authChat->save()){
-                $data['text'] = Yii::t('tlgrm', 'Start conversation with chat ') . $callbackDataArr[1];
+                $data['text'] = Yii::t('telegram/default', 'Start conversation with chat ') . $callbackDataArr[1];
                 Request::answerCallbackQuery($data);
                 unset($data['show_alert'], $data['callback_query_id']);
                 $data['chat_id'] = $chatId;
@@ -60,9 +60,9 @@ class CallbackqueryCommand extends SystemCommand
                 try {
                     $authChat = AuthorizedManagerChat::find()->where(['client_chat_id' => $callbackDataArr[1]])->one();
                     $manager = Usernames::find()->where(['chat_id' => $authChat->chat_id])->one();
-                    $data['text'] = Yii::t('tlgrm', 'Conversation already in progress in this chat. Responsible: ') . ($manager->username ? $manager->username : "not_found");
+                    $data['text'] = Yii::t('telegram/default', 'Conversation already in progress in this chat. Responsible: ') . ($manager->username ? $manager->username : "not_found");
                 } catch (\Exception $e){
-                    $data['text'] = Yii::t('tlgrm', 'Seems conversation already in progress in this chat.');
+                    $data['text'] = Yii::t('telegram/default', 'Seems conversation already in progress in this chat.');
                 }
                     unset($data['show_alert'], $data['callback_query_id']);
                     $data['chat_id'] = $chatId;
@@ -70,7 +70,7 @@ class CallbackqueryCommand extends SystemCommand
                 return Request::sendMessage($data);
             }
         } else {
-            $data['text'] = Yii::t('tlgrm', 'Unknown command.');
+            $data['text'] = Yii::t('telegram/default', 'Unknown command.');
             $data['show_alert'] = false;
             return Request::answerCallbackQuery($data);
         }

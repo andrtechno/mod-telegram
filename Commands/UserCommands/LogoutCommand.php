@@ -37,7 +37,7 @@ class LogoutCommand extends UserCommand
 
     public function __construct($telegram, $update = NULL)
     {
-        $this->description = \Yii::t('tlgrm', 'Logout from the support system.');
+        $this->description = \Yii::t('telegram/default', 'Logout from the support system.');
         parent::__construct($telegram, $update);
     }
 
@@ -54,7 +54,7 @@ class LogoutCommand extends UserCommand
         if (!$authChat){
             $data = [
                 'chat_id' => $chat_id,
-                'text'    => Yii::t('tlgrm', 'You are not logged in.'),
+                'text'    => Yii::t('telegram/default', 'You are not logged in.'),
             ];
         }else{
             $authChat->delete();
@@ -62,7 +62,7 @@ class LogoutCommand extends UserCommand
             if ($dbUsername) $dbUsername->delete();
             $data = [
                 'chat_id' => $chat_id,
-                'text'    => Yii::t('tlgrm', 'You will no longer receive messages.'),
+                'text'    => Yii::t('telegram/default', 'You will no longer receive messages.'),
             ];
         }
         
