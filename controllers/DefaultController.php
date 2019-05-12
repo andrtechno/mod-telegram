@@ -3,12 +3,14 @@
 
 namespace panix\mod\telegram\controllers;
 
+use Yii;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Telegram;
 use yii\base\UserException;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
+use yii\web\Response;
 
 define('API_KEY', \Yii::$app->modules['telegram']->API_KEY);
 define('BOT_NAME', \Yii::$app->modules['telegram']->BOT_NAME);
@@ -65,6 +67,7 @@ class DefaultController extends Controller
     }
 
     public function actionSetWebhook(){
+        Yii::$app->response->format = Response::FORMAT_HTML;
         try {
             // Create Telegram API object
             $telegram = new Telegram(API_KEY, BOT_NAME);
@@ -79,14 +82,20 @@ class DefaultController extends Controller
             // Set webhook
             $result = $telegram->setWebHook(hook_url);
             if ($result->isOk()) {
-                echo $result->getDescription();
+                return $result->getDescription();
             }
         } catch (TelegramException $e) {
-            echo $e->getMessage();
+            return $e->getMessage();
         }
         return null;
     }
+
+    /**
+     * @return null|string
+     * @throws ForbiddenHttpException
+     */
     public function actionUnsetWebhook(){
+        Yii::$app->response->format = Response::FORMAT_HTML;
         if (\Yii::$app->user->isGuest) throw new ForbiddenHttpException();
         try {
             // Create Telegram API object
@@ -96,10 +105,10 @@ class DefaultController extends Controller
             $result = $telegram->unsetWebHook();
 
             if ($result->isOk()) {
-                echo $result->getDescription();
+                return $result->getDescription();
             }
         } catch (TelegramException $e) {
-            echo $e->getMessage();
+            return $e->getMessage();
         }
     }
 
@@ -108,13 +117,14 @@ class DefaultController extends Controller
             // Create Telegram API object
             $telegram = new Telegram(API_KEY, BOT_NAME);
             $basePath = \Yii::$app->getModule('telegram')->basePath;
-//            $commandsPath = realpath($basePath . '/Commands/SystemCommands');
-            $commandsPath = realpath($basePath . '/Commands/UserCommands');
+//            $commandsPath = realpath($basePath . '/commands/SystemCommands');
+            $commandsPath = realpath($basePath . '/commands/UserCommands');
             $telegram->addCommandsPath($commandsPath);
             if (!empty(\Yii::$app->modules['telegram']->userCommandsPath)){
                 if(!$commandsPath = realpath(\Yii::getAlias(\Yii::$app->modules['telegram']->userCommandsPath))){
                     $commandsPath = realpath(\Yii::getAlias('@app') . \Yii::$app->modules['telegram']->userCommandsPath);
                 }
+
                 $telegram->addCommandsPath($commandsPath);
             }
             // Handle telegram webhook request
