@@ -1,9 +1,8 @@
 <?php
-/**
- * Message translations.
- *
- */
+
 return [
+    'MODULE_NAME'=>'Telegram Бот',
+    'MODULE_DESC'=>'Модуль управление Telegram ботом',
     'At the moment, there are no available operators. Please, try to write later.' => 'На данный момент нет свободных операторов. Попробуйте написать позже.',
     'Start conversation with chat ' => 'Начат диалог с чатом ',
 	'Start conversation' => 'Начать диалог',

@@ -2,18 +2,20 @@
 
 namespace panix\mod\telegram;
 
+use Yii;
 use yii\base\UserException;
 use yii\helpers\Url;
+use panix\engine\WebModule;
 
 /**
  * telegram module definition class
  */
-class Module extends \yii\base\Module implements \yii\base\BootstrapInterface
+class Module extends WebModule implements \yii\base\BootstrapInterface
 {
-    public $API_KEY = null;
-    public $BOT_NAME = null;
+    public $api_token = null;
+    public $bot_name = null;
     public $hook_url = null;
-    public $PASSPHRASE = null;
+    public $password = null;
     public $userCommandsPath = null;
     public $timeBeforeResetChatHandler = 0;
     public $db = 'db';
@@ -29,11 +31,22 @@ class Module extends \yii\base\Module implements \yii\base\BootstrapInterface
      */
     public function init()
     {
-        if (empty($this->API_KEY) || empty($this->BOT_NAME) || empty($this->hook_url))
-            throw new UserException('You must set API_KEY, BOT_NAME, hook_url');
-        if (empty($this->PASSPHRASE))
-            throw new UserException('You must set PASSPHRASE');
+        $config = Yii::$app->settings->get('telegram');
 
+        if (isset($config->api_token))
+            $this->api_token = $config->api_token;
+
+        if (isset($config->bot_name))
+            $this->bot_name = $config->bot_name;
+
+        if (isset($config->password))
+            $this->password = $config->password;
+
+
+        if (empty($this->hook_url))
+            throw new UserException('You must set hook_url');
+        if (empty($config->password))
+            throw new UserException('You must set PASSPHRASE');
 
 
         parent::init();
@@ -50,8 +63,32 @@ class Module extends \yii\base\Module implements \yii\base\BootstrapInterface
 
     public function bootstrap($app)
     {
+        $config = Yii::$app->settings->get('telegram');
         if ($app instanceof \yii\console\Application) {
             $this->controllerNamespace = 'panix\mod\telegram\commands';
         }
+
+
+        $app->setComponents([
+            'telegram' => [
+                'class' => 'panix\mod\telegram\components\Telegram',
+                'botToken' => $config->api_token,
+            ]
+        ]);
+
     }
+
+
+    public function getInfo()
+    {
+        return [
+            'label' => Yii::t('telegram/default', 'MODULE_NAME'),
+            'author' => $this->author,
+            'version' => '1.0',
+            'icon' => $this->icon,
+            'description' => Yii::t('telegram/default', 'MODULE_DESC'),
+            'url' => ['/admin/telegram'],
+        ];
+    }
+
 }
