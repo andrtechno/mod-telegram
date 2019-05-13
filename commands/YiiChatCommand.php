@@ -18,7 +18,7 @@ class YiiChatCommand
      */
     public static function sendToAuthorized($message)
     {
-        $telegram = new Telegram(\Yii::$app->modules['telegram']->API_KEY, \Yii::$app->modules['telegram']->BOT_NAME);
+        $telegram = new Telegram(\Yii::$app->modules['telegram']->api_token, \Yii::$app->modules['telegram']->bot_name);
         $data = [];
 
         $session = \Yii::$app->session;

@@ -7,7 +7,7 @@ use yii\web\Cookie;
 use yii\widgets\ActiveForm;
 use Yii;
 
-class Telegram extends \yii\base\Widget
+class TelegramWidget extends \yii\base\Widget
 {
 
     public static $tlgrmChatId = null;

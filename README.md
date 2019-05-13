@@ -82,7 +82,7 @@ go to https://yourhost.com/telegram/default/set-webhook (if not prettyUrl https:
 
 Now you can place where you want
 
-    echo \panix\mod\telegram\Telegram::widget(); //that add chat button in the page
+    echo \panix\mod\telegram\TelegramWidget::widget(); //that add chat button in the page
 
 in bottom right corner you can see:
 
