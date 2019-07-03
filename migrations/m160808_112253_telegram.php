@@ -12,12 +12,10 @@ class m160808_112253_telegram extends Migration
     public function safeUp()
     {
         $this->createTable('{{%tlgrm_actions}}', [
-            'chat_id' => $this->integer(11),
+            'chat_id' => $this->primaryKey(),
             'action' => $this->string(62),
-            'param' => $this->string(62),
-
+            'param' => $this->string(62)
         ]);
-        $this->addPrimaryKey('tlgrm_actions_PK', '{{%tlgrm_actions}}', 'chat_id');
 
 
         $this->createTable('{{%tlgrm_messages}}', [
