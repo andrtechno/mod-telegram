@@ -13,7 +13,7 @@ class DefaultController extends AdminController
 
     public function actionIndex()
     {
-        $this->pageName = Yii::t('app', 'SETTINGS');
+        $this->pageName = Yii::t('app/default', 'SETTINGS');
         $this->breadcrumbs = [
             [
                 'label' => $this->module->info['label'],
