@@ -12,6 +12,9 @@ namespace Longman\TelegramBot\Commands\UserCommands;
 
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\InlineKeyboard;
+use Longman\TelegramBot\Entities\InlineKeyboardButton;
+use Longman\TelegramBot\Entities\Keyboard;
+use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Request;
 use Yii;
 /**
@@ -34,12 +37,12 @@ class ProductCommand extends UserCommand
     /**
      * @var string
      */
-    protected $usage = '/product';
+    protected $usage = '/product <id>';
 
     /**
      * @var string
      */
-    protected $version = '0.1';
+    protected $version = '1.0';
 
     /**
      * Command execute method
@@ -61,12 +64,34 @@ class ProductCommand extends UserCommand
             ['text' => 'callback thumb up ', 'callback_data' => 'thumb up'],
         ]);
 
+
         $data = [
             'chat_id'      => $chat_id,
             'text'         => 'inline keyboard',
-            'reply_markup' => $inline_keyboard,
+           // 'reply_markup' => $inline_keyboard,
         ];
+       /* $data['reply_markup'] = (new Keyboard(['купить', (new KeyboardButton(['text'=>'Share Contact']))->setText('asddsa')]))
+            ->setResizeKeyboard(true)
+            ->setOneTimeKeyboard(true)
+            ->setSelective(true);*/
 
-        return Yii::$app->telegram->sendMessage($data);
+
+        /*$data['reply_markup'] = (new Keyboard(['купить222222', (new KeyboardButton(['text'=>'Share Contact', 'callback_data' => 'callbackqueryproduct']))->setText('asddsa')]))
+            ->setResizeKeyboard(false)
+            ->setOneTimeKeyboard(false)
+            ->setSelective(false);*/
+
+        $telegram = new \Longman\TelegramBot\Telegram('835652742:AAEBdMpPg9TgakFa2o8eduRSkynAZxipg-c', 'pixelion');
+        $data['reply_markup'] = (new Keyboard(['Мужской', 'Женский']))
+            ->setResizeKeyboard(true)
+            ->setOneTimeKeyboard(true)
+            ->setSelective(true);
+
+
+
+
+        return Request::sendMessage($data);
+
+       // return Yii::$app->telegram->sendMessage($data);
     }
 }

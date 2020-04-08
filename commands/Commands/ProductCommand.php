@@ -34,7 +34,7 @@ class ProductCommand extends UserCommand
     /**
      * @var string
      */
-    protected $usage = '/product';
+    protected $usage = '/product <location>';
 
     /**
      * @var string

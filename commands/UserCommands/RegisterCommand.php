@@ -17,32 +17,33 @@ use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Entities\PhotoSize;
 use Longman\TelegramBot\Request;
 use Yii;
+
 /**
- * User "/survey" command
+ * User "/register" command
  *
  * Command that demonstrated the Conversation funtionality in form of a simple survey.
  */
-class SurveyCommand extends UserCommand
+class RegisterCommand extends UserCommand
 {
     /**
      * @var string
      */
-    protected $name = 'survey';
+    protected $name = 'register';
 
     /**
      * @var string
      */
-    protected $description = 'Survery for bot users';
+    protected $description = 'Registration for bot users';
 
     /**
      * @var string
      */
-    protected $usage = '/survey';
+    protected $usage = '/register';
 
     /**
      * @var string
      */
-    protected $version = '0.3.0';
+    protected $version = '0.1.0';
 
     /**
      * @var bool
@@ -71,9 +72,9 @@ class SurveyCommand extends UserCommand
     {
         $message = $this->getMessage();
 
-        $chat    = $message->getChat();
-        $user    = $message->getFrom();
-        $text    = trim($message->getText(true));
+        $chat = $message->getChat();
+        $user = $message->getFrom();
+        $text = trim($message->getText(true));
         $chat_id = $chat->getId();
         $user_id = $user->getId();
 
@@ -102,6 +103,7 @@ class SurveyCommand extends UserCommand
 
         $result = Request::emptyResponse();
 
+
         //State machine
         //Entrypoint of the machine state if given by the track
         //Every time a step is achieved the track is updated
@@ -111,7 +113,7 @@ class SurveyCommand extends UserCommand
                     $notes['state'] = 0;
                     $this->conversation->update();
 
-                    $data['text']         = 'Type your name:';
+                    $data['text'] = 'Ваша почта:';
                     $data['reply_markup'] = Keyboard::remove(['selective' => true]);
 
                     //$result = Request::sendMessage($data);
@@ -119,8 +121,8 @@ class SurveyCommand extends UserCommand
                     break;
                 }
 
-                $notes['name'] = $text;
-                $text          = '';
+                $notes['email'] = $text;
+                $text = '';
 
             // no break
             case 1:
@@ -128,14 +130,14 @@ class SurveyCommand extends UserCommand
                     $notes['state'] = 1;
                     $this->conversation->update();
 
-                    $data['text'] = 'Type your surname:';
+                    $data['text'] = 'Телефон:'.$message->getContact()->getPhoneNumber();
 
                     $result = Request::sendMessage($data);
                     break;
                 }
 
-                $notes['surname'] = $text;
-                $text             = '';
+                $notes['phone_number2'] = $text;
+                $text = '';
 
             // no break
             case 2:
@@ -143,7 +145,7 @@ class SurveyCommand extends UserCommand
                     $notes['state'] = 2;
                     $this->conversation->update();
 
-                    $data['text'] = 'Type your age:';
+                    $data['text'] = 'Пароль:';
                     if ($text !== '') {
                         $data['text'] = 'Type your age, must be a number:';
                     }
@@ -152,21 +154,21 @@ class SurveyCommand extends UserCommand
                     break;
                 }
 
-                $notes['age'] = $text;
-                $text         = '';
+                $notes['password'] = $text;
+                $text = '';
 
             // no break
             case 3:
-                if ($text === '' || !in_array($text, ['M', 'F'], true)) {
+                if ($text === '' || !in_array($text, ['Мужской', 'Женский'], true)) {
                     $notes['state'] = 3;
                     $this->conversation->update();
 
-                    $data['reply_markup'] = (new Keyboard(['M', 'F']))
+                    $data['reply_markup'] = (new Keyboard(['Мужской', 'Женский']))
                         ->setResizeKeyboard(true)
                         ->setOneTimeKeyboard(true)
                         ->setSelective(true);
 
-                    $data['text'] = 'Select your gender:';
+                    $data['text'] = 'Ваш пол:';
                     if ($text !== '') {
                         $data['text'] = 'Select your gender, choose a keyboard option:';
                     }
@@ -178,7 +180,7 @@ class SurveyCommand extends UserCommand
                 $notes['gender'] = $text;
 
             // no break
-            case 4:
+           /* case 4:
                 if ($message->getLocation() === null) {
                     $notes['state'] = 4;
                     $this->conversation->update();
@@ -197,12 +199,12 @@ class SurveyCommand extends UserCommand
                 }
 
                 $notes['longitude'] = $message->getLocation()->getLongitude();
-                $notes['latitude']  = $message->getLocation()->getLatitude();
+                $notes['latitude'] = $message->getLocation()->getLatitude();
 
-            // no break
-            case 5:
+            // no break*/
+            case 4:
                 if ($message->getPhoto() === null) {
-                    $notes['state'] = 5;
+                    $notes['state'] = 4;
                     $this->conversation->update();
 
                     $data['text'] = 'Insert your picture:';
@@ -212,13 +214,13 @@ class SurveyCommand extends UserCommand
                 }
 
                 /** @var PhotoSize $photo */
-                $photo             = $message->getPhoto()[0];
+                $photo = $message->getPhoto()[0];
                 $notes['photo_id'] = $photo->getFileId();
 
             // no break
-            case 6:
+            case 5:
                 if ($message->getContact() === null) {
-                    $notes['state'] = 6;
+                    $notes['state'] = 5;
                     $this->conversation->update();
 
                     $data['reply_markup'] = (new Keyboard(
@@ -237,7 +239,7 @@ class SurveyCommand extends UserCommand
                 $notes['phone_number'] = $message->getContact()->getPhoneNumber();
 
             // no break
-            case 7:
+            case 6:
                 $this->conversation->update();
                 $out_text = '/Survey result:' . PHP_EOL;
                 unset($notes['state']);
@@ -245,9 +247,9 @@ class SurveyCommand extends UserCommand
                     $out_text .= PHP_EOL . ucfirst($k) . ': ' . $v;
                 }
 
-                $data['photo']        = $notes['photo_id'];
+                $data['photo'] = $notes['photo_id'];
                 $data['reply_markup'] = Keyboard::remove(['selective' => true]);
-                $data['caption']      = $out_text;
+                $data['caption'] = $out_text;
                 $this->conversation->stop();
 
                 $result = Request::sendPhoto($data);

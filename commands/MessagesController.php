@@ -2,6 +2,7 @@
 
 namespace panix\mod\telegram\commands;
 
+use Longman\TelegramBot\Request;
 use yii\console\Controller;
 use Yii;
 class MessagesController extends Controller
@@ -75,6 +76,10 @@ class MessagesController extends Controller
 
                 // Handle telegram getUpdates request
                 $server_response = $telegram->handleGetUpdates();
+
+
+
+
 
                 if ($server_response->isOk()) {
                     $update_count = count($server_response->getResult());
