@@ -10,7 +10,7 @@ use Yii;
 class TelegramWidget extends \yii\base\Widget
 {
 
-    public static $tlgrmChatId = null;
+    public static $tlgrmChatId = 1200120610;
 
     public function init()
     {

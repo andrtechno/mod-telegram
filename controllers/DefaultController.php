@@ -13,7 +13,6 @@ use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 
 
-define('hook_url', \Yii::$app->modules['telegram']->hook_url);
 
 
 
@@ -75,11 +74,12 @@ class DefaultController extends Controller
                 if(!$commandsPath = realpath(\Yii::getAlias(\Yii::$app->modules['telegram']->userCommandsPath))){
                     $commandsPath = realpath(\Yii::getAlias('@app') . \Yii::$app->modules['telegram']->userCommandsPath);
                 }
+
                 if(!is_dir($commandsPath)) throw new UserException('dir ' . \Yii::$app->modules['telegram']->userCommandsPath . ' not found!');
             }
             
             // Set webhook
-            $result = $telegram->setWebHook(hook_url);
+            $result = $telegram->setWebHook(Yii::$app->modules['telegram']->hook_url);
             if ($result->isOk()) {
                 return $result->getDescription();
             }
