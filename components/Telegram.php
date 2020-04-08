@@ -34,8 +34,7 @@ class Telegram extends \yii\base\Component
         $text = urlencode($option['text']);
         unset($option['chat_id']);
         unset($option['text']);
-        echo "https://api.telegram.org/bot" . $this->botToken . "/sendMessage?chat_id=" . $chat_id
-            . '&text=' . $text;
+
         $jsonResponse = $this->curl_call("https://api.telegram.org/bot" . $this->botToken . "/sendMessage?chat_id=" . $chat_id
             . '&text=' . $text, $option);
         return json_decode($jsonResponse);

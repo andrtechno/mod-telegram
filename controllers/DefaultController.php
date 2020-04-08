@@ -3,6 +3,7 @@
 
 namespace panix\mod\telegram\controllers;
 
+use panix\engine\CMS;
 use Yii;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Telegram;
@@ -101,7 +102,7 @@ class DefaultController extends Controller
             $telegram = new Telegram(Yii::$app->getModule('telegram')->api_token, Yii::$app->getModule('telegram')->bot_name);
 
             // Unset webhook
-            $result = $telegram->unsetWebHook();
+            $result = $telegram->deleteWebhook();
 
             if ($result->isOk()) {
                 return $result->getDescription();
@@ -112,27 +113,29 @@ class DefaultController extends Controller
     }
 
     public function actionHook(){
+        Yii::info('test','application');
         try {
+
             // Create Telegram API object
             $telegram = new Telegram(Yii::$app->getModule('telegram')->api_token, Yii::$app->getModule('telegram')->bot_name);
             $basePath = \Yii::$app->getModule('telegram')->basePath;
-//            $commandsPath = realpath($basePath . '/commands/SystemCommands');
+            // $commandsPath = realpath($basePath . '/commands/SystemCommands');
             $commandsPath = realpath($basePath . '/commands/UserCommands');
-
+           // $telegram->setCommandConfig('/sendtochannel',['command'=>'sendtochannel','description'=>'test']);
+           // CMS::dump($commandsPath);
             $telegram->addCommandsPath($commandsPath);
-            if (!empty(\Yii::$app->modules['telegram']->userCommandsPath)){
+           /* if (!empty(\Yii::$app->modules['telegram']->userCommandsPath)){
                 if(!$commandsPath = realpath(\Yii::getAlias(\Yii::$app->modules['telegram']->userCommandsPath))){
                     $commandsPath = realpath(\Yii::getAlias('@app') . \Yii::$app->modules['telegram']->userCommandsPath);
                 }
 
                 $telegram->addCommandsPath($commandsPath);
-            }
+            }*/
             // Handle telegram webhook request
             $telegram->handle();
         } catch (TelegramException $e) {
             // Silence is golden!
             // log telegram errors
-           // var_dump($e->getMessage());
             return $e->getMessage();
         }
         return null;

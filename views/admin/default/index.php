@@ -11,6 +11,30 @@ Yii::$app->telegram->sendMessage([
             'text' => 'upload_photo',
        ]);
 
+
+$results = \Longman\TelegramBot\Request::sendToActiveChats(
+    'sendMessage', // Callback function to execute (see Request.php methods)
+    ['text' => 'Hey! Check out the new features!!'], // Param to evaluate the request
+    [
+        'groups'      => true,
+        'supergroups' => true,
+        'channels'    => false,
+        'users'       => true,
+    ]
+);
+Yii::$app->telegram->sendMessage([
+    'chat_id' => 1200120610,
+    'text' => 'this is test',
+    'reply_markup' => json_encode([
+        'inline_keyboard'=>[
+            [
+                ['text'=>"refresh",'callback_data'=> time()]
+            ]
+        ]
+    ]),
+]);
+
+
 //\panix\engine\CMS::dump(Yii::$app->telegram->getUpdates());
 ?>
 
