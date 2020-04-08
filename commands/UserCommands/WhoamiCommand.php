@@ -10,12 +10,12 @@
  * Written by Marco Boretto <marco.bore@gmail.com>
  */
 
-namespace panix\mod\telegram\commands\UserCommands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\File;
 use Longman\TelegramBot\Request;
-
+use Yii;
 /**
  * User "/whoami" command
  */
@@ -83,19 +83,20 @@ class WhoamiCommand extends UserCommand
             $data['photo'] = $file_id;
             $data['caption'] = $caption;
 
-            $result = Request::sendPhoto($data);
-
+           // $result = Request::sendPhoto($data);
+            $result = Yii::$app->telegram->sendPhoto($data);
             //Download the image pictures
             //Download after send message response to speedup response
-            $file_id = $photo->getFileId();
-            $ServerResponse = Request::getFile(['file_id' => $file_id]);
-            if ($ServerResponse->isOk()) {
-                Request::downloadFile($ServerResponse->getResult());
-            }
+           // $file_id = $photo->getFileId();
+            //$ServerResponse = Request::getFile(['file_id' => $file_id]);
+            //if ($ServerResponse->isOk()) {
+                  // Request::downloadFile($ServerResponse->getResult());
+            //}
         } else {
             //No Photo just send text
             $data['text'] = $caption;
-            $result = Request::sendMessage($data);
+           // $result = Request::sendMessage($data);
+            $result = Yii::$app->telegram->sendMessage($data);
         }
 
         return $result;

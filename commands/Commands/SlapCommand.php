@@ -15,29 +15,43 @@ use Longman\TelegramBot\Request;
 
 /**
  * User "/slap" command
+ *
+ * Slap a user around with a big trout!
  */
 class SlapCommand extends UserCommand
 {
-    /**#@+
-     * {@inheritdoc}
+    /**
+     * @var string
      */
     protected $name = 'slap';
-    protected $description = 'Slap someone with their username';
-    protected $usage = '/slap <@user>';
-    protected $version = '1.0.1';
-    public $enabled = false;
-    /**#@-*/
 
     /**
-     * {@inheritdoc}
+     * @var string
+     */
+    protected $description = 'Slap someone with their username';
+
+    /**
+     * @var string
+     */
+    protected $usage = '/slap <@user>';
+
+    /**
+     * @var string
+     */
+    protected $version = '1.1.0';
+
+    /**
+     * Command execute method
+     *
+     * @return \Longman\TelegramBot\Entities\ServerResponse
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     public function execute()
     {
         $message = $this->getMessage();
 
         $chat_id = $message->getChat()->getId();
-        $message_id = $message->getMessageId();
-        $text = $message->getText(true);
+        $text    = $message->getText(true);
 
         $sender = '@' . $message->getFrom()->getUsername();
 

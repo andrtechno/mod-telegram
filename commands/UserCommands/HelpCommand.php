@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace panix\mod\telegram\commands\UserCommands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Request;
@@ -52,8 +52,8 @@ class HelpCommand extends UserCommand
 
         //If no command parameter is passed, show the list
         if ($command === '') {
-            $text = $this->telegram->getBotName() . ' v. ' . $this->telegram->getVersion() . "\n\n";
-            $text .= 'Commands List:' . "\n";
+            $text = $this->telegram->getBotUsername() . ' v. ' . $this->telegram->getVersion() . "\n\n";
+            $text .= 'Список команд:' . "\n";
             foreach ($commands as $command) {
                 $text .= '/' . $command->getName() . ' - ' . $command->getDescription() . "\n";
             }
@@ -76,7 +76,9 @@ class HelpCommand extends UserCommand
             'reply_to_message_id' => $message_id,
             'text'                => $text,
         ];
+//print_r($data);die;
+        return  Yii::$app->telegram->sendMessage($data);
 
-        return Request::sendMessage($data);
+     //   return Request::sendMessage($data);
     }
 }

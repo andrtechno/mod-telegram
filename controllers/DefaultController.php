@@ -113,7 +113,7 @@ class DefaultController extends Controller
     }
 
     public function actionHook(){
-        Yii::info('test','application');
+        Yii::info('test hook','application');
         try {
 
             // Create Telegram API object
@@ -124,13 +124,13 @@ class DefaultController extends Controller
            // $telegram->setCommandConfig('/sendtochannel',['command'=>'sendtochannel','description'=>'test']);
            // CMS::dump($commandsPath);
             $telegram->addCommandsPath($commandsPath);
-           /* if (!empty(\Yii::$app->modules['telegram']->userCommandsPath)){
+            if (!empty(\Yii::$app->modules['telegram']->userCommandsPath)){
                 if(!$commandsPath = realpath(\Yii::getAlias(\Yii::$app->modules['telegram']->userCommandsPath))){
                     $commandsPath = realpath(\Yii::getAlias('@app') . \Yii::$app->modules['telegram']->userCommandsPath);
                 }
 
                 $telegram->addCommandsPath($commandsPath);
-            }*/
+            }
             // Handle telegram webhook request
             $telegram->handle();
         } catch (TelegramException $e) {

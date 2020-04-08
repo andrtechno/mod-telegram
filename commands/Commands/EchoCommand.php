@@ -15,27 +15,42 @@ use Longman\TelegramBot\Request;
 
 /**
  * User "/echo" command
+ *
+ * Simply echo the input back to the user.
  */
 class EchoCommand extends UserCommand
 {
-    /**#@+
-     * {@inheritdoc}
+    /**
+     * @var string
      */
     protected $name = 'echo';
-    protected $description = 'Show text';
-    protected $usage = '/echo <text>';
-    protected $version = '1.0.1';
-    public $enabled = false;
-    /**#@-*/
 
     /**
-     * {@inheritdoc}
+     * @var string
+     */
+    protected $description = 'Show text';
+
+    /**
+     * @var string
+     */
+    protected $usage = '/echo <text>';
+
+    /**
+     * @var string
+     */
+    protected $version = '1.1.0';
+
+    /**
+     * Command execute method
+     *
+     * @return \Longman\TelegramBot\Entities\ServerResponse
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     public function execute()
     {
         $message = $this->getMessage();
         $chat_id = $message->getChat()->getId();
-        $text = trim($message->getText(true));
+        $text    = trim($message->getText(true));
 
         if ($text === '') {
             $text = 'Command usage: ' . $this->getUsage();

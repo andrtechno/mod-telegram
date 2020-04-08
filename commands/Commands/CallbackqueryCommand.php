@@ -9,33 +9,43 @@
  */
 
 namespace Longman\TelegramBot\Commands\SystemCommands;
-use panix\mod\shop\models\Product;
-use panix\mod\telegram\models\AuthorizedManagerChat;
-use panix\mod\telegram\models\Usernames;
+
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Request;
-use Yii;
+use panix\mod\shop\models\Product;
 
 /**
  * Callback query command
+ *
+ * This command handles all callback queries sent via inline keyboard buttons.
+ *
+ * @see InlinekeyboardCommand.php
  */
 class CallbackqueryCommand extends SystemCommand
 {
-    /**#@+
-     * {@inheritdoc}
+    /**
+     * @var string
      */
     protected $name = 'callbackquery';
-    protected $description = 'Reply to callback query';
-    protected $version = '1.0.0';
-    /**#@-*/
 
     /**
-     * {@inheritdoc}
+     * @var string
+     */
+    protected $description = 'Reply to callback query';
+
+    /**
+     * @var string
+     */
+    protected $version = '1.1.1';
+
+    /**
+     * Command execute method
+     *
+     * @return \Longman\TelegramBot\Entities\ServerResponse
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     public function execute()
     {
-        //Do nothing, just for rewriting default Longman command
-
         $callback_query    = $this->getCallbackQuery();
 
 
@@ -44,7 +54,7 @@ class CallbackqueryCommand extends SystemCommand
 
         if($callback_data == 'callbackqueryproduct'){
 
-            $product = Product::findOne(2665);
+            $product = Product::findOne(1);
             $text= ' get product'.$product->name;
         }else{
             $text= ' Hello World!';
@@ -55,9 +65,7 @@ class CallbackqueryCommand extends SystemCommand
             'show_alert'        => $callback_data === 'thumb up',
             'cache_time'        => 5,
         ];
-return Yii::$app->telegram->sendMessage($data);
-       // return Request::answerCallbackQuery($data);
 
-       // return Request::emptyResponse();
+        return Request::answerCallbackQuery($data);
     }
 }
