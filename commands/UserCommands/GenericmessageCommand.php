@@ -94,7 +94,7 @@ class GenericmessageCommand extends SystemCommand
                     $_authChat->save();
                     $data = [
                         'chat_id' =>  $chatId,
-                        'text'    =>  Yii::t('tlgrm', "Passphrase is correct, now you'll get the messages."),
+                        'text'    =>  Yii::t('telegram/default', "Passphrase is correct, now you'll get the messages."),
                     ];
                     //связь пользователя с чатом
                     $dbUserneme = new Usernames();
@@ -105,13 +105,13 @@ class GenericmessageCommand extends SystemCommand
                 }else{
                     $data = [
                         'chat_id' =>  $chatId,
-                        'text'    =>  Yii::t('tlgrm', "You are already subscribed to receive messages."),
+                        'text'    =>  Yii::t('telegram/default', "You are already subscribed to receive messages."),
                     ];
                 }
             }else{
                 $data = [
                     'chat_id' =>  $chatId,
-                    'text'    => Yii::t('tlgrm', 'Incorrect passphrase.'),
+                    'text'    => Yii::t('telegram/default', 'Incorrect passphrase.'),
                 ];
             }
             $dbUser->action = null;
@@ -119,7 +119,7 @@ class GenericmessageCommand extends SystemCommand
         } else {
             $data = [
                 'chat_id' => $chatId,
-                'text' => Yii::t('tlgrm', 'Try to enter the command, such as /help'),
+                'text' => Yii::t('telegram/default', 'Try to enter the command, such as /help'),
             ];
         }
 

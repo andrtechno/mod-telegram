@@ -25,7 +25,7 @@ class HelpCommand extends UserCommand
     protected $name = 'help';
     protected $description = '';
     protected $usage = '/help or /help <command>';
-    protected $version = '1.0.1';
+    protected $version = '1.0';
     /**#@-*/
 
     public function __construct($telegram, $update = NULL)
@@ -53,12 +53,12 @@ class HelpCommand extends UserCommand
         //If no command parameter is passed, show the list
         if ($command === '') {
             $text = $this->telegram->getBotUsername() . ' v. ' . $this->telegram->getVersion() . "\n\n";
-            $text .= 'Список команд:' . "\n";
+            $text .= Yii::t('telegram/command','COMMAND_LIST').PHP_EOL;
             foreach ($commands as $command) {
                 $text .= '/' . $command->getName() . ' - ' . $command->getDescription() . "\n";
             }
 
-            $text .= "\n" . 'For exact command help type: /help <command>';
+            $text .= "\n" . Yii::t('telegram/command','EXACT_COMMAND').': /help <command>';
         } else {
             $command = str_replace('/', '', $command);
             if (isset($commands[$command])) {

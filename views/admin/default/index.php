@@ -5,7 +5,7 @@ use panix\engine\bootstrap\ActiveForm;
 
 
 //print_r(Yii::$app->telegram->getMe());
-
+/*
 Yii::$app->telegram->sendMessage([
             'chat_id' => 1200120610,
             'text' => 'upload_photo',
@@ -34,6 +34,12 @@ Yii::$app->telegram->sendMessage([
     ]),
 ]);
 
+*/
+
+
+
+
+\panix\engine\CMS::dump($match);
 
 //\panix\engine\CMS::dump(Yii::$app->telegram->getUpdates());
 ?>

@@ -1,6 +1,6 @@
 <?php
 
-namespace Longman\TelegramBot\Commands\UserCommands;
+namespace Longman\TelegramBot\Commands\UserCommands2;
 
 use panix\mod\telegram\models\Actions;
 use panix\mod\telegram\models\AuthorizedManagerChat;

@@ -48,11 +48,9 @@ class CallbackqueryCommand extends SystemCommand
 
         $data['callback_query_id'] = $callback_query_id;
 
-        if($callback_data == 'callbackqueryproduct') {
+        if($callback_data == 'getProduct') {
 
             $product = Product::find()->where(['id' => 2665])->one();
-            $text = ' get <strong>product</strong>' . $product->name;
-
             $inline_keyboard = new InlineKeyboard([
                 ['text' => '👉 '.$product->price . ' грн. Купить', 'callback_data' => 'callbackqueryproduct']], [
                 ['text' => '🏆 ☎️  🛒 🎁 Характеристики', 'callback_data' => 'product_attributes'],
