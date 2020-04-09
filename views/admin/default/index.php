@@ -3,15 +3,27 @@
 use panix\engine\Html;
 use panix\engine\bootstrap\ActiveForm;
 
-
+$bot_api_key = '835652742:AAEBdMpPg9TgakFa2o8eduRSkynAZxipg-c';
+$bot_username = 'pixelionbot';
 //print_r(Yii::$app->telegram->getMe());
 /*
 Yii::$app->telegram->sendMessage([
-            'chat_id' => 1200120610,
+            'chat_id' => 835652742,
             'text' => 'upload_photo',
        ]);
 
+*/
 
+Yii::$app->telegram->sendChatAction([
+    'chat_id' => 835652742,
+    'action' => 'upload_photo',
+]);
+
+$admins = Yii::$app->telegram->getChatAdministrators([
+    'chat_id' => '835652742',
+]);
+
+$telegram = new \Longman\TelegramBot\Telegram($bot_api_key, $bot_username);
 $results = \Longman\TelegramBot\Request::sendToActiveChats(
     'sendMessage', // Callback function to execute (see Request.php methods)
     ['text' => 'Hey! Check out the new features!!'], // Param to evaluate the request
@@ -22,22 +34,11 @@ $results = \Longman\TelegramBot\Request::sendToActiveChats(
         'users'       => true,
     ]
 );
-Yii::$app->telegram->sendMessage([
-    'chat_id' => 1200120610,
-    'text' => 'this is test',
-    'reply_markup' => json_encode([
-        'inline_keyboard'=>[
-            [
-                ['text'=>"refresh",'callback_data'=> time()]
-            ]
-        ]
-    ]),
-]);
-
-*/
+print_r($results);
 
 
 
+$preg = preg_match('/(\/catalog|Каталог)/iu', 'xc Каталог1', $match);
 
 \panix\engine\CMS::dump($match);
 

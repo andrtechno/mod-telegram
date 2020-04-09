@@ -12,6 +12,8 @@ namespace Longman\TelegramBot\Commands\SystemCommands;
 
 
 use Longman\TelegramBot\Entities\InlineKeyboard;
+use Longman\TelegramBot\Entities\InlineKeyboardButton;
+use panix\mod\shop\models\Category;
 use panix\mod\shop\models\Product;
 use panix\mod\telegram\models\AuthorizedManagerChat;
 use panix\mod\telegram\models\Usernames;
@@ -41,11 +43,20 @@ class CallbackqueryCommand extends SystemCommand
         $update = $this->getUpdate();
 
         $callback_query = $update->getCallbackQuery();
-        //print_r($callback_query);die;
+       // print_r($callback_query->getMessage());die;
         $chatId = $callback_query->getMessage()->getChat()->getId();
+
+        $message = $callback_query->getMessage();
+
+       // $chat = $message->getChat();
+        $user = $message->getFrom();
+        $user_id = $user->getId();
+
+
+
         $callback_query_id = $callback_query->getId();
         $callback_data = $callback_query->getData();
-
+        $msh = $callback_query->getMessage();
         $data['callback_query_id'] = $callback_query_id;
 
         if($callback_data == 'getProduct') {
@@ -88,6 +99,55 @@ class CallbackqueryCommand extends SystemCommand
 
 
             return Request::answerCallbackQuery($data);
+
+
+        }elseif(preg_match('/^getCatalog\s+([0-9]+)/iu', trim($callback_data), $match)){
+            $msg = $callback_query->getMessage();
+
+
+
+            $id = (isset($match[1])) ? $match[1] : 1;
+            $root = Category::findOne($id);
+
+            $categories = $root->children()->all();
+
+
+            $keyboards = [];
+            if ($categories) {
+
+                foreach ($categories as $category) {
+                    $child = $category->children()->all();
+                    if ($child) {
+                        $keyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name, 'callback_data' => 'getCatalog '.$category->id])];
+                    } else {
+                        $keyboards[] = [new InlineKeyboardButton(['text' => ' '.$category->name . ' ('.$category->id.')', 'callback_data' => '/getProd'])];
+                    }
+
+
+                }
+            }
+
+            $data = [
+                'chat_id' => $chatId,
+                'parse_mode' => 'HTML',
+                'text' => '⬇ <strong>'.$root->name.'</strong>'.$root->description.'',
+                'reply_markup' => new InlineKeyboard([
+                    'inline_keyboard' => $keyboards
+                ]),
+            ];
+
+
+
+
+
+
+          //  print_r($msg);
+          //  echo 'tester';
+        //  $preg=  preg_match('/^getCatalog\s+([0-9]+)/iu', trim($callback_data), $match);
+          //if($preg){
+
+              return Yii::$app->telegram->sendMessage($data);
+         // }
         }else{
             $text= ' Hello World!';
         }

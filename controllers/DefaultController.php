@@ -3,6 +3,7 @@
 
 namespace panix\mod\telegram\controllers;
 
+use Longman\TelegramBot\Request;
 use panix\engine\CMS;
 use Yii;
 use Longman\TelegramBot\Exception\TelegramException;
@@ -132,7 +133,11 @@ class DefaultController extends Controller
                 $telegram->addCommandsPath($commandsPath);
             }
             // Handle telegram webhook request
+       // $telegram->setCustomInput(file_get_contents('php://input'));
             $telegram->handle();
+
+           // $u=  file_get_contents('php://input');
+         //   return $this->asJson($u,true);
         } catch (TelegramException $e) {
             // Silence is golden!
             // log telegram errors

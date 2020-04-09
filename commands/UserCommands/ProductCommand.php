@@ -63,25 +63,19 @@ class ProductCommand extends UserCommand
         $chat_id = $chat->getId();
         $user_id = $user->getId();
 
-        //Conversation start
-        $this->conversation = new Conversation($user_id, $chat_id, $this->getName());
-
-
-        $telegram = new \Longman\TelegramBot\Telegram('835652742:AAEBdMpPg9TgakFa2o8eduRSkynAZxipg-c', 'pixelion');
+       // $telegram = new \Longman\TelegramBot\Telegram('835652742:AAEBdMpPg9TgakFa2o8eduRSkynAZxipg-c', 'pixelion');
 
         $preg = preg_match('/^\/product\s+([0-9]+)/iu', trim($message->getText()), $match);
         if ($preg) {
             if (isset($match[1])) {
 
 
-                $product = Product::find()->published()->where(['id' => $match[1]])->one();
-                if($product){
-                    $inline_keyboard = new InlineKeyboard([
-                        ['text' => '👉 '.$product->price . ' UAH. Купить 👈', 'callback_data' => 'callbackqueryproduct']], [
-                        ['text' => '🏆 ☎️  🛒 🎁 Характеристики', 'callback_data' => 'product_attributes'],
-                        ['text' => 'LALAL 💵 💴 💶 💷 💰 💳  ✉️📦 📁 📄 📞 ✔ 🔴 🇺🇦 🤝  🚚 callback thumb up ', 'callback_data' => 'thumb up'],
-                    ]);
 
+
+
+
+                $product = Product::find()->published()->where(['id' => $match[1]])->one();
+                if($product) {
                     $sendPhoto = Yii::$app->telegram->sendPhoto([
                         'photo' => $product->getImage()->getPathToOrigin(),
                         'chat_id' => $chat_id,
@@ -89,61 +83,39 @@ class ProductCommand extends UserCommand
                         'caption' => '<strong>'.$product->name.'</strong>',
                         //'reply_markup' => $inline_keyboard,
                     ]);
+
+                    $keyboards[] = [new InlineKeyboardButton(['text' => '👉 '.$product->price . ' UAH. Купить 👈', 'callback_data' => 'callbackqueryproduct'])];
+                    $keyboards[] = [new InlineKeyboardButton(['text' => 'Характеристики', 'callback_data' => 'product_attributes'])];
+
+                    if ($this->telegram->isAdmin($chat_id)) {
+                        $keyboards[] = [new InlineKeyboardButton(['text' => '✏ 📝  ⚙ Редактировать', 'callback_data' => 'get']),new InlineKeyboardButton(['text' => '❌ Удалить', 'callback_data' => 'get'])];
+                        $keyboards[] = [new InlineKeyboardButton(['text' => '❓ 👤  👥 🛍 ✅ 🟢 🔴Удалить', 'callback_data' => 'get'])];
+                    }
+
+
                     $data = [
                         'chat_id' => $chat_id,
-                        'parse_mode' => 'HTML',
-                        //   'callback_query_id' => $callback_query_id,
-                        'text' => Yii::$app->view->render('@telegram/views/default/test', ['product' => $product]),
-                        'reply_markup' => $inline_keyboard,
+                        'text' => '⬇ Каталог продукции',
+                        'reply_markup' => new InlineKeyboard([
+                            'inline_keyboard' => $keyboards
+                        ]),
                     ];
+
 
                 }else{
                     $data = [
                         'chat_id' => $chat_id,
                         'parse_mode' => 'HTML',
-                        'text' => Yii::t('shop/default','NOT_FOUND_PRODUCT'),
-                       // 'reply_markup' => $inline_keyboard,
+                        'text' => '🚫 '. Yii::t('shop/default','NOT_FOUND_PRODUCT').' ⚠',
+                        // 'reply_markup' => $inline_keyboard,
                     ];
                 }
-
-
                 return Request::sendMessage($data);
             }
         }
-        $inline_keyboard = new InlineKeyboard([
-            ['text' => 'inline' . $message, 'switch_inline_query' => 123],
-            ['text' => 'inline current chat', 'switch_inline_query_current_chat' => 321],
-        ], [
-            ['text' => 'getProduct', 'callback_data' => '/getProduct '.$match[1]],
-            ['text' => 'callback thumb up ', 'callback_data' => 'thumb up'],
-        ]);
 
 
-        $data = [
-            'chat_id' => $chat_id,
-            'text' => 'inline keyboard',
-            'reply_markup' => $inline_keyboard,
-        ];
 
-        /* $data['reply_markup'] = (new Keyboard(['купить', (new KeyboardButton(['text'=>'Share Contact']))->setText('asddsa')]))
-             ->setResizeKeyboard(true)
-             ->setOneTimeKeyboard(true)
-             ->setSelective(true);*/
-
-
-        /*$data['reply_markup'] = (new Keyboard(['купить222222', (new KeyboardButton(['text'=>'Share Contact', 'callback_data' => 'callbackqueryproduct']))->setText('asddsa')]))
-            ->setResizeKeyboard(false)
-            ->setOneTimeKeyboard(false)
-            ->setSelective(false);*/
-
-
-        /*$data['reply_markup'] = (new Keyboard(['Мужской', 'Женский']))
-            ->setResizeKeyboard(true)
-            ->setOneTimeKeyboard(true)
-            ->setSelective(true);*/
-
-
-        return Request::sendMessage($data);
 
         // return Yii::$app->telegram->sendMessage($data);
     }

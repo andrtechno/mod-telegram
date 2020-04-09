@@ -20,7 +20,9 @@ class MessagesController extends Controller
         $db->createCommand()->delete('{{%tlgrm_messages}}', 'time < \'' . date("Y-m-d H:i:s", time() - (3600 * 24 * $keep)) . '\'')->execute();
     }
 
+//812367093
 
+//343987970
     public function actionGetUpdates()
     {
         $bot_api_key = '835652742:AAEBdMpPg9TgakFa2o8eduRSkynAZxipg-c';
@@ -28,7 +30,8 @@ class MessagesController extends Controller
 
 // Define all IDs of admin users in this array (leave as empty array if not used)
         $admin_users = [
-//    123,
+            812367093, //panix
+           // 343987970 // Сметанин
         ];
 
 // Define all paths for your custom commands in this array (leave as empty array if not used)
@@ -47,7 +50,7 @@ class MessagesController extends Controller
         try {
             while (true) {
 
-                sleep(1);
+                sleep(2);
                 // Create Telegram API object
                 $telegram = new \Longman\TelegramBot\Telegram($bot_api_key, $bot_username);
 
@@ -64,8 +67,8 @@ class MessagesController extends Controller
                 // https://github.com/php-telegram-bot/core/blob/master/doc/01-utils.md#logging
                 //
                 // Set custom Upload and Download paths
-                //$telegram->setDownloadPath(__DIR__ . '/Download');
-                //$telegram->setUploadPath(__DIR__ . '/Upload');
+                $telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
+                $telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
 
                 // Here you can set some command specific parameters
                 // e.g. Google geocode/timezone api key for /date command
@@ -78,7 +81,7 @@ class MessagesController extends Controller
                 $server_response = $telegram->handleGetUpdates();
 
 
-
+                //$telegram->executeCommand('/echo ff');
 
 
                 if ($server_response->isOk()) {

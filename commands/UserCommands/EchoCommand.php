@@ -25,7 +25,8 @@ class EchoCommand extends UserCommand
     protected $description = 'Show text';
     protected $usage = '/echo <text>';
     protected $version = '1.0.1';
-    public $enabled = false;
+    public $enabled = true;
+    public $private_only=true;
     /**#@-*/
 
     /**
