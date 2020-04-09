@@ -84,30 +84,23 @@ class CatalogCommand extends UserCommand
                     if ($child) {
                         $inlineKeyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name . ' ('.$category->id.')', 'callback_data' => 'getCatalog '.$category->id])];
                     } else {
-                        $inlineKeyboards[] = [new InlineKeyboardButton(['text' => '📄 '. $category->name . ' ('.$category->id.')', 'callback_data' => '/getProdu'])];
+                        $inlineKeyboards[] = [new InlineKeyboardButton(['text' => '📄 '. $category->name . ' ('.$category->id.')', 'callback_data' => 'getCatalogList '.$category->id])];
                     }
 
 
                 }
             }
 
-            $sticker=[
+            /*$sticker=[
                 'chat_id' => $chat_id,
                 'sticker'=>'BQADBAADsgUAApv7sgABW0IQT2B3WekC'
             ];
-            Request::sendSticker($sticker);
-
-
-/*
-https://t.me/addstickers/HotCherry
-*/
-
+            Request::sendSticker($sticker);*/
 
 
             $data2 = [
                 'chat_id' => $chat_id,
                 'text' => 'Выберите раздел:',
-
                 'reply_markup' => new InlineKeyboard([
                     'inline_keyboard' => $inlineKeyboards
                 ]),

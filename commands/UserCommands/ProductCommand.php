@@ -73,7 +73,6 @@ class ProductCommand extends UserCommand
 
 
 
-
                 $product = Product::find()->published()->where(['id' => $match[1]])->one();
                 if($product) {
                     $sendPhoto = Yii::$app->telegram->sendPhoto([

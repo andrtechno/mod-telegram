@@ -13,6 +13,8 @@ namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
+use Longman\TelegramBot\Entities\Keyboard;
+use Longman\TelegramBot\Entities\KeyboardButton;
 use panix\mod\shop\models\Category;
 use panix\mod\shop\models\Product;
 use panix\mod\telegram\models\AuthorizedManagerChat;
@@ -43,15 +45,13 @@ class CallbackqueryCommand extends SystemCommand
         $update = $this->getUpdate();
 
         $callback_query = $update->getCallbackQuery();
-       // print_r($callback_query->getMessage());die;
-        $chatId = $callback_query->getMessage()->getChat()->getId();
-
         $message = $callback_query->getMessage();
+        $chat_id = $message->getChat()->getId();
 
-       // $chat = $message->getChat();
+
+        // $chat = $message->getChat();
         $user = $message->getFrom();
         $user_id = $user->getId();
-
 
 
         $callback_query_id = $callback_query->getId();
@@ -59,11 +59,11 @@ class CallbackqueryCommand extends SystemCommand
         $msh = $callback_query->getMessage();
         $data['callback_query_id'] = $callback_query_id;
 
-        if($callback_data == 'getProduct') {
+        if ($callback_data == 'getProduct') {
 
             $product = Product::find()->where(['id' => 2665])->one();
             $inline_keyboard = new InlineKeyboard([
-                ['text' => '👉 '.$product->price . ' грн. Купить', 'callback_data' => 'callbackqueryproduct']], [
+                ['text' => '👉 ' . $product->price . ' грн. Купить', 'callback_data' => 'callbackqueryproduct']], [
                 ['text' => '🏆 ☎️  🛒 🎁 Характеристики', 'callback_data' => 'product_attributes'],
                 ['text' => '🤝  🚚 callback thumb up ', 'callback_data' => 'thumb up'],
             ]);
@@ -71,7 +71,7 @@ class CallbackqueryCommand extends SystemCommand
 //echo Yii::getAlias('@app/web/uploads').DIRECTORY_SEPARATOR.'1.jpg';die;
 
             $data = [
-                'chat_id' => $chatId,
+                'chat_id' => $chat_id,
                 'parse_mode' => 'HTML',
                 'callback_query_id' => $callback_query_id,
                 'text' => Yii::$app->view->render('@telegram/views/default/test', ['product' => $product]),
@@ -79,32 +79,32 @@ class CallbackqueryCommand extends SystemCommand
             ];
             $sendPhoto = Yii::$app->telegram->sendPhoto([
                 'photo' => Yii::getAlias('@app/web/uploads') . DIRECTORY_SEPARATOR . '1.jpg',
-                'chat_id' => $chatId,
+                'chat_id' => $chat_id,
                 'parse_mode' => 'HTML',
                 'caption' => 'LALAL 💵 💴 💶 💷 💰 💳  ✉️📦 📁 📄 📞 ✔ 🔴 🇺🇦<strong>sadsasdadsa sad as dasdas das d asd asd asd asd asdsdadsa</strong>',
                 'reply_markup' => $inline_keyboard,
             ]);
             return Yii::$app->telegram->sendMessage($data);
-        }elseif($callback_data == 'product_attributes'){
+        } elseif ($callback_data == 'product_attributes') {
             $product = Product::find()->where(['id' => 2665])->one();
             $eav = $product->getEavAttributes();
             $data = [
-                'chat_id' => $chatId,
-               // 'parse_mode' => 'HTML',
+                'chat_id' => $chat_id,
+                // 'parse_mode' => 'HTML',
                 'callback_query_id' => $callback_query_id,
-                'show_alert'=>true,
-                'text' => 'Тут будут параметры '.$callback_query_id,
-               // 'reply_markup' => $inline_keyboard,
+                'show_alert' => true,
+                'text' => 'Тут будут параметры ' . $callback_query_id,
+                // 'reply_markup' => $inline_keyboard,
             ];
 
 
             return Request::answerCallbackQuery($data);
 
 
-        }elseif(preg_match('/^getCatalog\s+([0-9]+)/iu', trim($callback_data), $match)){
-            $msg = $callback_query->getMessage();
+        } elseif (preg_match('/^getCatalog\s+([0-9]+)/iu', trim($callback_data), $match)) {
 
 
+//print_r($message);die;
 
             $id = (isset($match[1])) ? $match[1] : 1;
             $root = Category::findOne($id);
@@ -118,9 +118,9 @@ class CallbackqueryCommand extends SystemCommand
                 foreach ($categories as $category) {
                     $child = $category->children()->all();
                     if ($child) {
-                        $keyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name, 'callback_data' => 'getCatalog '.$category->id])];
+                        $keyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name, 'callback_data' => 'getCatalog ' . $category->id])];
                     } else {
-                        $keyboards[] = [new InlineKeyboardButton(['text' => ' '.$category->name . ' ('.$category->id.')', 'callback_data' => '/getProd'])];
+                        $keyboards[] = [new InlineKeyboardButton(['text' => ' ' . $category->name . ' (' . $category->id . ')', 'callback_data' => 'getCatalogList ' . $category->id])];
                     }
 
 
@@ -128,35 +128,108 @@ class CallbackqueryCommand extends SystemCommand
             }
 
             $data = [
-                'chat_id' => $chatId,
+                'chat_id' => $chat_id,
                 'parse_mode' => 'HTML',
-                'text' => '⬇ <strong>'.$root->name.'</strong>'.$root->description.'',
+                'text' => '⬇ <strong>' . $root->name . '</strong>' . $root->description . '',
                 'reply_markup' => new InlineKeyboard([
                     'inline_keyboard' => $keyboards
                 ]),
             ];
 
 
+            //  print_r($msg);
+            //  echo 'tester';
+            //  $preg=  preg_match('/^getCatalog\s+([0-9]+)/iu', trim($callback_data), $match);
+            //if($preg){
+            //  print_r($message);die;
+            $dataEdit['chat_id'] = $chat_id;
+            $dataEdit['message_id'] = $message->getMessageId();
+            $dataEdit['reply_markup'] = new InlineKeyboard([
+                'inline_keyboard' => $keyboards
+            ]);
+            return Request::editMessageReplyMarkup($dataEdit);
+            //  return Yii::$app->telegram->sendMessage($data);
+            // }
+        } elseif (preg_match('/^getCatalogList\s+([0-9]+)/iu', trim($callback_data), $match)) {
+
+
+            if (isset($match[1])) {
 
 
 
+                $keyboards2[] = [
+                    new KeyboardButton(['text' => '⏮ Первая', 'callback_data' => 'goHome']),
+                    new KeyboardButton(['text' => '◀', 'callback_data' => 'goHome']),
+                    new KeyboardButton(['text' => '▶', 'callback_data' => 'goHome']),
+                    new KeyboardButton(['text' => '⏭ Последняя', 'callback_data' => 'goHome']),
+                ];$keyboards2[] = [
+                    new KeyboardButton(['text' => '1', 'callback_data' => 'goHome']),
+                    new KeyboardButton(['text' => '2', 'callback_data' => 'goHome']),
+                    new KeyboardButton(['text' => '3', 'callback_data' => 'goHome']),
+                    new KeyboardButton(['text' => '4', 'callback_data' => 'goHome']),
+                    new KeyboardButton(['text' => '5', 'callback_data' => 'goHome']),
+                    new KeyboardButton(['text' => '6', 'callback_data' => 'goHome']),
+                    new KeyboardButton(['text' => '7', 'callback_data' => 'goHome']),
+                ];
+                $dataCatalog = [
+                    'chat_id' => $chat_id,
+                    'text' => 'test',
 
-          //  print_r($msg);
-          //  echo 'tester';
-        //  $preg=  preg_match('/^getCatalog\s+([0-9]+)/iu', trim($callback_data), $match);
-          //if($preg){
+                ];
+                $dataCatalog['reply_markup'] = (new Keyboard([
+                    'keyboard' => $keyboards2
+                ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
+                Request::sendMessage($dataCatalog);
 
-              return Yii::$app->telegram->sendMessage($data);
-         // }
-        }else{
-            $text= ' Hello World!';
+                $query = Product::find();
+                $query->published();
+                $query->sort();
+                $query->applyCategories($match[1]);
+                $query->limit(10);
+
+                $products = $query->all();
+                if ($products) {
+                    foreach ($products as $index => $product) {
+                        $keyboards = [];
+                        $caption = '<strong>' . $product->name . '</strong>' . PHP_EOL;
+                        $caption .= $product->price . ' грн';
+
+
+                        $keyboards[] = [new InlineKeyboardButton(['text' => '👉 '.$product->price . ' UAH. — Купить 👈', 'callback_data' => 'ads'])];
+                        if ($this->telegram->isAdmin($chat_id)) {
+                            $keyboards[] = [
+                                new InlineKeyboardButton(['text' => '✏', 'callback_data' => 'get']),
+                                new InlineKeyboardButton(['text' => '❌', 'callback_data' => 'get']),
+                                new InlineKeyboardButton(['text' => '👁', 'callback_data' => 'get'])
+                            ];
+                        }
+
+
+                        $dataPhoto = [
+                            'photo' => $product->getImage()->getPathToOrigin(),
+                            'chat_id' => $chat_id,
+                            'parse_mode' => 'HTML',
+                            'caption' => $caption,
+                            'reply_markup' => new InlineKeyboard([
+                                'inline_keyboard' => $keyboards
+                            ]),
+                        ];
+                        Request::sendPhoto($dataPhoto);
+                    }
+                }
+
+            }
+
+            return Request::emptyResponse();
+        } else {
+            $text = ' Hello World!';
         }
-      /*  $data = [
-            'callback_query_id' => $callback_query_id,
-            'text'              => $text,
-            'show_alert'        => $callback_data === 'thumb up',
-            'cache_time'        => 5,
-        ];*/
+        /*  $data = [
+              'callback_query_id' => $callback_query_id,
+              'text'              => $text,
+              'show_alert'        => $callback_data === 'thumb up',
+              'cache_time'        => 5,
+          ];*/
 
         return Request::answerCallbackQuery($data);
 
@@ -168,23 +241,23 @@ class CallbackqueryCommand extends SystemCommand
             //Закрепляем чат за авторизованным менеджером
             $authChat = AuthorizedManagerChat::findOne(intval($chatId));
             $authChat->client_chat_id = $callbackDataArr[1];
-            if ($authChat->validate() && $authChat->save()){
+            if ($authChat->validate() && $authChat->save()) {
                 $data['text'] = Yii::t('telegram/default', 'Start conversation with chat ') . $callbackDataArr[1];
                 Request::answerCallbackQuery($data);
                 unset($data['show_alert'], $data['callback_query_id']);
                 $data['chat_id'] = $chatId;
                 return Yii::$app->telegram->sendMessage($data);
-               // return Request::sendMessage($data);
-            }else{
+                // return Request::sendMessage($data);
+            } else {
                 try {
                     $authChat = AuthorizedManagerChat::find()->where(['client_chat_id' => $callbackDataArr[1]])->one();
                     $manager = Usernames::find()->where(['chat_id' => $authChat->chat_id])->one();
                     $data['text'] = Yii::t('telegram/default', 'Conversation already in progress in this chat. Responsible: ') . ($manager->username ? $manager->username : "not_found");
-                } catch (\Exception $e){
+                } catch (\Exception $e) {
                     $data['text'] = Yii::t('telegram/default', 'Seems conversation already in progress in this chat.');
                 }
-                    unset($data['show_alert'], $data['callback_query_id']);
-                    $data['chat_id'] = $chatId;
+                unset($data['show_alert'], $data['callback_query_id']);
+                $data['chat_id'] = $chatId;
 
 
                 return Yii::$app->telegram->sendMessage($data);
@@ -195,7 +268,7 @@ class CallbackqueryCommand extends SystemCommand
             $data['text'] = Yii::t('telegram/default', 'Unknown command.');
             $data['show_alert'] = false;
 
-           // return Yii::$app->telegram->sendMessage($data);
+            // return Yii::$app->telegram->sendMessage($data);
             return Request::answerCallbackQuery($data);
         }
 
