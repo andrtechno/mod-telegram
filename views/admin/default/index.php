@@ -2,7 +2,7 @@
 
 use panix\engine\Html;
 use panix\engine\bootstrap\ActiveForm;
-
+use Longman\TelegramBot\Entities\KeyboardButton;
 $bot_api_key = '835652742:AAEBdMpPg9TgakFa2o8eduRSkynAZxipg-c';
 $bot_username = 'pixelionbot';
 //print_r(Yii::$app->telegram->getMe());
@@ -34,15 +34,14 @@ $results = \Longman\TelegramBot\Request::sendToActiveChats(
         'users'       => true,
     ]
 );
-print_r($results);
 
 
 
-$preg = preg_match('/(\/catalog|Каталог)/iu', 'xc Каталог1', $match);
 
-\panix\engine\CMS::dump($match);
 
-//\panix\engine\CMS::dump(Yii::$app->telegram->getUpdates());
+
+//\panix\engine\CMS::dump($keyboards2);
+
 ?>
 
 <?php if (!Yii::$app->request->getIsSecureConnection()) { ?>

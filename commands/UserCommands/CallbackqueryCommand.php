@@ -17,12 +17,17 @@ use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use panix\mod\shop\models\Category;
 use panix\mod\shop\models\Product;
+use panix\mod\telegram\components\KeyboardMore;
+use panix\mod\telegram\components\KeyboardPager;
+use panix\mod\telegram\components\KeyboardPagination;
 use panix\mod\telegram\models\AuthorizedManagerChat;
 use panix\mod\telegram\models\Usernames;
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Request;
 use Yii;
+use yii\data\Pagination;
 use yii\helpers\Url;
+use yii\widgets\LinkPager;
 
 /**
  * Callback query command
@@ -117,12 +122,14 @@ class CallbackqueryCommand extends SystemCommand
 
                 foreach ($categories as $category) {
                     $child = $category->children()->all();
-                    if ($child) {
-                        $keyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name, 'callback_data' => 'getCatalog ' . $category->id])];
-                    } else {
-                        $keyboards[] = [new InlineKeyboardButton(['text' => ' ' . $category->name . ' (' . $category->id . ')', 'callback_data' => 'getCatalogList ' . $category->id])];
+                    $count = $category->countItems;
+                    if ($count) {
+                        if ($child) {
+                            $keyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name, 'callback_data' => 'getCatalog ' . $category->id])];
+                        } else {
+                            $keyboards[] = [new InlineKeyboardButton(['text' => ' ' . $category->name . ' (' . $count . ')', 'callback_data' => 'getCatalogList ' . $category->id])];
+                        }
                     }
-
 
                 }
             }
@@ -150,27 +157,47 @@ class CallbackqueryCommand extends SystemCommand
             return Request::editMessageReplyMarkup($dataEdit);
             //  return Yii::$app->telegram->sendMessage($data);
             // }
+
+        }elseif(preg_match('/🛍/iu', trim($callback_data), $match)){
+            $dataCatalog = [
+                'chat_id' => $chat_id,
+                'text' => 'test',
+
+            ];
+            Request::sendMessage($dataCatalog);
         } elseif (preg_match('/^getCatalogList\s+([0-9]+)/iu', trim($callback_data), $match)) {
 
 
             if (isset($match[1])) {
 
 
+                $query = Product::find()->published()->sort()->applyCategories($match[1]);
+                $pages = new KeyboardPagination(['totalCount' => $query->count()]);
+                $products = $query->offset($pages->offset)
+                    ->limit($pages->limit)
+                    ->all();
+
+
+                $test = new KeyboardMore(['pagination' => $pages,
+                ]);
+
+                //  print_r($test);die;
+
 
                 $keyboards2[] = [
-                    new KeyboardButton(['text' => '⏮ Первая', 'callback_data' => 'goHome']),
-                    new KeyboardButton(['text' => '◀', 'callback_data' => 'goHome']),
-                    new KeyboardButton(['text' => '▶', 'callback_data' => 'goHome']),
-                    new KeyboardButton(['text' => '⏭ Последняя', 'callback_data' => 'goHome']),
-                ];$keyboards2[] = [
-                    new KeyboardButton(['text' => '1', 'callback_data' => 'goHome']),
-                    new KeyboardButton(['text' => '2', 'callback_data' => 'goHome']),
-                    new KeyboardButton(['text' => '3', 'callback_data' => 'goHome']),
-                    new KeyboardButton(['text' => '4', 'callback_data' => 'goHome']),
-                    new KeyboardButton(['text' => '5', 'callback_data' => 'goHome']),
-                    new KeyboardButton(['text' => '6', 'callback_data' => 'goHome']),
-                    new KeyboardButton(['text' => '7', 'callback_data' => 'goHome']),
+                    new KeyboardButton(['text' => '📂 Каталог', 'callback_data' => 'getCatalog']),
+                    new KeyboardButton(['text' => '🛍 Корзина'])
                 ];
+                /*  $keyboards2[] = [
+                     new KeyboardButton(['text' => '1', 'callback_data' => 'goHome']),
+                     new KeyboardButton(['text' => '2', 'callback_data' => 'goHome']),
+                     new KeyboardButton(['text' => '3', 'callback_data' => 'goHome']),
+                     new KeyboardButton(['text' => '4', 'callback_data' => 'goHome']),
+                     new KeyboardButton(['text' => '5', 'callback_data' => 'goHome']),
+                     new KeyboardButton(['text' => '6', 'callback_data' => 'goHome']),
+                     new KeyboardButton(['text' => '7', 'callback_data' => 'goHome']),
+                 ];*/
+                $keyboards2 = array_merge($test->buttons, $keyboards2);
                 $dataCatalog = [
                     'chat_id' => $chat_id,
                     'text' => 'test',
@@ -181,11 +208,6 @@ class CallbackqueryCommand extends SystemCommand
                 ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
                 Request::sendMessage($dataCatalog);
 
-                $query = Product::find();
-                $query->published();
-                $query->sort();
-                $query->applyCategories($match[1]);
-                $query->limit(10);
 
                 $products = $query->all();
                 if ($products) {
@@ -195,7 +217,7 @@ class CallbackqueryCommand extends SystemCommand
                         $caption .= $product->price . ' грн';
 
 
-                        $keyboards[] = [new InlineKeyboardButton(['text' => '👉 '.$product->price . ' UAH. — Купить 👈', 'callback_data' => 'ads'])];
+                        $keyboards[] = [new InlineKeyboardButton(['text' => '👉 ' . $product->price . ' UAH. — Купить 👈', 'callback_data' => 'ads'])];
                         if ($this->telegram->isAdmin($chat_id)) {
                             $keyboards[] = [
                                 new InlineKeyboardButton(['text' => '✏', 'callback_data' => 'get']),

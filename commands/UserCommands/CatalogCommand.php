@@ -10,16 +10,13 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
-use Longman\TelegramBot\Commands\UserCommand;
-use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Request;
-use panix\engine\CMS;
 use panix\mod\shop\models\Category;
-use panix\mod\shop\models\Product;
+use panix\mod\telegram\components\Command;
 use Yii;
 
 /**
@@ -27,7 +24,7 @@ use Yii;
  *
  * Display an inline keyboard with a few buttons.
  */
-class CatalogCommand extends UserCommand
+class CatalogCommand extends Command
 {
     /**
      * @var string
@@ -48,8 +45,9 @@ class CatalogCommand extends UserCommand
      * @var string
      */
     protected $version = '1.0';
-    public $private_only = true;
-   // public $enabled = false;
+
+    // public $enabled = false;
+
     /**
      * Command execute method
      *
@@ -68,11 +66,9 @@ class CatalogCommand extends UserCommand
 
 
         $preg = preg_match('/^(\/catalog)\s([0-9]+)/', trim($message->getText()), $match);
-        if ($message->getText() == '/catalog' || $preg) {
+        //if ($message->getText() == '/catalog' || $preg) {
             $id = (isset($match[1])) ? $match[1] : 1;
             $root = Category::findOne($id);
-            echo '/catalog '.$id.PHP_EOL;
-            echo $text.PHP_EOL;
             $categories = $root->children()->all();
 
 
@@ -81,12 +77,14 @@ class CatalogCommand extends UserCommand
 
                 foreach ($categories as $category) {
                     $child = $category->children()->all();
-                    if ($child) {
-                        $inlineKeyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name . ' ('.$category->id.')', 'callback_data' => 'getCatalog '.$category->id])];
-                    } else {
-                        $inlineKeyboards[] = [new InlineKeyboardButton(['text' => '📄 '. $category->name . ' ('.$category->id.')', 'callback_data' => 'getCatalogList '.$category->id])];
+                    $count = $category->countItems;
+                    if ($count) {
+                        if ($child) {
+                            $inlineKeyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name . ' (' . $count . ')', 'callback_data' => 'getCatalog ' . $category->id])];
+                        } else {
+                            $inlineKeyboards[] = [new InlineKeyboardButton(['text' => '📄 ' . $category->name . ' (' . $count . ')', 'callback_data' => 'getCatalogList ' . $category->id])];
+                        }
                     }
-
 
                 }
             }
@@ -98,7 +96,7 @@ class CatalogCommand extends UserCommand
             Request::sendSticker($sticker);*/
 
 
-            $data2 = [
+            $data = [
                 'chat_id' => $chat_id,
                 'text' => 'Выберите раздел:',
                 'reply_markup' => new InlineKeyboard([
@@ -128,9 +126,10 @@ class CatalogCommand extends UserCommand
             Request::sendMessage($dataCatalog);
 
 
-            return Request::sendMessage($data2);
-        }
-        // return Yii::$app->telegram->sendMessage($data);
+            $result =  $data;
+       // }
+         return Request::sendMessage($result);
+        // return Yii::$app->telegram->sendMessage($result);
     }
 
 }

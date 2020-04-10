@@ -10,14 +10,14 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
-use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\Command;
 use Yii;
 
 /**
  * User "/help" command
  */
-class HelpCommand extends UserCommand
+class HelpCommand extends Command
 {
     /**#@+
      * {@inheritdoc}
@@ -26,6 +26,7 @@ class HelpCommand extends UserCommand
     protected $description = '';
     protected $usage = '/help or /help <command>';
     protected $version = '1.0';
+
     /**#@-*/
 
     public function __construct($telegram, $update = NULL)
@@ -53,16 +54,22 @@ class HelpCommand extends UserCommand
         //If no command parameter is passed, show the list
         if ($command === '') {
             $text = $this->telegram->getBotUsername() . ' v. ' . $this->telegram->getVersion() . "\n\n";
-            $text .= Yii::t('telegram/command','COMMAND_LIST').PHP_EOL;
+            $text .= Yii::t('telegram/command', 'COMMAND_LIST') . PHP_EOL;
             foreach ($commands as $command) {
+
+               // if($command->getName() == 'debug'){
+              //      print_r($command);
+               // }
                 $text .= '/' . $command->getName() . ' - ' . $command->getDescription() . "\n";
             }
 
-            $text .= "\n" . Yii::t('telegram/command','EXACT_COMMAND').': /help <command>';
+            $text .= "\n" . Yii::t('telegram/command', 'EXACT_COMMAND') . ': /help <command>';
         } else {
+
             $command = str_replace('/', '', $command);
             if (isset($commands[$command])) {
                 $command = $commands[$command];
+
                 $text = 'Command: ' . $command->getName() . ' v' . $command->getVersion() . "\n";
                 $text .= 'Description: ' . $command->getDescription() . "\n";
                 $text .= 'Usage: ' . $command->getUsage();
@@ -72,13 +79,12 @@ class HelpCommand extends UserCommand
         }
 
         $data = [
-            'chat_id'             => $chat_id,
+            'chat_id' => $chat_id,
             'reply_to_message_id' => $message_id,
-            'text'                => $text,
+            'text' => $text,
         ];
-//print_r($data);die;
-        return  Yii::$app->telegram->sendMessage($data);
+        $data['reply_markup'] = $this->startKeyboards();
 
-     //   return Request::sendMessage($data);
+        return Request::sendMessage($data);
     }
 }

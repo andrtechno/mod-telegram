@@ -2,7 +2,7 @@
 
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
-use Longman\TelegramBot\Commands\SystemCommand;
+use panix\mod\telegram\components\SystemCommand;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Request;
@@ -23,7 +23,7 @@ class StartCommand extends SystemCommand
     /**
      * @var string
      */
-    protected $description = 'Start command';
+    protected $description = 'Стартовая комманда';
 
     /**
      * @var string
@@ -63,8 +63,7 @@ class StartCommand extends SystemCommand
         $chat_id = $chat->getId();
         $user_id = $user->getId();
 
-
-        $text = Yii::t('telegram/command', 'START');
+        $text = Yii::t('telegram/command', 'START', [$user->getFirstName() . ' ' . $user->getLastName()]);
 
         $data = [
             'parse_mode' => 'HTML',
@@ -73,39 +72,7 @@ class StartCommand extends SystemCommand
         ];
 
 
-        /* $data['reply_markup'] = (new Keyboard(
-              [
-                  'купить',
-                  (new KeyboardButton(['text' => 'Share Contact']))->setText('asddsa'),
-                  ['text' => 'test', 'callback_data' => 'thumb up']
-              ]
-          ))
-              ->setResizeKeyboard(true)
-              ->setOneTimeKeyboard(true)
-              ->setSelective(true);*/
-
-        $keyboards[] = [
-            new KeyboardButton(['text' => '📂 Каталог', 'callback_data' => 'callbackqueryproduct']),
-            new KeyboardButton(['text' => '🛍 Корзина', 'callback_data' => 'product_attributes'])
-        ];
-        $keyboards[] = [
-            new KeyboardButton(['text' => '📢 Новости', 'callback_data' => 'callbackqueryproduct']),
-            new KeyboardButton(['text' => '📦 Заказы', 'callback_data' => 'product_attributes'])
-        ];
-        $keyboards[] = [
-            new KeyboardButton(['text' => '⚙ Настройки', 'callback_data' => 'callbackqueryproduct']),
-            new KeyboardButton(['text' => '❓ Помощь', 'callback_data' => 'product_attributes'])
-        ];
-
-        if ($this->telegram->isAdmin($chat_id)) {
-            //  $keyboards[] = [new InlineKeyboardButton(['text' => '✏ 📝  ⚙ Редактировать', 'callback_data' => 'get']), new InlineKeyboardButton(['text' => '❌ Удалить', 'callback_data' => 'get'])];
-            //  $keyboards[] = [new InlineKeyboardButton(['text' => '❓ 👤  👥 🛍 ✅ 🟢 🔴Удалить', 'callback_data' => 'get'])];
-        }
-
-
-        $data['reply_markup'] = (new Keyboard([
-            'keyboard' => $keyboards
-        ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
+        $data['reply_markup'] = $this->startKeyboards();
 
 
         return Request::sendMessage($data);
