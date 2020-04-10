@@ -19,17 +19,17 @@ use Yii;
  *
  * Display an inline keyboard with a few buttons.
  */
-class CartCommand extends Command
+class FeedbackCommand extends Command
 {
     /**
      * @var string
      */
     protected $name = 'cart';
-
+    protected $private_only = true;
     /**
      * @var string
      */
-    protected $description = 'Корзина заказа';
+    protected $description = 'asdза';
 
     /**
      * @var string

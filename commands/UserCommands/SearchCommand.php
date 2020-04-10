@@ -18,6 +18,7 @@ use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Request;
 use panix\mod\shop\models\Product;
+use panix\mod\telegram\components\Command;
 use Yii;
 
 /**
@@ -25,7 +26,7 @@ use Yii;
  *
  * Display an inline keyboard with a few buttons.
  */
-class SearchCommand extends UserCommand
+class SearchCommand extends Command
 {
     /**
      * @var string
@@ -90,7 +91,7 @@ class SearchCommand extends UserCommand
         $result = Request::emptyResponse();
 
 
-        if ($text === '') {
+        if ($text === '' || preg_match('/^(\x{1F50E})/iu', trim($text), $match)) {
             $notes['state'] = 0;
             $this->conversation->update();
 
@@ -103,7 +104,7 @@ class SearchCommand extends UserCommand
                 $data['text'] = 'Введите название товара или артикул:';
             }
 
-            $result = Request::sendMessage($data);
+            $result = $data;
 
         } else {
             $query = Product::find();
@@ -112,18 +113,19 @@ class SearchCommand extends UserCommand
             $query->groupBy(Product::tableName() . '.`id`');
             $query->applySearch($text);
 
-            $result = $query->all();
+            $resultQuery = $query->all();
 
-            if ($result) {
-
+            if ($resultQuery) {
+                $this->conversation->stop();
                 $inline_keyboard = new InlineKeyboard([
                     [
                         'text' => '👉 ' . Yii::t('shop/default', 'SEARCH_RESULT', [
                                 'query' => $text,
-                                'count' => count($result),
+                                'count' => count($resultQuery),
                             ]),
                         // 'callback_data' => 'thumb up'
-                        'url' => 'https://yii2.pixelion.com.ua/search?q=' . $text
+                        'url' => 'https://yii2.pixelion.com.ua/search?q=' . $text,
+
                     ],
                 ]);
 
@@ -132,12 +134,17 @@ class SearchCommand extends UserCommand
                     'parse_mode' => 'HTML',
                     'text' => Yii::t('shop/default', 'SEARCH_RESULT', [
                         'query' => $text,
-                        'count' => count($result),
+                        'count' => count($resultQuery),
                     ]),
                     'reply_markup' => $inline_keyboard,
                 ];
 
             } else {
+                $sticker = [
+                    'chat_id' => $chat_id,
+                    'sticker' => 'CAACAgIAAxkBAAJBQl6QlXE_01q3-LiWldLrnvAuPpkwAAIRAAOQ_ZoVIPDREeqfP5cYBA'
+                ];
+                Request::sendSticker($sticker);
                 $data = [
                     'chat_id' => $chat_id,
                     'parse_mode' => 'HTML',
@@ -145,13 +152,12 @@ class SearchCommand extends UserCommand
                         'query' => $text,
                         'count' => 0,
                     ]),
+                    'reply_markup' => $this->homeKeyboards(),
                 ];
             }
+            $result = $data;
 
-            $result = Request::sendMessage($data);
         }
-
-
-        return $result;
+        return Request::sendMessage($result);
     }
 }

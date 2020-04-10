@@ -10,6 +10,8 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
+use Longman\TelegramBot\Entities\Keyboard;
+use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Request;
 use panix\mod\telegram\components\Command;
 use Yii;
@@ -83,7 +85,27 @@ class HelpCommand extends Command
             'reply_to_message_id' => $message_id,
             'text' => $text,
         ];
-        $data['reply_markup'] = $this->startKeyboards();
+
+
+        $keyboards[] = [
+            new KeyboardButton(['text' => '☎ Позвонить']), //260E
+            new KeyboardButton(['text' => '📞 Написать']) //1F4DE
+        ];
+        $keyboards[] = [
+            new KeyboardButton(['text' => '✉ Написать']), //2709
+            new KeyboardButton(['text' => '📦 Мои заказы'])
+        ];
+        $keyboards[] = [
+            new KeyboardButton(['text' => '⚙ Настройки']),
+            new KeyboardButton(['text' => '❓ Помощь'])
+        ];
+
+        $reply_markup = (new Keyboard([
+            'keyboard' => $keyboards
+        ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
+
+
+        $data['reply_markup'] = $reply_markup;
 
         return Request::sendMessage($data);
     }

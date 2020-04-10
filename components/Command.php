@@ -10,6 +10,7 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
     public function startKeyboards(){
         $keyboards[] = [
             new KeyboardButton(['text' => '📂 Каталог']),
+            new KeyboardButton(['text' => '🔎 Поиск']),
             new KeyboardButton(['text' => '🛍 Корзина'])
         ];
         $keyboards[] = [

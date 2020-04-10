@@ -19,22 +19,22 @@ use Yii;
  *
  * Display an inline keyboard with a few buttons.
  */
-class CartCommand extends Command
+class NewsCommand extends Command
 {
     /**
      * @var string
      */
-    protected $name = 'cart';
+    protected $name = 'news';
 
     /**
      * @var string
      */
-    protected $description = 'Корзина заказа';
+    protected $description = 'Список новостей';
 
     /**
      * @var string
      */
-    protected $usage = '/cart';
+    protected $usage = '/news';
 
     /**
      * @var string
@@ -61,13 +61,18 @@ class CartCommand extends Command
 
         $sticker = [
             'chat_id' => $chat_id,
-            'sticker' => 'BQADBAADsgUAApv7sgABW0IQT2B3WekC'
+            'sticker' => 'CAACAgIAAxkBAAJBQl6QlXE_01q3-LiWldLrnvAuPpkwAAIRAAOQ_ZoVIPDREeqfP5cYBA'
         ];
         Request::sendSticker($sticker);
 
         $data['chat_id'] = $chat_id;
         $data['text'] = $this->description.' в разработке';
         $data['reply_markup'] = $this->homeKeyboards();
+
+
+      //  $s=Request::sticker(['name'=>'Hot Cherry']);
+//print_r($s);
+
 
         return Request::sendMessage($data);
 

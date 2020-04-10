@@ -10,6 +10,7 @@ abstract class SystemCommand extends \Longman\TelegramBot\Commands\SystemCommand
   public function startKeyboards(){
       $keyboards[] = [
           new KeyboardButton(['text' => '📂 Каталог']),
+          new KeyboardButton(['text' => '🔎 Поиск']),
           new KeyboardButton(['text' => '🛍 Корзина'])
       ];
       $keyboards[] = [
@@ -20,7 +21,6 @@ abstract class SystemCommand extends \Longman\TelegramBot\Commands\SystemCommand
           new KeyboardButton(['text' => '⚙ Настройки']),
           new KeyboardButton(['text' => '❓ Помощь'])
       ];
-
       $data = (new Keyboard([
           'keyboard' => $keyboards
       ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);

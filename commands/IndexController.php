@@ -106,7 +106,15 @@ class IndexController extends Controller
                             } elseif (preg_match('/^(\x{2753})/iu', trim($text), $match)) { //help emoji
                                 // $telegram->executeCommand('help');
                             } elseif (preg_match('/^(\x{1F4E2})/iu', trim($text), $match)) { //news emoji
+                                  $telegram->executeCommand('news');
+                            } elseif (preg_match('/^(\x{1F4E6})/iu', trim($text), $match)) { //my carts emoji
                                 //  $telegram->executeCommand('help');
+                            } elseif (preg_match('/^(\x{260E}|\x{1F4DE})/iu', trim($text), $match)) { //phone emoji
+                                //  $telegram->executeCommand('help');
+                            } elseif (preg_match('/^(\x{2709})/iu', trim($text), $match)) { //feedback emoji
+                                $telegram->executeCommand('feedback');
+                            } elseif (preg_match('/^(\x{1F50E})/iu', trim($text), $match)) { //search emoji
+                                $telegram->executeCommand('/search');
                             }
                         }
 
