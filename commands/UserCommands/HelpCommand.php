@@ -89,12 +89,13 @@ class HelpCommand extends Command
 
         $keyboards[] = [
             new KeyboardButton(['text' => '☎ Позвонить']), //260E
-            new KeyboardButton(['text' => '📞 Написать']) //1F4DE
-        ];
-        $keyboards[] = [
             new KeyboardButton(['text' => '✉ Написать']), //2709
-            new KeyboardButton(['text' => '📦 Мои заказы'])
+          //  new KeyboardButton(['text' => '📞 Написать']) //1F4DE
         ];
+       // $keyboards[] = [
+
+          //  new KeyboardButton(['text' => '📦 Мои заказы'])
+       // ];
         $keyboards[] = [
             new KeyboardButton(['text' => '⚙ Настройки']),
             new KeyboardButton(['text' => '❓ Помощь'])

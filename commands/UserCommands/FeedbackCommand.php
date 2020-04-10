@@ -10,6 +10,8 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
+use Longman\TelegramBot\Conversation;
+use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Request;
 use panix\mod\telegram\components\Command;
 use Yii;
@@ -24,23 +26,24 @@ class FeedbackCommand extends Command
     /**
      * @var string
      */
-    protected $name = 'cart';
+    protected $name = 'feedback';
     protected $private_only = true;
     /**
      * @var string
      */
-    protected $description = 'asdза';
+    protected $description = 'Feedback send message';
 
     /**
      * @var string
      */
-    protected $usage = '/cart';
+    protected $usage = '/feedback';
 
     /**
      * @var string
      */
     protected $version = '1.0';
-
+    protected $conversation;
+    protected $need_mysql = true;
     // public $enabled = false;
 
     /**
@@ -59,17 +62,81 @@ class FeedbackCommand extends Command
         $chat_id = $chat->getId();
         $user_id = $user->getId();
 
-        $sticker = [
+        $data = [
             'chat_id' => $chat_id,
-            'sticker' => 'BQADBAADsgUAApv7sgABW0IQT2B3WekC'
         ];
-        Request::sendSticker($sticker);
 
-        $data['chat_id'] = $chat_id;
-        $data['text'] = $this->description.' в разработке';
-        $data['reply_markup'] = $this->homeKeyboards();
+        if ($chat->isGroupChat() || $chat->isSuperGroup()) {
+            //reply to message id is applied by default
+            //Force reply is applied by default so it can work with privacy on
+            $data['reply_markup'] = Keyboard::forceReply(['selective' => true]);
+        }
 
-        return Request::sendMessage($data);
+        //Conversation start
+        $this->conversation = new Conversation($user_id, $chat_id, $this->getName());
+
+        $notes = &$this->conversation->notes;
+        !is_array($notes) && $notes = [];
+
+        //cache data from the tracking session if any
+        $state = 0;
+        if (isset($notes['state'])) {
+            $state = $notes['state'];
+        }
+
+        $result = Request::emptyResponse();
+
+
+        //State machine
+        //Entrypoint of the machine state if given by the track
+        //Every time a step is achieved the track is updated
+        switch ($state) {
+            case 0:
+                echo $text;
+                if ($text === '' || preg_match('/^(\x{2709})/iu', trim($text), $match)) {
+                    $notes['state'] = 0;
+                    $this->conversation->update();
+
+                    $data['text'] = 'Напишите сообщение. Оно будет отправлено команде:';
+                    $data['reply_markup'] = Keyboard::remove(['selective' => true]);
+                    if ($text !== '') {
+                        $data['text'] = 'Напишите сообщение. Оно будет отправлено команде:';
+                    }
+                    $result = Request::sendMessage($data);
+                    break;
+                }
+
+                $notes['message'] = $text;
+                $text = '';
+            // no break
+            case 1:
+                $this->conversation->update();
+                $out_text = '';
+                unset($notes['state']);
+                foreach ($notes as $k => $v) {
+                    $out_text .= PHP_EOL .'<strong>'. ucfirst($k) . '</strong>: ' . $v;
+                }
+
+                $data['reply_markup'] = Keyboard::remove(['selective' => true]);
+                $data['text'] = 'Сообщение успешно отправлено! Мы рассмотрим обращение и свяжемся с Вами.:';
+                $this->conversation->stop();
+
+                $dataChat['chat_id'] = '@pixelpalkin';
+                $dataChat['parse_mode'] = 'HTML';
+                $dataChat['disable_notification']=true;
+                $dataChat['text'] = 'Заявка feedback: '.$out_text;
+
+                $resultSendChat = Request::sendMessage($dataChat);
+
+
+                $result = Request::sendMessage($data);
+
+
+
+                break;
+        }
+
+        return $result;
 
     }
 

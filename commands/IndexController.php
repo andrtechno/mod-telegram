@@ -76,7 +76,7 @@ class IndexController extends Controller
                 $ss = $telegram;
                 // Here you can set some command specific parameters
                 // e.g. Google geocode/timezone api key for /date command
-                //$telegram->setCommandConfig('date', ['google_api_key' => 'your_google_api_key_here']);
+               // $telegram->setCommandConfig('date', ['google_api_key' => 'your_google_api_key_here']);
 
                 // Requests Limiter (tries to prevent reaching Telegram API limits)
                 $telegram->enableLimiter();
@@ -110,11 +110,14 @@ class IndexController extends Controller
                             } elseif (preg_match('/^(\x{1F4E6})/iu', trim($text), $match)) { //my carts emoji
                                 //  $telegram->executeCommand('help');
                             } elseif (preg_match('/^(\x{260E}|\x{1F4DE})/iu', trim($text), $match)) { //phone emoji
-                                //  $telegram->executeCommand('help');
+                                  $telegram->executeCommand('call');
                             } elseif (preg_match('/^(\x{2709})/iu', trim($text), $match)) { //feedback emoji
                                 $telegram->executeCommand('feedback');
                             } elseif (preg_match('/^(\x{1F50E})/iu', trim($text), $match)) { //search emoji
-                                $telegram->executeCommand('/search');
+                                $telegram->executeCommand('search');
+
+                              //  $telegram->setCommandConfig('catalog', ['category_id' => '20']);
+                              //  $telegram->executeCommand('catalog');
                             }
                         }
 

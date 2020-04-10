@@ -17,6 +17,7 @@ use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Entities\PhotoSize;
 use Longman\TelegramBot\Request;
 use Yii;
+
 /**
  * User "/survey" command
  *
@@ -71,9 +72,9 @@ class SurveyCommand extends UserCommand
     {
         $message = $this->getMessage();
 
-        $chat    = $message->getChat();
-        $user    = $message->getFrom();
-        $text    = trim($message->getText(true));
+        $chat = $message->getChat();
+        $user = $message->getFrom();
+        $text = trim($message->getText(true));
         $chat_id = $chat->getId();
         $user_id = $user->getId();
 
@@ -111,7 +112,7 @@ class SurveyCommand extends UserCommand
                     $notes['state'] = 0;
                     $this->conversation->update();
 
-                    $data['text']         = 'Type your name:';
+                    $data['text'] = 'Type your name:';
                     $data['reply_markup'] = Keyboard::remove(['selective' => true]);
 
                     //$result = Request::sendMessage($data);
@@ -120,7 +121,7 @@ class SurveyCommand extends UserCommand
                 }
 
                 $notes['name'] = $text;
-                $text          = '';
+                $text = '';
 
             // no break
             case 1:
@@ -135,7 +136,7 @@ class SurveyCommand extends UserCommand
                 }
 
                 $notes['surname'] = $text;
-                $text             = '';
+                $text = '';
 
             // no break
             case 2:
@@ -153,7 +154,7 @@ class SurveyCommand extends UserCommand
                 }
 
                 $notes['age'] = $text;
-                $text         = '';
+                $text = '';
 
             // no break
             case 3:
@@ -197,7 +198,7 @@ class SurveyCommand extends UserCommand
                 }
 
                 $notes['longitude'] = $message->getLocation()->getLongitude();
-                $notes['latitude']  = $message->getLocation()->getLatitude();
+                $notes['latitude'] = $message->getLocation()->getLatitude();
 
             // no break
             case 5:
@@ -212,7 +213,7 @@ class SurveyCommand extends UserCommand
                 }
 
                 /** @var PhotoSize $photo */
-                $photo             = $message->getPhoto()[0];
+                $photo = $message->getPhoto()[0];
                 $notes['photo_id'] = $photo->getFileId();
 
             // no break
@@ -245,9 +246,9 @@ class SurveyCommand extends UserCommand
                     $out_text .= PHP_EOL . ucfirst($k) . ': ' . $v;
                 }
 
-                $data['photo']        = $notes['photo_id'];
+                $data['photo'] = $notes['photo_id'];
                 $data['reply_markup'] = Keyboard::remove(['selective' => true]);
-                $data['caption']      = $out_text;
+                $data['caption'] = $out_text;
                 $this->conversation->stop();
 
                 $result = Request::sendPhoto($data);

@@ -11,12 +11,15 @@
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
 
+use Longman\TelegramBot\Entities\CallbackQuery;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
+use panix\mod\shop\models\Attribute;
 use panix\mod\shop\models\Category;
 use panix\mod\shop\models\Product;
+use panix\mod\telegram\components\CallbackQueryTest;
 use panix\mod\telegram\components\KeyboardMore;
 use panix\mod\telegram\components\KeyboardPager;
 use panix\mod\telegram\components\KeyboardPagination;
@@ -61,19 +64,22 @@ class CallbackqueryCommand extends SystemCommand
 
         $callback_query_id = $callback_query->getId();
         $callback_data = $callback_query->getData();
-        $msh = $callback_query->getMessage();
-        $data['callback_query_id'] = $callback_query_id;
 
+        $data['callback_query_id'] = $callback_query_id;
+if($callback_data == '/cart'){
+    $this->telegram->executeCommand('cart');
+    return Request::emptyResponse();
+}
         if ($callback_data == 'getProduct') {
 
             $product = Product::find()->where(['id' => 2665])->one();
             $inline_keyboard = new InlineKeyboard([
                 ['text' => '👉 ' . $product->price . ' грн. Купить', 'callback_data' => 'callbackqueryproduct']], [
-                ['text' => '🏆 ☎️  🛒 🎁 Характеристики', 'callback_data' => 'product_attributes'],
+                ['text' => '🏆  🛒 🎁 Характеристики', 'callback_data' => 'product_attributes'],
                 ['text' => '🤝  🚚 callback thumb up ', 'callback_data' => 'thumb up'],
             ]);
 
-//echo Yii::getAlias('@app/web/uploads').DIRECTORY_SEPARATOR.'1.jpg';die;
+
 
             $data = [
                 'chat_id' => $chat_id,
@@ -127,7 +133,7 @@ class CallbackqueryCommand extends SystemCommand
                         if ($child) {
                             $keyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name, 'callback_data' => 'getCatalog ' . $category->id])];
                         } else {
-                            $keyboards[] = [new InlineKeyboardButton(['text' => ' ' . $category->name . ' (' . $count . ')', 'callback_data' => 'getCatalogList ' . $category->id])];
+                            $keyboards[] = [new InlineKeyboardButton(['text' => ' ' . $category->name . ' (' . $count . ')', 'callback_data' => 'getCatalogList/' . $category->id])];
                         }
                     }
 
@@ -158,14 +164,43 @@ class CallbackqueryCommand extends SystemCommand
             //  return Yii::$app->telegram->sendMessage($data);
             // }
 
-        }elseif(preg_match('/🛍/iu', trim($callback_data), $match)){
+        } elseif (preg_match('/^addCart\/([0-9]+)/iu', trim($callback_data), $match)) {
+            print_r($update);
+           /* $product = Product::find()->published()->where(['id'=>$match[1]])->one();
             $dataCatalog = [
                 'chat_id' => $chat_id,
-                'text' => 'test',
+                'text' => 'addCart',
 
             ];
-            Request::sendMessage($dataCatalog);
-        } elseif (preg_match('/^getCatalogList\s+([0-9]+)/iu', trim($callback_data), $match)) {
+*/
+
+            $keyboards[] = [
+                new InlineKeyboardButton([
+                    'text' => 'товарв в корзине',
+                    'callback_data' => "openCart"
+                ]),
+                new InlineKeyboardButton([
+                    'text' => '🛍 Корзина',
+                    'callback_data' => "/cart"
+                ])
+            ];
+            if ($this->telegram->isAdmin($chat_id)) {
+                $keyboards[] = [
+                    new InlineKeyboardButton(['text' => '✏', 'callback_data' => 'get']),
+                    new InlineKeyboardButton(['text' => '❌', 'callback_data' => 'get']),
+                    new InlineKeyboardButton(['text' => '👁', 'callback_data' => 'get'])
+                ];
+            }
+
+
+            $dataEdit['chat_id'] = $chat_id;
+            $dataEdit['message_id'] = $update->getCallbackQuery()->getMessage()->getMessageId();
+            $dataEdit['reply_markup'] = new InlineKeyboard([
+                'inline_keyboard' => $keyboards
+            ]);
+            return Request::editMessageReplyMarkup($dataEdit);
+
+        } elseif (preg_match('/^getCatalogList\/([0-9]+)/iu', trim($callback_data), $match)) {
 
 
             if (isset($match[1])) {
@@ -181,24 +216,14 @@ class CallbackqueryCommand extends SystemCommand
                 $test = new KeyboardMore(['pagination' => $pages,
                 ]);
 
-                //  print_r($test);die;
-
 
                 $keyboards2[] = [
                     new KeyboardButton(['text' => '📂 Каталог', 'callback_data' => 'getCatalog']),
                     new KeyboardButton(['text' => '🛍 Корзина'])
                 ];
-                /*  $keyboards2[] = [
-                     new KeyboardButton(['text' => '1', 'callback_data' => 'goHome']),
-                     new KeyboardButton(['text' => '2', 'callback_data' => 'goHome']),
-                     new KeyboardButton(['text' => '3', 'callback_data' => 'goHome']),
-                     new KeyboardButton(['text' => '4', 'callback_data' => 'goHome']),
-                     new KeyboardButton(['text' => '5', 'callback_data' => 'goHome']),
-                     new KeyboardButton(['text' => '6', 'callback_data' => 'goHome']),
-                     new KeyboardButton(['text' => '7', 'callback_data' => 'goHome']),
-                 ];*/
+
                 $keyboards2 = array_merge($test->buttons, $keyboards2);
-                $dataCatalog = [
+              /*  $dataCatalog = [
                     'chat_id' => $chat_id,
                     'text' => 'test',
 
@@ -206,7 +231,7 @@ class CallbackqueryCommand extends SystemCommand
                 $dataCatalog['reply_markup'] = (new Keyboard([
                     'keyboard' => $keyboards2
                 ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
-                Request::sendMessage($dataCatalog);
+                Request::sendMessage($dataCatalog);*/
 
 
                 $products = $query->all();
@@ -214,10 +239,20 @@ class CallbackqueryCommand extends SystemCommand
                     foreach ($products as $index => $product) {
                         $keyboards = [];
                         $caption = '<strong>' . $product->name . '</strong>' . PHP_EOL;
-                        $caption .= $product->price . ' грн';
+                        $caption .= $product->price . ' грн' . PHP_EOL . PHP_EOL;
+                        $caption .= '<strong>Характеристики:</strong>' . PHP_EOL;
+                        foreach ($this->attributes($product) as $name=>$value){
+                            $caption .= '<strong>'.$name . '</strong>: '.$value . PHP_EOL;
+                        }
+                      //  print_r($this->attributes($product));die;
 
 
-                        $keyboards[] = [new InlineKeyboardButton(['text' => '👉 ' . $product->price . ' UAH. — Купить 👈', 'callback_data' => 'ads'])];
+                        $keyboards[] = [
+                            new InlineKeyboardButton([
+                                'text' => '👉 ' . $product->price . ' UAH. — Купить 👈',
+                                'callback_data' => "addCart/{$product->id}"
+                            ])
+                        ];
                         if ($this->telegram->isAdmin($chat_id)) {
                             $keyboards[] = [
                                 new InlineKeyboardButton(['text' => '✏', 'callback_data' => 'get']),
@@ -226,9 +261,9 @@ class CallbackqueryCommand extends SystemCommand
                             ];
                         }
 
-
                         $dataPhoto = [
                             'photo' => $product->getImage()->getPathToOrigin(),
+                           // 'photo' => 'https://yii2.pixelion.com.ua'.$product->getImage()->getUrl(),
                             'chat_id' => $chat_id,
                             'parse_mode' => 'HTML',
                             'caption' => $caption,
@@ -236,7 +271,7 @@ class CallbackqueryCommand extends SystemCommand
                                 'inline_keyboard' => $keyboards
                             ]),
                         ];
-                        Request::sendPhoto($dataPhoto);
+                        $photoRequest = Request::sendPhoto($dataPhoto);
                     }
                 }
 
@@ -294,5 +329,53 @@ class CallbackqueryCommand extends SystemCommand
             return Request::answerCallbackQuery($data);
         }
 
+    }
+    protected $_attributes;
+    public $model;
+    protected $_models;
+    public function attributes($product)
+    {
+
+        $eav = $product;
+        /** @var \panix\mod\shop\components\EavBehavior $eav */
+        $this->_attributes = $eav->getEavAttributes();
+
+
+        $data = [];
+        $groups = [];
+        foreach ($this->getModels() as $model) {
+            /** @var Attribute $model */
+            $abbr = ($model->abbreviation) ? ' ' . $model->abbreviation : '';
+
+            $value = $model->renderValue($this->_attributes[$model->name]) . $abbr;
+
+            $data[$model->title] = $value;
+        }
+
+        return $data;
+
+    }
+    public function getModels()
+    {
+        if (is_array($this->_models))
+            return $this->_models;
+
+        $this->_models = [];
+        //$cr = new CDbCriteria;
+        //$cr->addInCondition('t.name', array_keys($this->_attributes));
+
+        // $query = Attribute::getDb()->cache(function () {
+        $query = Attribute::find()
+            ->where(['IN', 'name', array_keys($this->_attributes)])
+            ->displayOnFront()
+            ->sort()
+            ->all();
+        // }, 3600);
+
+
+        foreach ($query as $m)
+            $this->_models[$m->name] = $m;
+
+        return $this->_models;
     }
 }

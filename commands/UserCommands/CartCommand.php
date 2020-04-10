@@ -10,8 +10,11 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
+use Longman\TelegramBot\Entities\InlineKeyboard;
+use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Request;
 use panix\mod\telegram\components\Command;
+use SebastianBergmann\CodeCoverage\Report\PHP;
 use Yii;
 
 /**
@@ -51,7 +54,14 @@ class CartCommand extends Command
      */
     public function execute()
     {
-        $message = $this->getMessage();
+        $update = $this->getUpdate();
+
+        if ($update->getCallbackQuery()) {
+            $message = $update->getCallbackQuery()->getMessage();
+        } else {
+            $message = $this->getMessage();
+        }
+
 
         $chat = $message->getChat();
         $user = $message->getFrom();
@@ -59,18 +69,39 @@ class CartCommand extends Command
         $chat_id = $chat->getId();
         $user_id = $user->getId();
 
-        $sticker = [
-            'chat_id' => $chat_id,
-            'sticker' => 'BQADBAADsgUAApv7sgABW0IQT2B3WekC'
+
+        $keyboards[] = [
+            new InlineKeyboardButton(['text' => '—', 'callback_data' => 'get']),
+            new InlineKeyboardButton(['text' => '2 шт.', 'callback_data' => 'get']),
+            new InlineKeyboardButton(['text' => '+', 'callback_data' => 'get'])
         ];
-        Request::sendSticker($sticker);
+        $keyboards[] = [
+            new InlineKeyboardButton(['text' => '⬅', 'callback_data' => 'get']),
+            new InlineKeyboardButton(['text' => '2 / 6', 'callback_data' => 'get']),
+            new InlineKeyboardButton(['text' => '➡', 'callback_data' => 'get'])
+        ];
+        $keyboards[] = [
+            new InlineKeyboardButton(['text' => '✅ Заказ на 130 грн. Офрормить', 'callback_data' => 'get']),
+        ];
+        $keyboards[] = [
+            new InlineKeyboardButton(['text' => '❌', 'callback_data' => 'get']),
+        ];
+
+
+        $text = '*Ваша корзина*' . PHP_EOL;
+        $text .= '[Мой товар](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
+        $text .= '_описание товара_' . PHP_EOL;
+        $text .= '`90 грн / 4 шт = 350 грн`' . PHP_EOL;
 
         $data['chat_id'] = $chat_id;
-        $data['text'] = $this->description.' в разработке';
-        $data['reply_markup'] = $this->homeKeyboards();
-
-        return Request::sendMessage($data);
-
+        $data['text'] = $text;
+        $data['parse_mode'] = 'Markdown';
+        $data['reply_markup'] = new InlineKeyboard([
+            'inline_keyboard' => $keyboards
+        ]);
+        $response = Request::sendMessage($data);
+        print_r($response);
+        return $response;
     }
 
 }

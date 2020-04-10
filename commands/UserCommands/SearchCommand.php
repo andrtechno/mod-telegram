@@ -116,7 +116,7 @@ class SearchCommand extends Command
             $resultQuery = $query->all();
 
             if ($resultQuery) {
-                $this->conversation->stop();
+
                 $inline_keyboard = new InlineKeyboard([
                     [
                         'text' => '👉 ' . Yii::t('shop/default', 'SEARCH_RESULT', [
@@ -155,6 +155,7 @@ class SearchCommand extends Command
                     'reply_markup' => $this->homeKeyboards(),
                 ];
             }
+            $this->conversation->stop();
             $result = $data;
 
         }
