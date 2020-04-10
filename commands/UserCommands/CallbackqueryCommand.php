@@ -11,26 +11,19 @@
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
 
-use Longman\TelegramBot\Entities\CallbackQuery;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
-use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use panix\mod\shop\models\Attribute;
 use panix\mod\shop\models\Category;
 use panix\mod\shop\models\Product;
-use panix\mod\telegram\components\CallbackQueryTest;
 use panix\mod\telegram\components\KeyboardMore;
-use panix\mod\telegram\components\KeyboardPager;
 use panix\mod\telegram\components\KeyboardPagination;
 use panix\mod\telegram\models\AuthorizedManagerChat;
 use panix\mod\telegram\models\Usernames;
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Request;
 use Yii;
-use yii\data\Pagination;
-use yii\helpers\Url;
-use yii\widgets\LinkPager;
 
 /**
  * Callback query command
@@ -165,7 +158,7 @@ if($callback_data == '/cart'){
             // }
 
         } elseif (preg_match('/^addCart\/([0-9]+)/iu', trim($callback_data), $match)) {
-            print_r($update);
+
            /* $product = Product::find()->published()->where(['id'=>$match[1]])->one();
             $dataCatalog = [
                 'chat_id' => $chat_id,

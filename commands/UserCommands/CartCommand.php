@@ -100,7 +100,7 @@ class CartCommand extends Command
             'inline_keyboard' => $keyboards
         ]);
         $response = Request::sendMessage($data);
-        print_r($response);
+       // print_r($response);
         return $response;
     }
 
