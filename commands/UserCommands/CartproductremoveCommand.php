@@ -69,6 +69,7 @@ class CartproductremoveCommand extends SystemCommand
         $chat_id = $message->getChat()->getId();
 
 
+echo 'zz';
         $orderProduct = OrderProduct::findOne(['product_id' => $this->product_id, 'client_id' => $user_id]);
         if($orderProduct){
             $originalProduct = $orderProduct->originalProduct;

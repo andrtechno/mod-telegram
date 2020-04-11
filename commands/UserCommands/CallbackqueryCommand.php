@@ -167,29 +167,23 @@ class CallbackqueryCommand extends SystemCommand
             return $this->telegram->executeCommand('cartproductremove');
 
         } elseif (preg_match('/^addCart\/([0-9]+)\/(up|down)/iu', trim($callback_data), $match)) {
-            $user_id = $callback_query->getFrom()->getId();
+
             $orderProduct = OrderProduct::findOne(['product_id' => $match[1], 'client_id' => $user_id]);
             if ($match[2] == 'up') {
                 $orderProduct->quantity++;
             } else {
                 $orderProduct->quantity--;
             }
-            if($orderProduct->quantity >= 1){
-                $orderProduct->save(false);
-            }else{
-                return $this->telegram
-                    ->setCommandConfig('cartproductremove', ['product_id' => $orderProduct->product_id])
-                    ->executeCommand('cartproductremove');
-            }
+            $orderProduct->save(false);
 
-            return $this->telegram
-                ->setCommandConfig('cartproductquantity', [
-                    'product_id' => $orderProduct->product_id,
-                    'quantity' => $orderProduct->quantity
-                ])
-                ->executeCommand('cartproductquantity');
+            $this->telegram->setCommandConfig('cartproductquantity', [
+                'product_id' => $orderProduct->product_id,
+                'quantity' => $orderProduct->quantity
+            ]);
+            $response = $this->telegram->executeCommand('cartproductquantity');
 
 
+            return $response;
 
         } elseif (preg_match('/^addCart\/([0-9]+)/iu', trim($callback_data), $match)) {
 
@@ -279,30 +273,10 @@ class CallbackqueryCommand extends SystemCommand
                          //   return new CartproductquantityCommand()->getKeyboards();
                             $keyboards[] = [
                                 new InlineKeyboardButton([
-                                    'text' => '—',
-                                    'callback_data' => "addCart/{$product->id}/down"
-                                ]),
-                                new InlineKeyboardButton([
-                                    'text' => '' . $orderProduct->quantity . ' шт.',
-                                    'callback_data' => time()
-                                ]),
-                                new InlineKeyboardButton([
-                                    'text' => '+',
+                                    'text' => '👉 ' . $orderProduct->quantity . ' шт.',
                                     'callback_data' => "addCart/{$product->id}/up"
-                                ]),
-                                new InlineKeyboardButton([
-                                    'text' => '❌',
-                                    'callback_data' => "removeProductCart/{$product->id}"
-                                ]),
-                            ];
-                            $keyboards[] = [
-                                new InlineKeyboardButton([
-                                    'text' => '🛍 Корзина',
-                                    'callback_data' => "getCart"
                                 ])
                             ];
-
-
                          //   $keyboards[] = $this->telegram->executeCommand('cartproductquantity')->getKeywords();
                         } else {
                             $keyboards[] = [
