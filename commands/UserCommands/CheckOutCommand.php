@@ -102,12 +102,12 @@ class CheckOutCommand extends SystemCommand
             $state = $notes['state'];
         }
         $data['chat_id'] = $chat_id;
-        if ($state ==0) {
+        if ($state == 0) {
 
-           // $data['parse_mode'] = 'HTML';
-           // $data['text'] = 'Оформление заказа';
-           // $data['reply_markup'] = $this->startKeyboards();
-           // $hello = Request::sendMessage($data);
+            // $data['parse_mode'] = 'HTML';
+            // $data['text'] = 'Оформление заказа';
+            // $data['reply_markup'] = $this->startKeyboards();
+            // $hello = Request::sendMessage($data);
         }
 
 
@@ -120,22 +120,21 @@ class CheckOutCommand extends SystemCommand
             case 0:
 
 
-
                 if ($text === '') {
                     $notes['state'] = 0;
                     $this->conversation->update();
-                    if($user->getFirstName() && $user->getLastName()){
-                        $data['text'] = $user->getFirstName().' '.$user->getLastName();
-                      //  $text = $data['text'];
+                    if ($user->getFirstName() && $user->getLastName()) {
+                        $data['text'] = $user->getFirstName() . ' ' . $user->getLastName();
+                        //  $text = $data['text'];
 
 
-                        $data['reply_markup'] = (new Keyboard([$user->getFirstName().' '.$user->getLastName()]))
+                        $data['reply_markup'] = (new Keyboard([$user->getFirstName() . ' ' . $user->getLastName()]))
                             ->setResizeKeyboard(true)
                             ->setOneTimeKeyboard(true)
                             ->setSelective(true);
 
                         $result = Request::sendMessage($data);
-                    }else{
+                    } else {
                         $data['text'] = 'ФИО:';
                         $data['reply_markup'] = Keyboard::remove(['selective' => true]);
                         $result = Request::sendMessage($data);
@@ -151,18 +150,23 @@ class CheckOutCommand extends SystemCommand
 
                 $delivery = Delivery::find()->all();
                 $deliveryList = [];
-                foreach ($delivery as $item){
+                $keyboards= [];
+                foreach ($delivery as $item) {
                     $deliveryList[]=$item->name;
+                    $keyboards[] = new KeyboardButton(['text' => $item->name]);
                 }
+                $keyboards = array_chunk($keyboards,2);
+
+                $buttons = (new Keyboard(['keyboard' => $keyboards]))
+                    ->setResizeKeyboard(true)
+                    ->setOneTimeKeyboard(true)
+                    ->setSelective(true);
 
                 if ($text === '' || !in_array($text, $deliveryList, true)) {
                     $notes['state'] = 1;
                     $this->conversation->update();
 
-                    $data['reply_markup'] = (new Keyboard($deliveryList))
-                        ->setResizeKeyboard(true)
-                        ->setOneTimeKeyboard(true)
-                        ->setSelective(true);
+                    $data['reply_markup'] = $buttons;
 
                     $data['text'] = 'Выберите вариант доставки:';
                     if ($text !== '') {
@@ -179,19 +183,23 @@ class CheckOutCommand extends SystemCommand
 
                 $payments = Payment::find()->all();
                 $paymentList = [];
-                foreach ($payments as $k=>$item){
-
-                    $paymentList[]=$item->name;
+                $keyboards= [];
+                foreach ($payments as $k => $item) {
+                    $paymentList[] = $item->name;
+                    $keyboards[] = new KeyboardButton(['text' => $item->name]);
                 }
+                $keyboards = array_chunk($keyboards,2);
+
+                $buttons = (new Keyboard(['keyboard' => $keyboards]))
+                    ->setResizeKeyboard(true)
+                    ->setOneTimeKeyboard(true)
+                    ->setSelective(true);
 
                 if ($text === '' || !in_array($text, $paymentList, true)) {
                     $notes['state'] = 2;
                     $this->conversation->update();
 
-                    $data['reply_markup'] = (new Keyboard($paymentList))
-                        ->setResizeKeyboard(true)
-                        ->setOneTimeKeyboard(true)
-                        ->setSelective(true);
+                    $data['reply_markup'] = $buttons;
 
                     $data['text'] = 'Выберите вариант оплаты:';
                     if ($text !== '') {
@@ -216,7 +224,7 @@ class CheckOutCommand extends SystemCommand
                         ->setResizeKeyboard(true)
                         ->setSelective(true);
 
-                    $data['text'] = 'Share your contact information:';
+                    $data['text'] = 'Ваши контактные данные:';
 
                     $result = Request::sendMessage($data);
                     break;
@@ -230,7 +238,7 @@ class CheckOutCommand extends SystemCommand
                 $out_text = '✅ Ваш заказ успешно оформлен' . PHP_EOL;
                 unset($notes['state']);
                 foreach ($notes as $k => $v) {
-                    $out_text .= PHP_EOL . '<strong>'.ucfirst($k) . '</strong>: ' . $v;
+                    $out_text .= PHP_EOL . '<strong>' . ucfirst($k) . '</strong>: ' . $v;
                 }
 
                 $data['parse_mode'] = 'HTML';
