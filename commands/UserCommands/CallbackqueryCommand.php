@@ -231,6 +231,13 @@ class CallbackqueryCommand extends SystemCommand
 
             return $response;
 
+        } elseif (preg_match('/^getCart\/([0-9]+)/iu', trim($callback_data), $match)) {
+            $this->telegram->setCommandConfig('cart', [
+                'page' => $match[1],
+            ]);
+            $response = $this->telegram->executeCommand('cart');
+
+            return $response;
         } elseif (preg_match('/^getCatalogList\/([0-9]+)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
 
@@ -244,8 +251,7 @@ class CallbackqueryCommand extends SystemCommand
                     ->all();
 
 
-                $test = new KeyboardMore(['pagination' => $pages,
-                ]);
+                $test = new KeyboardMore(['pagination' => $pages]);
 
 
                 $keyboards2[] = [
