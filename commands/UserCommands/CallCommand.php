@@ -1,6 +1,6 @@
 <?php
 
-namespace Longman\TelegramBot\Commands\UserCommands;
+namespace panix\mod\telegram\commands\UserCommands;
 
 use Longman\TelegramBot\Request;
 use panix\mod\telegram\components\Command;

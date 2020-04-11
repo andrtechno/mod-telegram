@@ -10,7 +10,7 @@
  * Written by Marco Boretto <marco.bore@gmail.com>
  */
 
-namespace Longman\TelegramBot\Commands\UserCommands;
+namespace panix\mod\telegram\commands\UserCommands;
 
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\File;
@@ -59,15 +59,17 @@ class WhoamiCommand extends UserCommand
             'chat_id' => $chat_id,
             'action' => 'typing',
         ]);
-
+print_r($from);
         $caption = sprintf(
-            'Your Id: %d' . PHP_EOL .
-            'Name: %s %s' . PHP_EOL .
-            'Username: %s',
+            'ID: %d' . PHP_EOL .
+            'Имя: %s %s' . PHP_EOL .
+            'Username: %s' . PHP_EOL .
+            'Язык: %s',
             $user_id,
             $from->getFirstName(),
             $from->getLastName(),
-            $from->getUsername()
+            $from->getUsername(),
+            $from->getLanguageCode()
         );
 
         //Fetch user profile photo
@@ -111,10 +113,6 @@ class WhoamiCommand extends UserCommand
 
         //No Photo just send text
         $data['text'] = $caption;
-
-
-
-
 
 
         return Request::sendMessage($data);

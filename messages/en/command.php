@@ -29,7 +29,7 @@ return [
     " writes:" => ' пишет:',
     'EXACT_COMMAND' => 'Для точной команды введите',
     'COMMAND_LIST' => 'Список команд',
-    'COMMAND_CATALOG' => 'Каталог продукции',
+    'COMMAND_CATALOG' => 'Product catalog',
     'COMMAND_HELP' => 'Помощь',
     'COMMAND_CART' => 'Корзина',
     'COMMAND_NEWS' => 'Новости',

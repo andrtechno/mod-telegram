@@ -9,12 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Longman\TelegramBot\Commands\AdminCommands;
+namespace panix\mod\telegram\commands\AdminCommands;
 
-use Longman\TelegramBot\Commands\AdminCommand;
+
 use Longman\TelegramBot\DB;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\commands\AdminCommand;
 
 /**
  * Admin "/debug" command
@@ -39,7 +40,7 @@ class DebugCommand extends AdminCommand
     /**
      * @var string
      */
-    protected $version = '1.1.0';
+    protected $version = '1.0.0';
 
     /**
      * Command execute method
@@ -61,7 +62,7 @@ class DebugCommand extends AdminCommand
 
             return Request::sendMessage($data);
         }
-
+echo 'debug';
         $debug_info = [];
 
         $debug_info[] = sprintf('*TelegramBot version:* `%s`', $this->telegram->getVersion());

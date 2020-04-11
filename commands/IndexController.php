@@ -2,9 +2,7 @@
 
 namespace panix\mod\telegram\commands;
 
-use Longman\TelegramBot\Commands\UserCommands\CatalogCommand;
-use Longman\TelegramBot\Conversation;
-use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\TelegramApi;
 use yii\console\Controller;
 use Yii;
 
@@ -28,8 +26,7 @@ class IndexController extends Controller
 //343987970
     public function actionIndex()
     {
-        $bot_api_key = '835652742:AAEBdMpPg9TgakFa2o8eduRSkynAZxipg-c';
-        $bot_username = 'pixelionbot';
+
 
 // Define all IDs of admin users in this array (leave as empty array if not used)
         $admin_users = [
@@ -53,7 +50,7 @@ class IndexController extends Controller
 //print_r($commands_paths);die;
         try {
             // Create Telegram API object
-            $telegram = new \Longman\TelegramBot\Telegram($bot_api_key, $bot_username);
+            $telegram = new TelegramApi();
 
             // Add commands paths containing your custom commands
             $telegram->addCommandsPaths($commands_paths);
@@ -66,7 +63,7 @@ class IndexController extends Controller
 
             // Logging (Error, Debug and Raw Updates)
             // https://github.com/php-telegram-bot/core/blob/master/doc/01-utils.md#logging
-            //
+
             // Set custom Upload and Download paths
             $telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
             $telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
@@ -74,7 +71,7 @@ class IndexController extends Controller
                 sleep(2);
 
 
-                $ss = $telegram;
+
                 // Here you can set some command specific parameters
                 // e.g. Google geocode/timezone api key for /date command
                // $telegram->setCommandConfig('date', ['google_api_key' => 'your_google_api_key_here']);
@@ -84,10 +81,6 @@ class IndexController extends Controller
 
                 // Handle telegram getUpdates request
                 $server_response = $telegram->handleGetUpdates();
-
-
-                //$telegram->executeCommand('/echo ff');
-
 
                 if ($server_response->isOk()) {
 
