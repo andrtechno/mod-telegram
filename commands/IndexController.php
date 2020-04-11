@@ -52,27 +52,28 @@ class IndexController extends Controller
         ];
 //print_r($commands_paths);die;
         try {
+            // Create Telegram API object
+            $telegram = new \Longman\TelegramBot\Telegram($bot_api_key, $bot_username);
+
+            // Add commands paths containing your custom commands
+            $telegram->addCommandsPaths($commands_paths);
+
+            // Enable admin users
+            $telegram->enableAdmins($admin_users);
+            // Enable MySQL
+            $telegram->enableMySql($mysql_credentials);
+
+
+            // Logging (Error, Debug and Raw Updates)
+            // https://github.com/php-telegram-bot/core/blob/master/doc/01-utils.md#logging
+            //
+            // Set custom Upload and Download paths
+            $telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
+            $telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
             while (true) {
-
                 sleep(2);
-                // Create Telegram API object
-                $telegram = new \Longman\TelegramBot\Telegram($bot_api_key, $bot_username);
 
-                // Add commands paths containing your custom commands
-                $telegram->addCommandsPaths($commands_paths);
 
-                // Enable admin users
-                $telegram->enableAdmins($admin_users);
-
-                // Enable MySQL
-                $telegram->enableMySql($mysql_credentials);
-
-                // Logging (Error, Debug and Raw Updates)
-                // https://github.com/php-telegram-bot/core/blob/master/doc/01-utils.md#logging
-                //
-                // Set custom Upload and Download paths
-                $telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
-                $telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
                 $ss = $telegram;
                 // Here you can set some command specific parameters
                 // e.g. Google geocode/timezone api key for /date command
