@@ -50,11 +50,15 @@ class IndexController extends Controller
 //print_r($commands_paths);die;
         try {
 <<<<<<< HEAD
+<<<<<<< HEAD
             // Create Telegram API object
             $telegram = new TelegramApi();
 
             // Add commands paths containing your custom commands
             $telegram->addCommandsPaths($commands_paths);
+=======
+            while (true) {
+>>>>>>> parent of af9b854... init
 =======
             while (true) {
 >>>>>>> parent of af9b854... init
@@ -66,6 +70,7 @@ class IndexController extends Controller
                 // Add commands paths containing your custom commands
                 $telegram->addCommandsPaths($commands_paths);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
             // Logging (Error, Debug and Raw Updates)
             // https://github.com/php-telegram-bot/core/blob/master/doc/01-utils.md#logging
@@ -79,13 +84,20 @@ class IndexController extends Controller
                 // Enable admin users
                 $telegram->enableAdmins($admin_users);
 >>>>>>> parent of af9b854... init
+=======
+                // Enable admin users
+                $telegram->enableAdmins($admin_users);
+>>>>>>> parent of af9b854... init
 
                 // Enable MySQL
                 $telegram->enableMySql($mysql_credentials);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
+=======
+>>>>>>> parent of af9b854... init
                 // Logging (Error, Debug and Raw Updates)
                 // https://github.com/php-telegram-bot/core/blob/master/doc/01-utils.md#logging
                 //
