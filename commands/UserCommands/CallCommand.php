@@ -1,14 +1,14 @@
 <?php
 
-namespace panix\mod\telegram\commands\UserCommands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
+use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Request;
-use panix\mod\telegram\components\Command;
 
 /**
  * User "/cell" command
  */
-class CallCommand extends Command
+class CallCommand extends UserCommand
 {
     /**#@+
      * {@inheritdoc}

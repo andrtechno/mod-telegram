@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace panix\mod\telegram\commands\UserCommands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Commands\UserCommand;
@@ -69,7 +69,6 @@ class CartproductremoveCommand extends SystemCommand
         $chat_id = $message->getChat()->getId();
 
 
-echo 'zz';
         $orderProduct = OrderProduct::findOne(['product_id' => $this->product_id, 'client_id' => $user_id]);
         if($orderProduct){
             $originalProduct = $orderProduct->originalProduct;

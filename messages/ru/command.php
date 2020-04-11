@@ -29,11 +29,5 @@ return [
     " writes:" => ' пишет:',
     'EXACT_COMMAND' => 'Для точной команды введите',
     'COMMAND_LIST' => 'Список команд',
-    'COMMAND_CATALOG' => 'Каталог продукции',
-    'COMMAND_HELP' => 'Помощь',
-    'COMMAND_CART' => 'Корзина',
-    'COMMAND_NEWS' => 'Новости',
-    'COMMAND_SEARCH' => 'Поиск',
-    'COMMAND_FEEDBACK' => 'Написать нам',
     'START' => 'Добро пожаловать в наш бот, <strong>{0}</strong>.' . PHP_EOL . 'воспользуйтесь командой /help'
 ];

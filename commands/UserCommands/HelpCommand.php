@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace panix\mod\telegram\commands\UserCommands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
@@ -42,49 +42,58 @@ class HelpCommand extends Command
      */
     public function execute()
     {
-        $message = $this->getMessage();
-        $chat_id = $message->getChat()->getId();
+        $message     = $this->getMessage();
+        $chat_id     = $message->getChat()->getId();
+        $command_str = trim($message->getText(true));
 
-        $message_id = $message->getMessageId();
-        $command = trim($message->getText(true));
-
-        //Only get enabled Admin and User commands
-        $commands = array_filter($this->telegram->getCommandsList(), function ($command) {
-            return (!$command->isSystemCommand() && $command->isEnabled());
-        });
-
-        //If no command parameter is passed, show the list
-        if ($command === '') {
-            $text = $this->telegram->getBotUsername() . ' v. ' . $this->telegram->getVersion() . "\n\n";
-            $text .= Yii::t('telegram/command', 'COMMAND_LIST') . PHP_EOL;
-            foreach ($commands as $command) {
-
-               // if($command->getName() == 'debug'){
-              //      print_r($command);
-               // }
-                $text .= '/' . $command->getName() . ' - ' . $command->getDescription() . "\n";
-            }
-
-            $text .= "\n" . Yii::t('telegram/command', 'EXACT_COMMAND') . ': /help <command>';
-        } else {
-
-            $command = str_replace('/', '', $command);
-            if (isset($commands[$command])) {
-                $command = $commands[$command];
-
-                $text = 'Command: ' . $command->getName() . ' v' . $command->getVersion() . "\n";
-                $text .= 'Description: ' . $command->getDescription() . "\n";
-                $text .= 'Usage: ' . $command->getUsage();
-            } else {
-                $text = 'No help available: Command /' . $command . ' not found.';
-            }
-        }
+        // Admin commands shouldn't be shown in group chats
+        $safe_to_show = $message->getChat()->isPrivateChat();
 
         $data = [
-            'chat_id' => $chat_id,
-            'reply_to_message_id' => $message_id,
-            'text' => $text,
+            'chat_id'    => $chat_id,
+            'parse_mode' => 'markdown',
         ];
+
+        list($all_commands, $user_commands, $admin_commands) = $this->getUserAdminCommands();
+
+        // If no command parameter is passed, show the list.
+        if ($command_str === '') {
+            $data['text'] = '*Commands List*:' . PHP_EOL;
+            foreach ($user_commands as $user_command) {
+                $data['text'] .= '/' . $user_command->getName() . ' - ' . $user_command->getDescription() . PHP_EOL;
+            }
+
+            if ($safe_to_show && count($admin_commands) > 0) {
+                $data['text'] .= PHP_EOL . '*Admin Commands List*:' . PHP_EOL;
+                foreach ($admin_commands as $admin_command) {
+                    $data['text'] .= '/' . $admin_command->getName() . ' - ' . $admin_command->getDescription() . PHP_EOL;
+                }
+            }
+
+            $data['text'] .= PHP_EOL . 'For exact command help type: /help <command>';
+
+            return Request::sendMessage($data);
+        }
+
+        $command_str = str_replace('/', '', $command_str);
+        if (isset($all_commands[$command_str]) && ($safe_to_show || !$all_commands[$command_str]->isAdminCommand())) {
+            $command      = $all_commands[$command_str];
+            $data['text'] = sprintf(
+                'Command: %s (v%s)' . PHP_EOL .
+                'Description: %s' . PHP_EOL .
+                'Usage: %s',
+                $command->getName(),
+                $command->getVersion(),
+                $command->getDescription(),
+                $command->getUsage()
+            );
+
+            return Request::sendMessage($data);
+        }
+
+        $data['text'] = 'No help available: Command /' . $command_str . ' not found';
+
+
 
 
         $keyboards[] = [
@@ -109,5 +118,32 @@ class HelpCommand extends Command
         $data['reply_markup'] = $reply_markup;
 
         return Request::sendMessage($data);
+    }
+
+
+    protected function getUserAdminCommands()
+    {
+        // Only get enabled Admin and User commands that are allowed to be shown.
+        /** @var Command[] $commands */
+        $commands = array_filter($this->telegram->getCommandsList(), function ($command) {
+            /** @var Command $command */
+            return !$command->isSystemCommand() && $command->showInHelp() && $command->isEnabled();
+        });
+
+        $user_commands = array_filter($commands, function ($command) {
+            /** @var Command $command */
+            return $command->isUserCommand();
+        });
+
+        $admin_commands = array_filter($commands, function ($command) {
+            /** @var Command $command */
+            return $command->isAdminCommand();
+        });
+
+        ksort($commands);
+        ksort($user_commands);
+        ksort($admin_commands);
+
+        return [$commands, $user_commands, $admin_commands];
     }
 }

@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace panix\mod\telegram\commands\SystemCommands;
+namespace Longman\TelegramBot\Commands\SystemCommands;
 use panix\mod\shop\models\Product;
 use panix\mod\telegram\models\AuthorizedManagerChat;
 use panix\mod\telegram\models\Usernames;

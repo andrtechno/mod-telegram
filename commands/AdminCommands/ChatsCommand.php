@@ -9,15 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace panix\mod\telegram\commands\AdminCommands;
+namespace Longman\TelegramBot\Commands\AdminCommands;
 
-
+use Longman\TelegramBot\Commands\AdminCommand;
 use Longman\TelegramBot\DB;
 use Longman\TelegramBot\Entities\Chat;
 use Longman\TelegramBot\Entities\ServerResponse;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
-use panix\mod\telegram\commands\AdminCommand;
 
 class ChatsCommand extends AdminCommand
 {

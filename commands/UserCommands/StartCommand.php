@@ -1,6 +1,6 @@
 <?php
 
-namespace panix\mod\telegram\commands\SystemCommands;
+namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use panix\mod\telegram\components\SystemCommand;
 use Longman\TelegramBot\Entities\Keyboard;
@@ -39,12 +39,6 @@ class StartCommand extends SystemCommand
      * @var bool
      */
     protected $private_only = true;
-    /**
-     * Conversation Object
-     *
-     * @var \Longman\TelegramBot\Conversation
-     */
-    protected $conversation;
 
     /**
      * Command execute method

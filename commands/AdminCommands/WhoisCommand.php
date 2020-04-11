@@ -11,9 +11,9 @@
  * Written by Jack'lul <jacklul@jacklul.com>
  */
 
-namespace panix\mod\telegram\commands\AdminCommands;
+namespace Longman\TelegramBot\Commands\AdminCommands;
 
-
+use Longman\TelegramBot\Commands\AdminCommand;
 use Longman\TelegramBot\DB;
 use Longman\TelegramBot\Entities\Chat;
 use Longman\TelegramBot\Entities\PhotoSize;
@@ -21,7 +21,6 @@ use Longman\TelegramBot\Entities\ServerResponse;
 use Longman\TelegramBot\Entities\UserProfilePhotos;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
-use panix\mod\telegram\commands\AdminCommand;
 
 /**
  * Admin "/whois" command

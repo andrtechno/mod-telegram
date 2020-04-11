@@ -8,14 +8,13 @@
  * file that was distributed with this source code.
  */
 
-namespace panix\mod\telegram\commands\UserCommands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
+use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Request;
-use panix\mod\telegram\components\Command;
 use panix\mod\telegram\models\Order;
-use SebastianBergmann\CodeCoverage\Report\PHP;
 use Yii;
 
 /**
@@ -23,7 +22,7 @@ use Yii;
  *
  * Display an inline keyboard with a few buttons.
  */
-class CartCommand extends Command
+class CartCommand extends UserCommand
 {
     /**
      * @var string
@@ -59,10 +58,8 @@ class CartCommand extends Command
 
         if ($update->getCallbackQuery()) {
             $message = $update->getCallbackQuery()->getMessage();
-            echo '2222222222222';
         } else {
             $message = $this->getMessage();
-            echo 'zzzz';
         }
 
 

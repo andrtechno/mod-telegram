@@ -8,25 +8,24 @@
  * file that was distributed with this source code.
  */
 
-namespace panix\mod\telegram\commands\UserCommands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Entities\InlineKeyboard;
-use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
+use Longman\TelegramBot\Entities\PhotoSize;
 use Longman\TelegramBot\Request;
 use panix\mod\shop\models\Product;
-use panix\mod\telegram\components\Command;
 use Yii;
 
 /**
  * User "/search" command
  *
- * Display an inline keyboard with a few buttons.
+ * Command that demonstrated the Conversation funtionality in form of a simple survey.
  */
-class SearchCommand extends Command
+class SearchCommand extends UserCommand
 {
     /**
      * @var string
@@ -36,17 +35,33 @@ class SearchCommand extends Command
     /**
      * @var string
      */
-    protected $description = 'Поиск товаров';
+    protected $description = 'Survery for bot users';
 
     /**
      * @var string
      */
-    protected $usage = '/search <string>';
+    protected $usage = '/search';
 
     /**
      * @var string
      */
-    protected $version = '1.0';
+    protected $version = '1.0.0';
+
+    /**
+     * @var bool
+     */
+    protected $need_mysql = true;
+
+    /**
+     * @var bool
+     */
+    protected $private_only = true;
+
+    /**
+     * Conversation Object
+     *
+     * @var \Longman\TelegramBot\Conversation
+     */
     protected $conversation;
 
     /**
@@ -90,75 +105,92 @@ class SearchCommand extends Command
 
         $result = Request::emptyResponse();
 
+        //State machine
+        //Entrypoint of the machine state if given by the track
+        //Every time a step is achieved the track is updated
+        switch ($state) {
+            case 0:
+                if ($text === ''|| preg_match('/^(\x{1F50E})/iu', trim($text), $match)) {
+                    $notes['state'] = 0;
+                    $this->conversation->update();
 
-        if ($text === '' || preg_match('/^(\x{1F50E})/iu', trim($text), $match)) {
-            $notes['state'] = 0;
-            $this->conversation->update();
+                    $data['text'] = 'Введите название товара или артикул:';
+                    $data['reply_markup'] = Keyboard::remove(['selective' => true]);
+                    if ($text !== '') {
+                        $data['text'] = 'Введите название товара или артикул:';
+                    }
+                    $result = Request::sendMessage($data);
+                    if($result->getOk()){
+                        echo $text;
+                       // print_r($result->getResult());
+                    }
+                    break;
+                }
+
+                $notes['query'] = $text;
+                $text = '';
+
+            // no break
+            case 1:
+                if ($notes['query']!=='') {
 
 
-            $data['reply_markup'] = Keyboard::remove(['selective' => true]);
+                    $query = Product::find();
+                    $query->sort();
+                    $query->published();
+                    $query->groupBy(Product::tableName() . '.`id`');
+                    $query->applySearch($notes['query']);
 
-            //$result = Request::sendMessage($data);
-            $data['text'] = 'Введите название товара или артикул:';
-            if ($text !== '') {
-                $data['text'] = 'Введите название товара или артикул:';
-            }
+                    $resultQuery = $query->all();
+                    if ($resultQuery) {
+                        $notes['state'] = 1;
+                        $this->conversation->update();
+                        $inline_keyboard = new InlineKeyboard([
+                            [
+                                'text' => '👉 ' . Yii::t('shop/default', 'SEARCH_RESULT', [
+                                        'query' => $notes['query'],
+                                        'count' => count($resultQuery),
+                                    ]),
+                                // 'callback_data' => 'thumb up'
+                                'url' => 'https://yii2.pixelion.com.ua/search?q=' . $notes['query'],
 
-            $result = $data;
+                            ],
+                        ]);
 
-        } else {
-            $query = Product::find();
-            $query->sort();
-            $query->published();
-            $query->groupBy(Product::tableName() . '.`id`');
-            $query->applySearch($text);
-
-            $resultQuery = $query->all();
-
-            if ($resultQuery) {
-
-                $inline_keyboard = new InlineKeyboard([
-                    [
-                        'text' => '👉 ' . Yii::t('shop/default', 'SEARCH_RESULT', [
+                        $data = [
+                            'chat_id' => $chat_id,
+                            'parse_mode' => 'HTML',
+                            'text' => Yii::t('shop/default', 'SEARCH_RESULT', [
                                 'query' => $text,
                                 'count' => count($resultQuery),
                             ]),
-                        // 'callback_data' => 'thumb up'
-                        'url' => 'https://yii2.pixelion.com.ua/search?q=' . $text,
+                            'reply_markup' => $inline_keyboard,
+                        ];
 
-                    ],
-                ]);
+                        $this->conversation->stop();
+                    } else {
+                        $notes['state'] = 0;
+                        $this->conversation->update();
+                        $data = [
+                            'chat_id' => $chat_id,
+                            'parse_mode' => 'HTML',
+                            'text' => Yii::t('shop/default', 'SEARCH_RESULT', [
+                                'query' => $text,
+                                'count' => 0,
+                            ]),
+                            'reply_markup' => $this->homeKeyboards(),
+                        ];
+                    }
 
-                $data = [
-                    'chat_id' => $chat_id,
-                    'parse_mode' => 'HTML',
-                    'text' => Yii::t('shop/default', 'SEARCH_RESULT', [
-                        'query' => $text,
-                        'count' => count($resultQuery),
-                    ]),
-                    'reply_markup' => $inline_keyboard,
-                ];
+                    $result = Request::sendMessage($data);
+                    break;
+                }
 
-            } else {
-                $sticker = [
-                    'chat_id' => $chat_id,
-                    'sticker' => 'CAACAgIAAxkBAAJBQl6QlXE_01q3-LiWldLrnvAuPpkwAAIRAAOQ_ZoVIPDREeqfP5cYBA'
-                ];
-                Request::sendSticker($sticker);
-                $data = [
-                    'chat_id' => $chat_id,
-                    'parse_mode' => 'HTML',
-                    'text' => Yii::t('shop/default', 'SEARCH_RESULT', [
-                        'query' => $text,
-                        'count' => 0,
-                    ]),
-                    'reply_markup' => $this->homeKeyboards(),
-                ];
-            }
-            $this->conversation->stop();
-            $result = $data;
-
+                $notes['query'] = $text;
+                $text = '';
+                break;
         }
-        return Request::sendMessage($result);
+
+        return $result;
     }
 }

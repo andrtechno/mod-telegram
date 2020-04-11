@@ -10,7 +10,7 @@
  * Written by Marco Boretto <marco.bore@gmail.com>
  */
 
-namespace panix\mod\telegram\commands\UserCommands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\File;
@@ -59,7 +59,7 @@ class WhoamiCommand extends UserCommand
             'chat_id' => $chat_id,
             'action' => 'typing',
         ]);
-print_r($from);
+
         $caption = sprintf(
             'ID: %d' . PHP_EOL .
             'Имя: %s %s' . PHP_EOL .

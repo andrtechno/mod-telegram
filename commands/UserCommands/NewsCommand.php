@@ -8,10 +8,10 @@
  * file that was distributed with this source code.
  */
 
-namespace panix\mod\telegram\commands\UserCommands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
+use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Request;
-use panix\mod\telegram\components\Command;
 use Yii;
 
 /**
@@ -19,7 +19,7 @@ use Yii;
  *
  * Display an inline keyboard with a few buttons.
  */
-class NewsCommand extends Command
+class NewsCommand extends UserCommand
 {
     /**
      * @var string
