@@ -11,6 +11,7 @@
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
 
+use Longman\TelegramBot\Commands\UserCommands\CartproductquantityCommand;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\KeyboardButton;
@@ -20,6 +21,8 @@ use panix\mod\shop\models\Product;
 use panix\mod\telegram\components\KeyboardMore;
 use panix\mod\telegram\components\KeyboardPagination;
 use panix\mod\telegram\models\AuthorizedManagerChat;
+use panix\mod\telegram\models\Order;
+use panix\mod\telegram\models\OrderProduct;
 use panix\mod\telegram\models\Usernames;
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Request;
@@ -59,10 +62,10 @@ class CallbackqueryCommand extends SystemCommand
         $callback_data = $callback_query->getData();
 
         $data['callback_query_id'] = $callback_query_id;
-if($callback_data == '/cart'){
-    $this->telegram->executeCommand('cart');
-    return Request::emptyResponse();
-}
+        if ($callback_data == '/cart') {
+            $this->telegram->executeCommand('cart');
+            return Request::emptyResponse();
+        }
         if ($callback_data == 'getProduct') {
 
             $product = Product::find()->where(['id' => 2665])->one();
@@ -71,7 +74,6 @@ if($callback_data == '/cart'){
                 ['text' => '🏆  🛒 🎁 Характеристики', 'callback_data' => 'product_attributes'],
                 ['text' => '🤝  🚚 callback thumb up ', 'callback_data' => 'thumb up'],
             ]);
-
 
 
             $data = [
@@ -156,45 +158,76 @@ if($callback_data == '/cart'){
             return Request::editMessageReplyMarkup($dataEdit);
             //  return Yii::$app->telegram->sendMessage($data);
             // }
+        } elseif (preg_match('/^removeProductCart\/([0-9]+)/iu', trim($callback_data), $match)) {
+            $user_id = $callback_query->getFrom()->getId();
+
+            $this->telegram->setCommandConfig('cartproductremove', [
+                'product_id' => $match[1],
+            ]);
+            return $this->telegram->executeCommand('cartproductremove');
+
+        } elseif (preg_match('/^addCart\/([0-9]+)\/(up|down)/iu', trim($callback_data), $match)) {
+
+            $orderProduct = OrderProduct::findOne(['product_id' => $match[1], 'client_id' => $user_id]);
+            if ($match[2] == 'up') {
+                $orderProduct->quantity++;
+            } else {
+                $orderProduct->quantity--;
+            }
+            $orderProduct->save(false);
+
+            $this->telegram->setCommandConfig('cartproductquantity', [
+                'product_id' => $orderProduct->product_id,
+                'quantity' => $orderProduct->quantity
+            ]);
+            $response = $this->telegram->executeCommand('cartproductquantity');
+
+
+            return $response;
 
         } elseif (preg_match('/^addCart\/([0-9]+)/iu', trim($callback_data), $match)) {
 
-           /* $product = Product::find()->published()->where(['id'=>$match[1]])->one();
-            $dataCatalog = [
-                'chat_id' => $chat_id,
-                'text' => 'addCart',
+            /* $product = Product::find()->published()->where(['id'=>$match[1]])->one();
+             $dataCatalog = [
+                 'chat_id' => $chat_id,
+                 'text' => 'addCart',
 
-            ];
-*/
+             ];
+ */
+            $user_id = $callback_query->getFrom()->getId();
 
-            $keyboards[] = [
-                new InlineKeyboardButton([
-                    'text' => 'товарв в корзине',
-                    'callback_data' => "openCart"
-                ]),
-                new InlineKeyboardButton([
-                    'text' => '🛍 Корзина',
-                    'callback_data' => "/cart"
-                ])
-            ];
-            if ($this->telegram->isAdmin($chat_id)) {
-                $keyboards[] = [
-                    new InlineKeyboardButton(['text' => '✏', 'callback_data' => 'get']),
-                    new InlineKeyboardButton(['text' => '❌', 'callback_data' => 'get']),
-                    new InlineKeyboardButton(['text' => '👁', 'callback_data' => 'get'])
-                ];
+            $product = Product::findOne($match[1]);
+            $order = Order::findOne(['client_id' => $user_id, 'checkout' => 0]);
+            $quantity = 1;
+            if (!$order) {
+                $order = new Order;
+                $order->client_id = $user_id;
+                $order->firstname = $callback_query->getFrom()->getFirstName();
+                $order->lastname = $callback_query->getFrom()->getLastName();
+                $order->save();
+
+                $order->addProduct($product, $quantity, $product->price);
+            } else {
+                $op = OrderProduct::findOne(['product_id' => $product->id, 'order_id' => $order->id]);
+                if ($op) {
+                    $op->quantity++;
+                    $quantity = $op->quantity;
+                    $op->save(false);
+                } else {
+                    $order->addProduct($product, $quantity, $product->price);
+                }
             }
 
-
-            $dataEdit['chat_id'] = $chat_id;
-            $dataEdit['message_id'] = $update->getCallbackQuery()->getMessage()->getMessageId();
-            $dataEdit['reply_markup'] = new InlineKeyboard([
-                'inline_keyboard' => $keyboards
+            $this->telegram->setCommandConfig('cartproductquantity', [
+                'product_id' => $product->id,
+                'quantity' => $quantity
             ]);
-            return Request::editMessageReplyMarkup($dataEdit);
+            $response = $this->telegram->executeCommand('cartproductquantity');
+
+            return $response;
 
         } elseif (preg_match('/^getCatalogList\/([0-9]+)/iu', trim($callback_data), $match)) {
-
+            $user_id = $callback_query->getFrom()->getId();
 
             if (isset($match[1])) {
 
@@ -214,49 +247,57 @@ if($callback_data == '/cart'){
                     new KeyboardButton(['text' => '📂 Каталог', 'callback_data' => 'getCatalog']),
                     new KeyboardButton(['text' => '🛍 Корзина'])
                 ];
-
-                $keyboards2 = array_merge($test->buttons, $keyboards2);
-              /*  $dataCatalog = [
-                    'chat_id' => $chat_id,
-                    'text' => 'test',
-
-                ];
-                $dataCatalog['reply_markup'] = (new Keyboard([
-                    'keyboard' => $keyboards2
-                ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
-                Request::sendMessage($dataCatalog);*/
-
-
                 $products = $query->all();
                 if ($products) {
+
                     foreach ($products as $index => $product) {
                         $keyboards = [];
                         $caption = '<strong>' . $product->name . '</strong>' . PHP_EOL;
                         $caption .= $product->price . ' грн' . PHP_EOL . PHP_EOL;
                         $caption .= '<strong>Характеристики:</strong>' . PHP_EOL;
-                        foreach ($this->attributes($product) as $name=>$value){
-                            $caption .= '<strong>'.$name . '</strong>: '.$value . PHP_EOL;
+                        foreach ($this->attributes($product) as $name => $value) {
+                            $caption .= '<strong>' . $name . '</strong>: ' . $value . PHP_EOL;
                         }
-                      //  print_r($this->attributes($product));die;
+                        //  print_r($this->attributes($product));die;
 
 
-                        $keyboards[] = [
-                            new InlineKeyboardButton([
-                                'text' => '👉 ' . $product->price . ' UAH. — Купить 👈',
-                                'callback_data' => "addCart/{$product->id}"
-                            ])
-                        ];
+                        $orderProduct = OrderProduct::findOne(['product_id' => $product->id, 'client_id' => $user_id]);
+                        if ($orderProduct) {
+
+                          //  $this->telegram->setCommandConfig('cartproductquantity', [
+                          //      'product_id' => $orderProduct->product_id,
+                          //      'quantity' => $orderProduct->quantity
+                          //  ]);
+                           // $response = $this->telegram->executeCommand('cartproductquantity');
+
+                         //   return new CartproductquantityCommand()->getKeyboards();
+                            $keyboards[] = [
+                                new InlineKeyboardButton([
+                                    'text' => '👉 ' . $orderProduct->quantity . ' шт.',
+                                    'callback_data' => "addCart/{$product->id}/up"
+                                ])
+                            ];
+                         //   $keyboards[] = $this->telegram->executeCommand('cartproductquantity')->getKeywords();
+                        } else {
+                            $keyboards[] = [
+                                new InlineKeyboardButton([
+                                    'text' => '👉 ' . $product->price . ' UAH. — Купить 👈',
+                                    'callback_data' => "addCart/{$product->id}"
+                                ])
+                            ];
+                        }
+
                         if ($this->telegram->isAdmin($chat_id)) {
                             $keyboards[] = [
-                                new InlineKeyboardButton(['text' => '✏', 'callback_data' => 'get']),
-                                new InlineKeyboardButton(['text' => '❌', 'callback_data' => 'get']),
-                                new InlineKeyboardButton(['text' => '👁', 'callback_data' => 'get'])
+                                new InlineKeyboardButton(['text' => '✏', 'callback_data' => "productUpdate/{$product->id}"]),
+                                new InlineKeyboardButton(['text' => '❌', 'callback_data' => "productDelete/{$product->id}"]),
+                                new InlineKeyboardButton(['text' => '👁', 'callback_data' => "productHide/{$product->id}"])
                             ];
                         }
 
                         $dataPhoto = [
                             'photo' => $product->getImage()->getPathToOrigin(),
-                           // 'photo' => 'https://yii2.pixelion.com.ua'.$product->getImage()->getUrl(),
+                            // 'photo' => 'https://yii2.pixelion.com.ua'.$product->getImage()->getUrl(),
                             'chat_id' => $chat_id,
                             'parse_mode' => 'HTML',
                             'caption' => $caption,
@@ -264,7 +305,7 @@ if($callback_data == '/cart'){
                                 'inline_keyboard' => $keyboards
                             ]),
                         ];
-                        $photoRequest = Request::sendPhoto($dataPhoto);
+                        $response = Request::sendPhoto($dataPhoto);
                     }
                 }
 
@@ -323,9 +364,11 @@ if($callback_data == '/cart'){
         }
 
     }
+
     protected $_attributes;
     public $model;
     protected $_models;
+
     public function attributes($product)
     {
 
@@ -348,6 +391,7 @@ if($callback_data == '/cart'){
         return $data;
 
     }
+
     public function getModels()
     {
         if (is_array($this->_models))
@@ -371,4 +415,5 @@ if($callback_data == '/cart'){
 
         return $this->_models;
     }
+
 }
