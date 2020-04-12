@@ -36,11 +36,11 @@ $results = \Longman\TelegramBot\Request::sendToActiveChats(
 );
 
 
+$s =preg_match('/getCart/', trim('command=getCart&oldPage=10&newPage=1'), $match);
 
 
-
-
-//\panix\engine\CMS::dump($keyboards2);
+\panix\engine\CMS::dump($s);
+\panix\engine\CMS::dump($match);
 
 ?>
 

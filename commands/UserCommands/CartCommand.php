@@ -11,10 +11,12 @@
 namespace Longman\TelegramBot\Commands\UserCommands;
 
 
-
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\commands\pager\InlineKeyboardPagination;
+use panix\mod\telegram\components\InlineKeyboardPager;
+use panix\mod\telegram\components\KeyboardPager;
 use panix\mod\telegram\components\UserCommand;
 use panix\mod\telegram\models\OrderProduct;
 use panix\mod\telegram\components\KeyboardCart;
@@ -48,7 +50,7 @@ class CartCommand extends UserCommand
      * @var string
      */
     protected $version = '1.0';
-    public $page = 1;
+    private $page = 0;
     // public $enabled = false;
 
     /**
@@ -60,65 +62,68 @@ class CartCommand extends UserCommand
     public function execute()
     {
         $update = $this->getUpdate();
-        $res = false;
+
         if ($update->getCallbackQuery()) {
             $callbackQuery = $update->getCallbackQuery();
             $message = $callbackQuery->getMessage();
+            //  $chat = $callbackQuery->getMessage()->getChat();
+            //  $user = $message->getFrom();
             $chat = $message->getChat();
-            $user = $message->getFrom();
-            $res=true;
-            print_r($callbackQuery);
+            $user = $callbackQuery->getFrom();
+            $chat_id = $chat->getId();
+            $user_id = $user->getId();
         } else {
+            $callbackQuery= null;
             $message = $this->getMessage();
             $chat = $message->getChat();
             $user = $message->getFrom();
 
+            $chat_id = $chat->getId();
+            $user_id = $user->getId();
         }
-
         $text = trim($message->getText(true));
-        $chat_id = $chat->getId();
-        $user_id = $user->getId();
 
-//print_r($message->getFrom()->getId()).PHP_EOL;
+
         $data['chat_id'] = $chat_id;
+
         $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
         if ($order) {
 
 
-            $queryProducts = OrderProduct::find()->where(['order_id' => $order->id]);
-
-            $num = 1;
-            $count = $queryProducts->count();
-            $total = ($count - 1) / $num + 1;
-
-            if (empty($this->page) or $this->page < 0)
-                $this->page = 1;
-
-            if ($this->page > $total)
-                $this->page = $total;
-
-            $start = $this->page * $num - $num;
+if($this->getConfig('page')){
+    $this->page = $this->getConfig('page');
+}
 
 
-            //  $query = Product::find()->published()->sort()->applyCategories($match[1]);
-           // $pages = new KeyboardPagination(['totalCount' => $queryProducts->count()]);
-            $products = $queryProducts->offset($start)
-                ->limit($num)
+            $query = OrderProduct::find()->where(['order_id' => $order->id]);
+            $pages = new KeyboardPagination([
+                'totalCount' => $query->count(),
+                'defaultPageSize' => 1,
+                //'pageSize'=>3
+            ]);
+            $pages->setPage($this->page);
+            $products = $query->offset($pages->offset)
+                ->limit($pages->limit)
                 ->all();
 
 
-            //   print_r($products);
-            $keyboards=[];
+
+            $pager = new InlineKeyboardPager([
+                'pagination' => $pages,
+                'lastPageLabel' => false,
+                'firstPageLabel' => false,
+                'maxButtonCount' => 1,
+                'command' => 'getCart'
+            ]);
+
+
+            $keyboards = [];
             foreach ($products as $product) {
+                $keyboards[] = $pager->buttons;
                 $keyboards[] = [
                     new InlineKeyboardButton(['text' => '—', 'callback_data' => "addCart/{$product->product_id}/down"]),
                     new InlineKeyboardButton(['text' => $product->quantity . ' шт.', 'callback_data' => 'get']),
                     new InlineKeyboardButton(['text' => '+', 'callback_data' => "addCart/{$product->product_id}/up"])
-                ];
-                $keyboards[] = [
-                    new InlineKeyboardButton(['text' => '⬅' . ($this->page - 1), 'callback_data' => 'getCart/' . ($this->page - 1)]),
-                    new InlineKeyboardButton(['text' => $this->page . ' / ' . $count, 'callback_data' => time()]),
-                    new InlineKeyboardButton(['text' => '➡' . ($this->page + 1), 'callback_data' => 'getCart/' . ($this->page + 1)])
                 ];
                 $keyboards[] = [
                     new InlineKeyboardButton(['text' => '✅ Заказ на 130 грн. Офрормить', 'callback_data' => 'checkOut']),
@@ -128,11 +133,11 @@ class CartCommand extends UserCommand
                 ];
 
 
-                $text = '*' . $product->id . 'Ваша корзина*' . PHP_EOL;
+                $text = '*Ваша корзина*' . PHP_EOL;
                 //$text .= '[Мой товар](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
-                $text .= '[Мой товар](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
+                $text .= '['.$product->name.'](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
                 $text .= '_описание товара_' . PHP_EOL;
-                $text .= '`90 грн / 4 шт = 350 грн`' . PHP_EOL;
+                $text .= '`'.$product->price.' грн / '.$product->quantity.' шт = '.($product->price*$product->quantity).' грн`' . PHP_EOL;
 
                 $data['chat_id'] = $chat_id;
                 $data['text'] = $text;
@@ -140,66 +145,23 @@ class CartCommand extends UserCommand
                 $data['reply_markup'] = new InlineKeyboard([
                     'inline_keyboard' => $keyboards
                 ]);
-                $response = Request::sendMessage($data);
-            }
+                if ($callbackQuery) {
+                    $data['chat_id'] = $chat_id;
+                    $data['message_id'] = $message->getMessageId();
+                    $response = Request::editMessageText($data);
 
-            if($res){
-                $keyboards[] = [
-                    new InlineKeyboardButton([
-                        'text' => '🛍 Корзина',
-                        'callback_data' => "getCart"
-                    ])
-                ];
+                    $dataReplyMarkup['reply_markup'] = new InlineKeyboard([
+                        'inline_keyboard' => $keyboards
+                    ]);
 
-print_r($response);
-                $dataEdit['chat_id'] = $chat_id;
-                $dataEdit['message_id'] = $mssage->getMessageId();
-                $dataEdit['reply_markup'] = new InlineKeyboard([
-                    'inline_keyboard' => $keyboards
-                ]);
+                    $response = Request::editMessageReplyMarkup(array_merge($data,$dataReplyMarkup));
+                }else{
+                    $response = Request::sendMessage($data);
+                }
 
-
-                $response= Request::editMessageReplyMarkup($dataEdit);
-            }
-
-
-            /*$keyboards[] = [
-                new InlineKeyboardButton(['text' => '—', 'callback_data' => "addCart/{$product->product_id}/down"]),
-                new InlineKeyboardButton(['text' => $product->quantity.' шт.', 'callback_data' => 'get']),
-                new InlineKeyboardButton(['text' => '+', 'callback_data' => "addCart/{$product->product_id}/up"])
-            ];
-            $keyboards[] = [
-                new InlineKeyboardButton(['text' => '⬅', 'callback_data' => 'get']),
-                new InlineKeyboardButton(['text' => '2 / 6', 'callback_data' => 'get']),
-                new InlineKeyboardButton(['text' => '➡', 'callback_data' => 'get'])
-            ];
-            $keyboards[] = [
-                new InlineKeyboardButton(['text' => '✅ Заказ на 130 грн. Офрормить', 'callback_data' => 'get']),
-            ];
-            $keyboards[] = [
-                new InlineKeyboardButton(['text' => '❌', 'callback_data' => "removeProductCart/{$product->product_id}"]),
-            ];
-
-
-            $text = '*'.$product->id.'Ваша корзина*' . PHP_EOL;
-            //$text .= '[Мой товар](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
-            $text .= '[Мой товар](https://yii2.pixelion.com.ua/images/get-file/2157ff033e-2.jpg)' . PHP_EOL;
-            $text .= '_описание товара_' . PHP_EOL;
-            $text .= '`90 грн / 4 шт = 350 грн`' . PHP_EOL;
-
-            $data['chat_id'] = $chat_id;
-            $data['text'] = $text;
-            $data['parse_mode'] = 'Markdown';
-            $data['reply_markup'] = new InlineKeyboard([
-                'inline_keyboard' => $keyboards
-            ]);
-            $response = Request::sendMessage($data);*/
-
-            foreach ($order->products as $product) {
 
             }
 
-            //$response = true;
         } else {
             $data['text'] = Yii::$app->settings->get('telegram', 'empty_cart_text');
             $data['reply_markup'] = $this->startKeyboards();

@@ -117,6 +117,8 @@ class IndexController extends Controller
                                 $telegram->executeCommand('feedback');
                             } elseif (preg_match('/^(\x{1F4E6})/iu', trim($text), $match)) { //package emoji
                                 $telegram->executeCommand('history');
+                            } elseif (preg_match('/^(\x{2699})/iu', trim($text), $match)) { //gear emoji
+                                $telegram->executeCommand('settings');
                             } elseif (preg_match('/^(\x{1F50E})/iu', trim($text), $match)) { //search emoji
                                 $telegram->executeCommand('search');
 

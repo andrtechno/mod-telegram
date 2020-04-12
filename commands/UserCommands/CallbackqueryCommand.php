@@ -13,10 +13,13 @@ namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
+use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use panix\mod\shop\models\Attribute;
 use panix\mod\shop\models\Category;
 use panix\mod\shop\models\Product;
+use panix\mod\telegram\commands\pager\InlineKeyboardPagination;
+use panix\mod\telegram\components\InlineKeyboardPager;
 use panix\mod\telegram\components\KeyboardMore;
 use panix\mod\telegram\components\KeyboardPagination;
 use panix\mod\telegram\models\AuthorizedManagerChat;
@@ -65,6 +68,10 @@ class CallbackqueryCommand extends SystemCommand
             $this->telegram->executeCommand('cart');
             return Request::emptyResponse();
         }
+
+
+
+
         if ($callback_data == 'getProduct') {
 
             $product = Product::find()->where(['id' => 2665])->one();
@@ -107,6 +114,28 @@ class CallbackqueryCommand extends SystemCommand
 
         } elseif ($callback_data == 'goHome') {
             return $this->telegram->executeCommand('start');
+        } elseif (strpos(trim($callback_data),'command_pager')) {
+
+            return $this->telegram
+                ->setCommandConfig('cart', ['page' => $orderProduct->product_id])
+                ->executeCommand('cart');
+
+            $params = InlineKeyboardPagination::getParametersFromCallbackData($callback_data);
+print_r($params);
+//$params = [
+//    'command' => 'testCommand',
+//    'oldPage' => '10',
+//    'newPage' => '1',
+//];
+
+// or, just use PHP directly if you like. (literally what the helper does!)
+            print_r(parse_str($callback_data, $params));
+
+
+
+            return Request::emptyResponse();
+
+
         } elseif (preg_match('/^getCatalog\s+([0-9]+)/iu', trim($callback_data), $match)) {
 
 
@@ -122,19 +151,35 @@ class CallbackqueryCommand extends SystemCommand
             if ($categories) {
 
                 foreach ($categories as $category) {
-                    $child = $category->children()->all();
+                    $child = $category->children()->count();
                     $count = $category->countItems;
                     if ($count) {
                         if ($child) {
-                            $keyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name, 'callback_data' => 'getCatalog ' . $category->id])];
+                            $keyboards[] = [
+                                new InlineKeyboardButton([
+                                    'text' => '📂 ' . $category->name,
+                                    'callback_data' => 'getCatalog ' . $category->id
+                                ])];
                         } else {
-                            $keyboards[] = [new InlineKeyboardButton(['text' => ' ' . $category->name . ' (' . $count . ')', 'callback_data' => 'getCatalogList/' . $category->id])];
+                            $keyboards[] = [
+                                new InlineKeyboardButton([
+                                    'text' => ' ' . $category->name . ' (' . $count . ')',
+                                    'callback_data' => 'getCatalogList/' . $category->id
+                                ])];
                         }
                     }
 
                 }
-            }
 
+            }
+            $back = $root->parent()->one();
+            if ($back) {
+                $keyboards[] = [
+                    new InlineKeyboardButton([
+                        'text' => '↩ ' . $back->name,
+                        'callback_data' => 'getCatalog ' . $back->id
+                    ])];
+            }
             $data = [
                 'chat_id' => $chat_id,
                 'parse_mode' => 'HTML',
@@ -174,9 +219,9 @@ class CallbackqueryCommand extends SystemCommand
             } else {
                 $orderProduct->quantity--;
             }
-            if($orderProduct->quantity >= 1){
+            if ($orderProduct->quantity >= 1) {
                 $orderProduct->save(false);
-            }else{
+            } else {
                 return $this->telegram
                     ->setCommandConfig('cartproductremove', ['product_id' => $orderProduct->product_id])
                     ->executeCommand('cartproductremove');
@@ -188,7 +233,6 @@ class CallbackqueryCommand extends SystemCommand
                     'quantity' => $orderProduct->quantity
                 ])
                 ->executeCommand('cartproductquantity');
-
 
 
         } elseif (preg_match('/^addCart\/([0-9]+)/iu', trim($callback_data), $match)) {
@@ -232,9 +276,13 @@ class CallbackqueryCommand extends SystemCommand
 
             return $response;
 
-        } elseif (preg_match('/^getCart\/([0-9]+)/iu', trim($callback_data), $match)) {
+        } elseif (preg_match('/getCart/', trim($callback_data), $match)) { //preg_match('/^getCart\/([0-9]+)/iu', trim($callback_data), $match)
+
+            echo $callback_data;
+            $params = InlineKeyboardPager::getParametersFromCallbackData($callback_data);
+            echo 'q: '. $params['page'].PHP_EOL;
             $this->telegram->setCommandConfig('cart', [
-                'page' => $match[1],
+                'page' => $params['page'],
             ]);
             $response = $this->telegram->executeCommand('cart');
 
@@ -252,13 +300,6 @@ class CallbackqueryCommand extends SystemCommand
                     ->all();
 
 
-                $test = new KeyboardMore(['pagination' => $pages]);
-
-
-                $keyboards2[] = [
-                    new KeyboardButton(['text' => '📂 Каталог', 'callback_data' => 'getCatalog']),
-                    new KeyboardButton(['text' => '🛍 Корзина'])
-                ];
                 $products = $query->all();
                 if ($products) {
 
@@ -272,17 +313,17 @@ class CallbackqueryCommand extends SystemCommand
                         }
                         //  print_r($this->attributes($product));die;
 
-
+echo $user_id;
                         $orderProduct = OrderProduct::findOne(['product_id' => $product->id, 'client_id' => $user_id]);
                         if ($orderProduct) {
 
-                          //  $this->telegram->setCommandConfig('cartproductquantity', [
-                          //      'product_id' => $orderProduct->product_id,
-                          //      'quantity' => $orderProduct->quantity
-                          //  ]);
-                           // $response = $this->telegram->executeCommand('cartproductquantity');
+                            //  $this->telegram->setCommandConfig('cartproductquantity', [
+                            //      'product_id' => $orderProduct->product_id,
+                            //      'quantity' => $orderProduct->quantity
+                            //  ]);
+                            // $response = $this->telegram->executeCommand('cartproductquantity');
 
-                         //   return new CartproductquantityCommand()->getKeyboards();
+                            //   return new CartproductquantityCommand()->getKeyboards();
                             $keyboards[] = [
                                 new InlineKeyboardButton([
                                     'text' => '—',
@@ -309,7 +350,7 @@ class CallbackqueryCommand extends SystemCommand
                             ];
 
 
-                         //   $keyboards[] = $this->telegram->executeCommand('cartproductquantity')->getKeywords();
+                            //   $keyboards[] = $this->telegram->executeCommand('cartproductquantity')->getKeywords();
                         } else {
                             $keyboards[] = [
                                 new InlineKeyboardButton([
@@ -340,6 +381,21 @@ class CallbackqueryCommand extends SystemCommand
                         $response = Request::sendPhoto($dataPhoto);
                     }
                 }
+
+                $test = new KeyboardMore(['pagination' => $pages]);
+
+
+                $keyboards2[] = [
+                    new KeyboardButton(['text' => '📂 Каталог', 'callback_data' => 'getCatalog']),
+                    new KeyboardButton(['text' => '🛍 Корзина']),
+                    // $test->buttons
+                ];
+                $data['chat_id'] = $chat_id;
+                $data['text'] = $pages->page . ' / ' . $pages->totalCount;
+                $data['reply_markup'] = (new Keyboard([
+                    'keyboard' => $keyboards2
+                ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
+                return Request::sendMessage($data);
 
             }
 

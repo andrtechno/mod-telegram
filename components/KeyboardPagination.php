@@ -79,7 +79,7 @@ class KeyboardPagination extends BaseObject implements Linkable
     const LINK_PREV = 'prev';
     const LINK_FIRST = 'first';
     const LINK_LAST = 'last';
-    public $page = 1;
+
     /**
      * @var string name of the parameter storing the current page index.
      * @see params
@@ -90,16 +90,7 @@ class KeyboardPagination extends BaseObject implements Linkable
      * @see params
      */
     public $pageSizeParam = 'per-page';
-    /**
-     * @var bool whether to always have the page parameter in the URL created by [[createUrl()]].
-     * If false and [[page]] is 0, the page parameter will not be put in the URL.
-     */
-    public $forcePageParam = true;
-    /**
-     * @var string the route of the controller action for displaying the paged contents.
-     * If not set, it means using the currently requested route.
-     */
-    public $route;
+
     /**
      * @var array parameters (name => value) that should be used to obtain the current page number
      * and to create new pagination URLs. If not set, all parameters from $_GET will be used instead.
@@ -110,11 +101,7 @@ class KeyboardPagination extends BaseObject implements Linkable
      * while the element indexed by [[pageSizeParam]] is treated as the page size (defaults to [[defaultPageSize]]).
      */
     public $params;
-    /**
-     * @var \yii\web\UrlManager the URL manager used for creating pagination URLs. If not set,
-     * the "urlManager" application component will be used.
-     */
-    public $urlManager;
+
     /**
      * @var bool whether to check if [[page]] is within valid range.
      * When this property is true, the value of [[page]] will always be between 0 and ([[pageCount]]-1).
@@ -217,7 +204,7 @@ class KeyboardPagination extends BaseObject implements Linkable
                 $pageSize = $this->defaultPageSize;
                 $this->setPageSize($pageSize);
             } else {
-                $pageSize = (int) $this->getQueryParam($this->pageSizeParam, $this->defaultPageSize);
+                $pageSize = (int) $this->getQueryParam($this->pageSize, $this->defaultPageSize);
                 $this->setPageSize($pageSize, true);
             }
         }
@@ -245,46 +232,6 @@ class KeyboardPagination extends BaseObject implements Linkable
             $this->_pageSize = $value;
         }
     }
-
-    /**
-     * Creates the URL suitable for pagination with the specified page number.
-     * This method is mainly called by pagers when creating URLs used to perform pagination.
-     * @param int $page the zero-based page number that the URL should point to.
-     * @param int $pageSize the number of items on each page. If not set, the value of [[pageSize]] will be used.
-     * @param bool $absolute whether to create an absolute URL. Defaults to `false`.
-     * @return string the created URL
-     * @see params
-     * @see forcePageParam
-
-    public function createUrl($page, $pageSize = null, $absolute = false)
-    {
-        $page = (int) $page;
-        $pageSize = (int) $pageSize;
-        if (($params = $this->params) === null) {
-            $request = Yii::$app->getRequest();
-            $params = $request instanceof Request ? $request->getQueryParams() : [];
-        }
-        if ($page > 0 || $page == 0 && $this->forcePageParam) {
-            $params[$this->pageParam] = $page + 1;
-        } else {
-            unset($params[$this->pageParam]);
-        }
-        if ($pageSize <= 0) {
-            $pageSize = $this->getPageSize();
-        }
-        if ($pageSize != $this->defaultPageSize) {
-            $params[$this->pageSizeParam] = $pageSize;
-        } else {
-            unset($params[$this->pageSizeParam]);
-        }
-        $params[0] = $this->route === null ? Yii::$app->controller->getRoute() : $this->route;
-        $urlManager = $this->urlManager === null ? Yii::$app->getUrlManager() : $this->urlManager;
-        if ($absolute) {
-            return $urlManager->createAbsoluteUrl($params);
-        }
-
-        return $urlManager->createUrl($params);
-    }*/
 
     /**
      * @return int the offset of the data. This may be used to set the

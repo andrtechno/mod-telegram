@@ -14,7 +14,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
 
-class KeyboardPager extends Component
+class InlineKeyboardPager extends Component
 {
     /**
      * @var Pagination the pagination object that this pager is associated with.
@@ -74,7 +74,6 @@ class KeyboardPager extends Component
     }
 
 
-
     /**
      * Renders the page buttons.
      * @return string the rendering result
@@ -85,14 +84,14 @@ class KeyboardPager extends Component
         if ($pageCount < 2 && $this->hideOnSinglePage) {
             return 'empty';
         }
-
-       // $this->buttons = [];
+        $totalCount = $this->pagination->totalCount;
+        // $this->buttons = [];
         $currentPage = $this->pagination->getPage();
 
         // first page
         $firstPageLabel = $this->firstPageLabel === true ? '1' : $this->firstPageLabel;
         if ($firstPageLabel !== false) {
-            $this->buttons[] = $this->renderPageButton($firstPageLabel, 0,  $currentPage <= 0, false);
+            $this->buttons[] = $this->renderPageButton($firstPageLabel, 0, $currentPage <= 0, false);
         }
 
         // prev page
@@ -104,16 +103,13 @@ class KeyboardPager extends Component
         }
 
 
-
-
-
-
         // internal pages
         list($beginPage, $endPage) = $this->getPageRange();
 
         for ($i = $beginPage; $i <= $endPage; ++$i) {
-            $this->buttons[] = $this->renderPageButton($i + 1, $i, null, $this->disableCurrentPageButton && $i == $currentPage, $i == $currentPage);
+            $this->buttons[] = $this->renderPageButton(($i + 1) . ' / ' . $totalCount, $i, null, $this->disableCurrentPageButton && $i == $currentPage, $i == $currentPage);
         }
+
 
         // next page
         if ($this->nextPageLabel !== false) {
@@ -122,11 +118,14 @@ class KeyboardPager extends Component
             }
             $this->buttons[] = $this->renderPageButton($this->nextPageLabel, $page, $currentPage >= $pageCount - 1, false);
         }
+
+
         // last page
         $lastPageLabel = $this->lastPageLabel === true ? $pageCount : $this->lastPageLabel;
         if ($lastPageLabel !== false) {
             $this->buttons[] = $this->renderPageButton($lastPageLabel, $pageCount - 1, $currentPage >= $pageCount - 1, false);
         }
+
         return $this->buttons;
     }
 
@@ -142,15 +141,15 @@ class KeyboardPager extends Component
      */
     protected function renderPageButton($label, $page, $disabled, $active)
     {
-        $callback = 'goPage_'.$page;
+        $callback = $this->generateCallbackData($page);
         if ($active) {
-            $callback=time();
+            $callback = time();
         }
         if ($disabled) {
-            $callback=time();
+            $callback = time();
         }
 
-       // return Html::tag($linkWrapTag, Html::a($label, $this->pagination->createUrl($page), $linkOptions), $options);
+        // return Html::tag($linkWrapTag, Html::a($label, $this->pagination->createUrl($page), $linkOptions), $options);
         return new InlineKeyboardButton(['text' => $label, 'callback_data' => $callback]);
     }
 
@@ -162,12 +161,27 @@ class KeyboardPager extends Component
         $currentPage = $this->pagination->getPage();
         $pageCount = $this->pagination->getPageCount();
 
-        $beginPage = max(0, $currentPage - (int) ($this->maxButtonCount / 2));
+        $beginPage = max(0, $currentPage - (int)($this->maxButtonCount / 2));
         if (($endPage = $beginPage + $this->maxButtonCount - 1) >= $pageCount) {
             $endPage = $pageCount - 1;
             $beginPage = max(0, $endPage - $this->maxButtonCount + 1);
         }
 
         return [$beginPage, $endPage];
+    }
+
+    public $callback_data = 'command={command}&page={page}';
+    public $command = 'command';
+
+    protected function generateCallbackData(int $page): string
+    {
+        return str_replace(['{command}', '{page}'], [$this->command, $page], $this->callback_data);
+    }
+
+    public static function getParametersFromCallbackData($data): array
+    {
+        parse_str($data, $params);
+
+        return $params;
     }
 }

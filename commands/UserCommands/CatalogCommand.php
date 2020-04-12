@@ -74,9 +74,9 @@ class CatalogCommand extends UserCommand
             $this->category_id = 1;
         }
 
-        $preg = preg_match('/^(\/catalog)\s([0-9]+)/', trim($message->getText()), $match);
+       // $preg = preg_match('/^(\/catalog)\s([0-9]+)/', trim($message->getText()), $match);
         //if ($message->getText() == '/catalog' || $preg) {
-        $id = (isset($match[1])) ? $match[1] : 1;
+       // $id = (isset($match[1])) ? $match[1] : 1;
         $root = Category::findOne($this->category_id);
         $categories = $root->children()->all();
 
@@ -85,11 +85,17 @@ class CatalogCommand extends UserCommand
         if ($categories) {
 
             foreach ($categories as $category) {
-                $child = $category->children()->all();
+
                 $count = $category->countItems;
                 if ($count) {
+                    $child = $category->children()->count();
                     if ($child) {
-                        $inlineKeyboards[] = [new InlineKeyboardButton(['text' => '📂 ' . $category->name . ' (' . $count . ')', 'callback_data' => 'getCatalog ' . $category->id])];
+                        $inlineKeyboards[] = [
+                            new InlineKeyboardButton([
+                                'text' => '📂 ' . $category->name . ' (' . $count . ')',
+                                'callback_data' => 'getCatalog ' . $category->id
+                            ])
+                        ];
                     } else {
                         //  $inlineKeyboards[] = [new InlineKeyboardButton(['text' => '📄 ' . $category->name . ' (' . $count . ')', 'callback_data' => 'getCatalogList ' . $category->id])];
                         $inlineKeyboards[] = [
