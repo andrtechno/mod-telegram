@@ -10,10 +10,12 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
-use Longman\TelegramBot\Commands\UserCommand;
+
+
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\UserCommand;
 use panix\mod\telegram\models\OrderProduct;
 use panix\mod\telegram\components\KeyboardCart;
 use panix\mod\telegram\components\KeyboardPagination;
@@ -76,12 +78,11 @@ class CartCommand extends UserCommand
         $text = trim($message->getText(true));
         $chat_id = $chat->getId();
         $user_id = $user->getId();
-var_dump($res);
-echo $chat_id;die;
-//print_r($message->getFrom()->getId()).PHP_EOL;
 
+//print_r($message->getFrom()->getId()).PHP_EOL;
+        $data['chat_id'] = $chat_id;
         $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
-        if ($order && !$res) {
+        if ($order) {
 
 
             $queryProducts = OrderProduct::find()->where(['order_id' => $order->id]);
@@ -200,7 +201,9 @@ print_r($response);
 
             //$response = true;
         } else {
-            echo 'empy cart';
+            $data['text'] = Yii::$app->settings->get('telegram', 'empty_cart_text');
+            $data['reply_markup'] = $this->startKeyboards();
+            return Request::sendMessage($data);
         }
 
         // print_r($response);

@@ -58,6 +58,8 @@ $form = ActiveForm::begin();
             <?= $form->field($model, 'api_token') ?>
             <?= $form->field($model, 'bot_name') ?>
             <?= $form->field($model, 'password') ?>
+            <?= $form->field($model, 'empty_cart_text')->textarea() ?>
+            <?= $form->field($model, 'empty_history_text')->textarea() ?>
         </div>
         <div class="card-footer text-center">
             <?= $model->submitButton(); ?>

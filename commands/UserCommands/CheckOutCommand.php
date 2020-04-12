@@ -10,7 +10,7 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
-use Longman\TelegramBot\Commands\SystemCommand;
+
 use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
@@ -18,6 +18,8 @@ use Longman\TelegramBot\Entities\PhotoSize;
 use Longman\TelegramBot\Request;
 use panix\mod\cart\models\Delivery;
 use panix\mod\cart\models\Payment;
+use panix\mod\telegram\components\SystemCommand;
+use panix\mod\telegram\models\Order;
 use Yii;
 
 /**
@@ -79,8 +81,13 @@ class CheckOutCommand extends SystemCommand
         $text = trim($message->getText(true));
         $chat_id = $chat->getId();
         $user_id = $user->getId();
-
-
+        $data['chat_id'] = $chat_id;
+        $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
+        if (!$order) {
+            $data['text'] = Yii::$app->settings->get('telegram', 'empty_cart_text');
+            $data['reply_markup'] = $this->startKeyboards();
+            return Request::sendMessage($data);
+        }
         //Preparing Response
 
 
@@ -100,14 +107,6 @@ class CheckOutCommand extends SystemCommand
         $state = 0;
         if (isset($notes['state'])) {
             $state = $notes['state'];
-        }
-        $data['chat_id'] = $chat_id;
-        if ($state == 0) {
-
-            // $data['parse_mode'] = 'HTML';
-            // $data['text'] = 'Оформление заказа';
-            // $data['reply_markup'] = $this->startKeyboards();
-            // $hello = Request::sendMessage($data);
         }
 
 
@@ -150,12 +149,12 @@ class CheckOutCommand extends SystemCommand
 
                 $delivery = Delivery::find()->all();
                 $deliveryList = [];
-                $keyboards= [];
+                $keyboards = [];
                 foreach ($delivery as $item) {
-                    $deliveryList[]=$item->name;
+                    $deliveryList[] = $item->name;
                     $keyboards[] = new KeyboardButton(['text' => $item->name]);
                 }
-                $keyboards = array_chunk($keyboards,2);
+                $keyboards = array_chunk($keyboards, 2);
 
                 $buttons = (new Keyboard(['keyboard' => $keyboards]))
                     ->setResizeKeyboard(true)
@@ -183,12 +182,12 @@ class CheckOutCommand extends SystemCommand
 
                 $payments = Payment::find()->all();
                 $paymentList = [];
-                $keyboards= [];
+                $keyboards = [];
                 foreach ($payments as $k => $item) {
                     $paymentList[] = $item->name;
                     $keyboards[] = new KeyboardButton(['text' => $item->name]);
                 }
-                $keyboards = array_chunk($keyboards,2);
+                $keyboards = array_chunk($keyboards, 2);
 
                 $buttons = (new Keyboard(['keyboard' => $keyboards]))
                     ->setResizeKeyboard(true)
@@ -218,7 +217,7 @@ class CheckOutCommand extends SystemCommand
                     $this->conversation->update();
 
                     $data['reply_markup'] = (new Keyboard(
-                        (new KeyboardButton('Оставить конакты'))->setRequestContact(true)
+                        (new KeyboardButton('📞 Оставить конакты'))->setRequestContact(true)
                     ))
                         ->setOneTimeKeyboard(true)
                         ->setResizeKeyboard(true)
@@ -235,15 +234,28 @@ class CheckOutCommand extends SystemCommand
             // no break
             case 4:
                 $this->conversation->update();
-                $out_text = '✅ Ваш заказ успешно оформлен' . PHP_EOL;
+                $content = '✅ Ваш заказ успешно оформлен' . PHP_EOL;
+                $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
+                if ($order) {
+                    if ($order->products) {
+                        foreach ($order->products as $product) {
+                            $content .= '<strong>' . $product->name . '</strong>: ' . $product->price . '' . PHP_EOL;
+                        }
+                    }
+                }
+                $content .= 'Суммка заказа: ' . $order->total_price . '' . PHP_EOL;
                 unset($notes['state']);
                 foreach ($notes as $k => $v) {
-                    $out_text .= PHP_EOL . '<strong>' . ucfirst($k) . '</strong>: ' . $v;
+                    $content .= PHP_EOL . '<strong>' . ucfirst($k) . '</strong>: ' . $v;
                 }
+
+
+                $order->checkout = 1;
+                $order->save();
 
                 $data['parse_mode'] = 'HTML';
                 $data['reply_markup'] = Keyboard::remove(['selective' => true]);
-                $data['text'] = $out_text;
+                $data['text'] = $content;
                 $this->conversation->stop();
 
                 $result = Request::sendMessage($data);

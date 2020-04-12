@@ -21,6 +21,13 @@ class DefaultController extends AdminController
             ],
             $this->pageName
         ];
+        $this->buttons=[
+            [
+                'label'=>'Emoji',
+                'url'=>'https://emojipedia.org/apple/',
+                'options'=>['target'=>'_blank']
+            ]
+        ];
         $model = new SettingsForm();
         if ($model->load(Yii::$app->request->post())) {
             $model->save();
