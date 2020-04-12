@@ -10,7 +10,7 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
-use Longman\TelegramBot\Commands\UserCommand;
+
 use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\Keyboard;
@@ -18,6 +18,7 @@ use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Entities\PhotoSize;
 use Longman\TelegramBot\Request;
 use panix\mod\shop\models\Product;
+use panix\mod\telegram\components\UserCommand;
 use Yii;
 
 /**
@@ -180,6 +181,7 @@ class SearchCommand extends UserCommand
                             ]),
                             'reply_markup' => $this->homeKeyboards(),
                         ];
+                       // $this->conversation->cancel();
                     }
 
                     $result = Request::sendMessage($data);

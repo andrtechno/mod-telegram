@@ -10,10 +10,11 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
-use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Conversation;
+use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\ReplyKeyboardHide;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\SystemCommand;
 
 /**
  * User "/cancel" command
@@ -22,7 +23,7 @@ use Longman\TelegramBot\Request;
  * returns a message to let the user know which conversation it was.
  * If no conversation is active, the returned message says so.
  */
-class CancelCommand extends UserCommand
+class CancelCommand extends SystemCommand
 {
     /**#@+
      * {@inheritdoc}
@@ -30,9 +31,9 @@ class CancelCommand extends UserCommand
     protected $name = 'cancel';
     protected $description = 'Cancel the currently active conversation';
     protected $usage = '/cancel';
-    protected $version = '0.1.1';
+    protected $version = '1.0.0';
     protected $need_mysql = true;
-    public $enabled = false;
+    public $enabled = true;
     
     /**#@-*/
 
@@ -51,7 +52,7 @@ class CancelCommand extends UserCommand
 
         if ($conversation_command = $conversation->getCommand()) {
             $conversation->cancel();
-            $text = 'Conversation "' . $conversation_command . '" cancelled!';
+            $text = ucfirst($conversation_command) . ': Отменено!';
         }
 
         return $this->hideKeyboard($text);
@@ -75,7 +76,7 @@ class CancelCommand extends UserCommand
     private function hideKeyboard($text)
     {
         return Request::sendMessage([
-            'reply_markup' => new ReplyKeyboardHide(['selective' => true]),
+            'reply_markup' => Keyboard::remove(['selective' => true]),
             'chat_id'      => $this->getMessage()->getChat()->getId(),
             'text'         => $text,
         ]);

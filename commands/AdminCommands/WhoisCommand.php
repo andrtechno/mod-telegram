@@ -21,6 +21,7 @@ use Longman\TelegramBot\Entities\ServerResponse;
 use Longman\TelegramBot\Entities\UserProfilePhotos;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
+use panix\engine\CMS;
 
 /**
  * Admin "/whois" command
@@ -173,8 +174,8 @@ class WhoisCommand extends AdminCommand
                     $text = 'Chat ID: ' . $user_id . (!empty($old_id) ? ' (previously: ' . $old_id . ')' : '') . PHP_EOL;
                     $text .= 'Type: ' . ucfirst($chat->getType()) . PHP_EOL;
                     $text .= 'Title: ' . $chat->getTitle() . PHP_EOL;
-                    $text .= 'First time added to group: ' . $created_at . PHP_EOL;
-                    $text .= 'Last activity: ' . $updated_at . PHP_EOL;
+                    $text .= 'First time added to group: ' . CMS::date(strtotime($created_at)) . PHP_EOL;
+                    $text .= 'Последняя активность: ' . CMS::date(strtotime($updated_at)) . PHP_EOL;
                 }
             } elseif (is_array($results) && count($results) > 1) {
                 $text = 'Multiple chats matched!';

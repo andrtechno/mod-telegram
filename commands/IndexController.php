@@ -39,7 +39,8 @@ class IndexController extends Controller
 
 // Define all paths for your custom commands in this array (leave as empty array if not used)
         $commands_paths = [
-              __DIR__ . '/UserCommands',
+            __DIR__ . '/UserCommands',
+            __DIR__ . '/AdminCommands',
            // __DIR__ . '/Commands',
         ];
 
@@ -103,6 +104,7 @@ class IndexController extends Controller
                                 $telegram->executeCommand('catalog');
                             } elseif (preg_match('/^(\x{1F3E0})/iu', trim($text), $match)) { //home emoji
                                 $telegram->executeCommand('start');
+                                $telegram->executeCommand('cancel');
                             } elseif (preg_match('/^(\x{2753})/iu', trim($text), $match)) { //help emoji
                                 // $telegram->executeCommand('help');
                             } elseif (preg_match('/^(\x{1F4E2})/iu', trim($text), $match)) { //news emoji

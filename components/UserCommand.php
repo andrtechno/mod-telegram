@@ -27,4 +27,16 @@ abstract class UserCommand extends \Longman\TelegramBot\Commands\UserCommand
 
       return $data;
   }
+
+    public function homeKeyboards(){
+        $keyboards[] = [
+            new KeyboardButton(['text' => '🏠 Начало']),
+        ];
+
+        $data = (new Keyboard([
+            'keyboard' => $keyboards
+        ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
+
+        return $data;
+    }
 }
