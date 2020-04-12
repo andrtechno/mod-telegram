@@ -27,7 +27,9 @@ return [
     'Online support' => 'Онлайн помощь',
     'Write your question...' => 'Напишите здесь свой вопрос...',
     " writes:" => ' пишет:',
+    'USAGE'=>'Используйте: {0}',
     'EXACT_COMMAND' => 'Для точной команды введите',
     'COMMAND_LIST' => 'Список команд',
+    'COMMAND_LIST_ADMIN' => 'Список команд администратора',
     'START' => 'Добро пожаловать в наш бот, <strong>{0}</strong>.' . PHP_EOL . 'воспользуйтесь командой /help'
 ];

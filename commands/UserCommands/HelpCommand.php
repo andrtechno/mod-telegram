@@ -54,25 +54,50 @@ class HelpCommand extends Command
             'parse_mode' => 'markdown',
         ];
 
+
+
+        $keyboards[] = [
+            new KeyboardButton(['text' => '☎ Позвонить']), //260E
+            new KeyboardButton(['text' => '✉ Написать']), //2709
+            //  new KeyboardButton(['text' => '📞 Написать']) //1F4DE
+        ];
+        // $keyboards[] = [
+
+        //  new KeyboardButton(['text' => '📦 Мои заказы'])
+        // ];
+        $keyboards[] = [
+            new KeyboardButton(['text' => '⚙ Настройки']),
+           // new KeyboardButton(['text' => '❓ Помощь'])
+        ];
+
+        $reply_markup = (new Keyboard([
+            'keyboard' => $keyboards
+        ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
+
+
+        $data['reply_markup'] = $reply_markup;
+
+
         list($all_commands, $user_commands, $admin_commands) = $this->getUserAdminCommands();
 
         // If no command parameter is passed, show the list.
         if ($command_str === '') {
-            $data['text'] = '*Commands List*:' . PHP_EOL;
+            $data['text'] = '*'.Yii::t('telegram/command','COMMAND_LIST').'*:' . PHP_EOL;
             foreach ($user_commands as $user_command) {
                 $data['text'] .= '/' . $user_command->getName() . ' - ' . $user_command->getDescription() . PHP_EOL;
             }
 
             if ($safe_to_show && count($admin_commands) > 0) {
-                $data['text'] .= PHP_EOL . '*Admin Commands List*:' . PHP_EOL;
+                $data['text'] .= PHP_EOL . '*'.Yii::t('telegram/command','COMMAND_LIST_ADMIN').'*:' . PHP_EOL;
                 foreach ($admin_commands as $admin_command) {
                     $data['text'] .= '/' . $admin_command->getName() . ' - ' . $admin_command->getDescription() . PHP_EOL;
                 }
             }
 
-            $data['text'] .= PHP_EOL . 'For exact command help type: /help <command>';
+            $data['text'] .= PHP_EOL . 'Для полной справки испльзуйте: /help <command>';
 
-            return Request::sendMessage($data);
+            $result = $data;
+            //return Request::sendMessage($data);
         }
 
         $command_str = str_replace('/', '', $command_str);
@@ -87,8 +112,8 @@ class HelpCommand extends Command
                 $command->getDescription(),
                 $command->getUsage()
             );
-
-            return Request::sendMessage($data);
+            $result = $data;
+          //  return Request::sendMessage($data);
         }
 
         $data['text'] = 'No help available: Command /' . $command_str . ' not found';
@@ -96,28 +121,9 @@ class HelpCommand extends Command
 
 
 
-        $keyboards[] = [
-            new KeyboardButton(['text' => '☎ Позвонить']), //260E
-            new KeyboardButton(['text' => '✉ Написать']), //2709
-          //  new KeyboardButton(['text' => '📞 Написать']) //1F4DE
-        ];
-       // $keyboards[] = [
-
-          //  new KeyboardButton(['text' => '📦 Мои заказы'])
-       // ];
-        $keyboards[] = [
-            new KeyboardButton(['text' => '⚙ Настройки']),
-            new KeyboardButton(['text' => '❓ Помощь'])
-        ];
-
-        $reply_markup = (new Keyboard([
-            'keyboard' => $keyboards
-        ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
 
 
-        $data['reply_markup'] = $reply_markup;
-
-        return Request::sendMessage($data);
+        return Request::sendMessage($result);
     }
 
 

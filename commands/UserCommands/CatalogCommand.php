@@ -45,6 +45,7 @@ class CatalogCommand extends UserCommand
      * @var string
      */
     protected $version = '1.0';
+    protected $private_only = true;
     /**
      * The Google API Key from the command config
      *
@@ -103,13 +104,6 @@ class CatalogCommand extends UserCommand
             }
         }
 
-        /*$sticker=[
-            'chat_id' => $chat_id,
-            'sticker'=>'BQADBAADsgUAApv7sgABW0IQT2B3WekC'
-        ];
-        Request::sendSticker($sticker);*/
-
-
         $data = [
             'chat_id' => $chat_id,
             'text' => 'Выберите раздел:',
@@ -128,12 +122,6 @@ class CatalogCommand extends UserCommand
             new KeyboardButton(['text' => '🏠 Начало', 'callback_data' => 'goHome']),
         ];
 
-        if ($this->telegram->isAdmin($chat_id)) {
-            //  $keyboards[] = [new InlineKeyboardButton(['text' => '✏ 📝  ⚙ Редактировать', 'callback_data' => 'get']), new InlineKeyboardButton(['text' => '❌ Удалить', 'callback_data' => 'get'])];
-            //  $keyboards[] = [new InlineKeyboardButton(['text' => '❓ 👤  👥 🛍 ✅ 🟢 🔴Удалить', 'callback_data' => 'get'])];
-        }
-
-
         $dataCatalog['reply_markup'] = (new Keyboard([
             'keyboard' => $keyboards
         ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
@@ -141,9 +129,9 @@ class CatalogCommand extends UserCommand
 
 
         $result = $data;
-        // }
+
         return Request::sendMessage($result);
-        // return Yii::$app->telegram->sendMessage($result);
+
     }
 
 }

@@ -4,7 +4,7 @@ namespace Longman\TelegramBot\Commands\UserCommands;
 
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Request;
-
+use Yii;
 /**
  * User "/cell" command
  */
@@ -31,12 +31,12 @@ class CallCommand extends UserCommand
         $text = trim($message->getText(true));
 
         if ($text === '') {
-            $text = 'Command usage: ' . $this->getUsage();
+            $text = Yii::t('telegram/command', 'USAGE', $this->getUsage());
         }
 
         $data = [
             'chat_id' => $chat_id,
-            'text' => $text,
+            'text' => $text . 'zzz',
         ];
 
         return Request::sendMessage($data);

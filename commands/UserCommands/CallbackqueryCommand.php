@@ -105,7 +105,8 @@ class CallbackqueryCommand extends SystemCommand
 
             return Request::answerCallbackQuery($data);
 
-
+        } elseif ($callback_data == 'goHome') {
+            return $this->telegram->executeCommand('start');
         } elseif (preg_match('/^getCatalog\s+([0-9]+)/iu', trim($callback_data), $match)) {
 
 

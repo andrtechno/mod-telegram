@@ -92,7 +92,14 @@ class FeedbackCommand extends UserCommand
         //Every time a step is achieved the track is updated
         switch ($state) {
             case 0:
-                echo $text;
+                /*if(mb_strlen($text) >= 10){
+                    $notes['state'] = 0;
+                    $this->conversation->update();
+                    $data['reply_markup'] = Keyboard::remove(['selective' => true]);
+                    $data['text'] = 'Количество символов должно быть больше 10.';
+                    $result = Request::sendMessage($data);
+                    break;
+                }*/
                 if ($text === '' || preg_match('/^(\x{2709})/iu', trim($text), $match)) {
                     $notes['state'] = 0;
                     $this->conversation->update();
@@ -102,6 +109,7 @@ class FeedbackCommand extends UserCommand
                     if ($text !== '') {
                         $data['text'] = 'Напишите сообщение. Оно будет отправлено команде:';
                     }
+
                     $result = Request::sendMessage($data);
                     break;
                 }
@@ -110,6 +118,7 @@ class FeedbackCommand extends UserCommand
                 $text = '';
             // no break
             case 1:
+                $notes['state'] = 1;
                 $this->conversation->update();
                 $out_text = '';
                 unset($notes['state']);
@@ -118,7 +127,7 @@ class FeedbackCommand extends UserCommand
                 }
 
                 $data['reply_markup'] = Keyboard::remove(['selective' => true]);
-                $data['text'] = 'Сообщение успешно отправлено! Мы рассмотрим обращение и свяжемся с Вами.:';
+                $data['text'] = '✅ Сообщение успешно отправлено! Мы рассмотрим обращение и свяжемся с Вами.';
                 $this->conversation->stop();
 
                 $dataChat['chat_id'] = '@pixelpalkin';
