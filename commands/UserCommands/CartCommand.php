@@ -136,7 +136,8 @@ if($this->getConfig('page')){
                 $text = '*Ваша корзина*' . PHP_EOL;
                 //$text .= '[Мой товар](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
                 $text .= '['.$product->name.'](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
-                $text .= '_описание товара_' . PHP_EOL;
+                //$text .= '['.$product->name.'](https://yii2.pixelion.com.ua'.$product->image.')' . PHP_EOL;
+                $text .= '_описание товара_'  . PHP_EOL;
                 $text .= '`'.$product->price.' грн / '.$product->quantity.' шт = '.($product->price*$product->quantity).' грн`' . PHP_EOL;
 
                 $data['chat_id'] = $chat_id;

@@ -34,6 +34,7 @@ class m160809_132156_telegram_order extends Migration
             'order_id' => $this->integer(11),
             'product_id' => $this->integer(11),
             'name' => $this->string(255),
+            'image' => $this->string(255),
             'quantity' => $this->smallInteger(8),
             'price' => $this->money(10, 2),
             // 'param' => $this->string(62)
