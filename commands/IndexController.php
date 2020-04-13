@@ -5,6 +5,7 @@ namespace panix\mod\telegram\commands;
 use Longman\TelegramBot\Commands\UserCommands\CatalogCommand;
 use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Request;
+use Longman\TelegramBot\Telegram;
 use yii\console\Controller;
 use Yii;
 use yii\console\Exception;
@@ -25,55 +26,38 @@ class IndexController extends Controller
         $db->createCommand()->delete('{{%tlgrm_messages}}', 'time < \'' . date("Y-m-d H:i:s", time() - (3600 * 24 * $keep)) . '\'')->execute();
     }
 
-//812367093
 
-//343987970
     public function actionIndex()
     {
-        $bot_api_key = '835652742:AAEBdMpPg9TgakFa2o8eduRSkynAZxipg-c';
-        $bot_username = 'pixelionbot';
 
 // Define all IDs of admin users in this array (leave as empty array if not used)
-        $admin_users = [
-            812367093, //panix
-            // 343987970 // Сметанин
-        ];
+        $admin_users = [812367093, //panix// 343987970 // Сметанин];
+        $admin_users2 = explode(',', Yii::$app->settings->get('telegram', 'bot_admins'));
 
-// Define all paths for your custom commands in this array (leave as empty array if not used)
         $commands_paths = [
             __DIR__ . '/UserCommands',
+            __DIR__ . '/SystemCommands',
             __DIR__ . '/AdminCommands',
-           // __DIR__ . '/Commands',
         ];
 
-// Enter your MySQL database credentials
+
         $mysql_credentials = [
             'host' => 'localhost',
             'user' => 'root',
             'password' => '47228960panix',
             'database' => 'telegram',
         ];
-        /*$date = new \DateTime(date('Y-m-d', time()), new \DateTimeZone('Europe/Kiev'));
-        $date = $date->format('Y-m-d');
-        $logPath = '@runtime/logs/' . $date . '/' . Yii::$app->id.'/telegram';
-        Yii::$app->log->targets[] = [
-            [
-                'class' => 'panix\engine\log\FileTarget',
-                'levels' => ['error', 'warning'],
-                //'categories' => ['yii\db\*'],
-                'logFile' => $logPath . '/error.log',
-            ],
-            ];*/
-//print_r($commands_paths);die;
+        $api_key = Yii::$app->settings->get('telegram', 'api_token');
+        $bot_username = Yii::$app->settings->get('telegram', 'bot_name');
         try {
 
-            $telegram = new Api($bot_api_key, $bot_username);
+            $telegram = new Api();
 
             // Add commands paths containing your custom commands
             $telegram->addCommandsPaths($commands_paths);
 
             // Enable admin users
-            $telegram->enableAdmins($admin_users);
+            $telegram->enableAdmins();
 
             // Enable MySQL
             $telegram->enableMySql($mysql_credentials);
