@@ -25,12 +25,12 @@ use Yii;
  *
  * Command that demonstrated the Conversation funtionality in form of a simple survey.
  */
-class ProductremoveCommand extends AdminCommand
+class Productremove1Command extends AdminCommand
 {
     /**
      * @var string
      */
-    protected $name = 'productremove';
+    protected $name = 'productremove1';
 
     /**
      * @var string
@@ -40,7 +40,7 @@ class ProductremoveCommand extends AdminCommand
     /**
      * @var string
      */
-    protected $usage = '/productremove <id>';
+    protected $usage = '/productremove1 <id>';
 
     /**
      * @var string
@@ -107,39 +107,32 @@ class ProductremoveCommand extends AdminCommand
         switch ($state) {
             case 0:
 
-                if ($text !== '') {
+                if ($text === '' || !is_numeric($text)) {
                     $notes['state'] = 0;
-                    if (!is_numeric($text)) {
-                        $this->conversation->update();
+                    $this->conversation->update();
+                    $data['text'] = 'Укажите ID товара';
+                    if ($text !== '') {
+                        $data['text'] = 'ID товара должен быть числом:';
+                    }
+                    $result = Request::sendMessage($data);
+                    break;
+                }
+                if ($text !== '' || is_numeric($text)){
+                    $notes['state'] = 0;
+                    $this->conversation->update();
+                    echo $text;
+                    $product = Product::findOne($text);
 
-                        $data['text'] = 'Укажите ID товара';
-                        if ($text !== '') {
-                            $data['text'] = 'ID товара должен быть числом:';
-                        }
+                    if ($product) {
+                        $data['text'] = 'Товар не найден';
+                        $data['reply_markup'] = (new Keyboard(['Отмена']))
+                            ->setResizeKeyboard(true)
+                            ->setOneTimeKeyboard(true)
+                            ->setSelective(true);
                         $result = Request::sendMessage($data);
                         break;
-                    } else {
-
-                        $this->conversation->update();
-                        echo $text;
-                        $product = Product::findOne($text);
-
-                        if ($product) {
-                            $data['text'] = 'Товар найден';
-                            $data['reply_markup'] = (new Keyboard(['Отмена']))
-                                ->setResizeKeyboard(true)
-                                ->setOneTimeKeyboard(true)
-                                ->setSelective(true);
-                            $result = Request::sendMessage($data);
-                            break;
-                        }else{
-                            $data['text'] = 'Товар не найден';
-                              $result = Request::sendMessage($data);
-
-                        }
                     }
                 }
-
 
                 $notes['product'] = $product;
                 $notes['id'] = $text;
@@ -149,7 +142,7 @@ class ProductremoveCommand extends AdminCommand
 
             case 1:
 
-print_r($notes);
+
                 if ($text === '' || !in_array($text, ['Yes', 'No'], true)) {
                     $notes['state'] = 1;
                     $this->conversation->update();

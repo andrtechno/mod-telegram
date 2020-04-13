@@ -11,7 +11,7 @@
 
 namespace Longman\TelegramBot\Commands\AdminCommands;
 
-use Longman\TelegramBot\Commands\AdminCommand;
+use panix\mod\telegram\components\AdminCommand;
 use Longman\TelegramBot\DB;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;

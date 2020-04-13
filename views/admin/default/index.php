@@ -59,8 +59,19 @@ $form = ActiveForm::begin();
             <?= $form->field($model, 'bot_name') ?>
             <?= $form->field($model, 'password') ?>
             <?= $form->field($model, 'empty_cart_text')->textarea() ?>
-            <?= $form->field($model, 'empty_history_text')->textarea() ?>
+            <?php   // $form->field($model, 'empty_history_text')->textarea() ?>
         </div>
+
+
+        <?=
+
+        $form->field($model, 'empty_history_text')->widget(\panix\ext\tinymce\TinyMceMarkdown::class, [
+            'options' => ['rows' => 6],
+        ]);
+
+        ?>
+
+
         <div class="card-footer text-center">
             <?= $model->submitButton(); ?>
         </div>

@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
-use Longman\TelegramBot\Commands\UserCommand;
+
 use Longman\TelegramBot\Entities\ServerResponse;
+use panix\mod\telegram\components\UserCommand;
 
 /**
  * User "/rules" command

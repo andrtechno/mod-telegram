@@ -17,32 +17,33 @@ use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Request;
 use panix\engine\CMS;
+use panix\mod\shop\models\Attribute;
 use panix\mod\shop\models\Category;
 use panix\mod\shop\models\Product;
 use panix\mod\shop\models\ProductType;
 use Yii;
 
 /**
- * User "/productadd" command
+ * User "/test" command
  *
  * Command that demonstrated the Conversation funtionality in form of a simple survey.
  */
-class ProductaddCommand extends AdminCommand
+class TestCommand extends AdminCommand
 {
     /**
      * @var string
      */
-    protected $name = 'productadd';
+    protected $name = 'test';
 
     /**
      * @var string
      */
-    protected $description = 'productadd productadd productadd';
+    protected $description = 'test';
 
     /**
      * @var string
      */
-    protected $usage = '/productadd';
+    protected $usage = '/test';
 
     /**
      * @var string
@@ -144,8 +145,58 @@ class ProductaddCommand extends AdminCommand
             // no break
             case 2:
 
-                $model = Category::find()->excludeRoot()->all();
-                $list = [];
+                $model = ProductType::findOne($notes['type_id']);
+
+               $attributes = $model->shopAttributes;
+                if($attributes){
+                    foreach ($attributes as $a) {
+                        $value = $model->getEavAttribute($a->name);
+
+
+                        if ($a->type == Attribute::TYPE_DROPDOWN) {
+                            $addOptionLink = Html::a(Html::icon('add'), '#', [
+                                'rel' => $a->id,
+                                'data-name' => $a->getIdByName(), //$a->getIdByName()
+                                //'data-name' => Html::getInputName($a, $a->name),
+                                'onclick' => 'js: return addNewOption($(this));',
+                                'class' => 'btn btn-success', // btn-sm mt-2 float-right
+                                'title' => Yii::t('shop/admin', 'ADD_OPTION')
+                            ]);
+
+                            // . ' ' . Yii::t('shop/admin', 'ADD_OPTION')
+                        } else
+                            $addOptionLink = null;
+
+                        $error = '';
+                        $inputClass = '';
+
+                        if ($a->required && array_key_exists($a->name, $model->getErrors())) {
+                            $inputClass = 'is-invalid';
+                            $error = Html::error($a, $a->name);
+                        }
+
+$required=($a->required ? 'required' : '');
+
+
+$a->title;
+                        $a->name;
+
+
+ $a->renderField($value, $inputClass);
+
+
+
+
+
+
+
+
+
+
+
+                    }
+                }
+               /* $list = [];
                 $keyboards = [];
                 foreach ($model as $k => $item) {
                     $list[$item->id] = $item->name;
@@ -157,7 +208,7 @@ class ProductaddCommand extends AdminCommand
                     ->setResizeKeyboard(true)
                     ->setOneTimeKeyboard(true)
                     ->setSelective(true);
-
+*/
                 if ($text === '' || !in_array($text, $list, true)) {
                     $notes['state'] = 2;
                     $this->conversation->update();
@@ -177,125 +228,19 @@ class ProductaddCommand extends AdminCommand
                 $notes['category_id'] = array_search($text, $list);
                 $text = '';
             // no break
+
             case 3:
-                if ($text === '') {
-                    $notes['state'] = 3;
-                    $this->conversation->update();
-                    $data['text'] = 'Название товара:';
-                    $data['reply_markup'] = Keyboard::remove(['selective' => true]);
-                    $result = Request::sendMessage($data);
-
-                    break;
-                }
-
-                $notes['name'] = $text;
-                $text = '';
-            // no break
-            case 4:
-
-                $text = '';
-            // no break
-            case 5:
-                if ($text === '' || !is_numeric($text)) {
-                    $notes['state'] = 5;
-                    $this->conversation->update();
-
-                    $data['text'] = 'Цена:';
-                    if ($text !== '') {
-                        $data['text'] = 'Цена должна быть числом:';
-                    }
-
-                    $result = Request::sendMessage($data);
-                    break;
-                }
-
-                $notes['price'] = $text;
-                $text = '';
-
-            // no break
-            case 6:
-                if ($message->getPhoto() === null) {
-                    $notes['state'] = 6;
-                    $this->conversation->update();
-
-                    $data['text'] = 'Перетащите изображение:';
-
-                    $result = Request::sendMessage($data);
-                    break;
-                }
-
-                $message_type = $message->getType();
-
-
-                $doc = $message->{'get' . ucfirst($message_type)}();
-
-                // For photos, get the best quality!
-                ($message_type === 'photo') && $doc = end($doc);
-
-                $file_id = $doc->getFileId();
-                $file = Request::getFile(['file_id' => $file_id]);
-                if ($file->isOk()) {
-                    $filePath = $this->telegram->getDownloadPath().DIRECTORY_SEPARATOR.$file->getResult()->file_path;
-                    if(!file_exists($filePath)){
-                        $download = Request::downloadFile($file->getResult());
-                    }
-
-                    $data['text'] = $message_type . ' file is located at: ' . $filePath;
-                } else {
-                    $data['text'] = 'Ошибка загрузки файла.';
-                }
-                $r=Request::sendMessage($data);
-
-                /** @var PhotoSize $photo */
-                $photo = $message->getPhoto()[0];
-                $notes['image'] = $photo->getFileId();
-                $notes['image_id'] = $file_id;
-
-            // no break
-            case 6:
                 $this->conversation->update();
                 $content = '✅ Товар успешно добавлен' . PHP_EOL;
 
-                $product = new Product;
+
 
                 unset($notes['state']);
                 foreach ($notes as $k => $v) {
                     $content .= PHP_EOL . '<strong>' . ucfirst($k) . '</strong>: ' . $v;
                 }
 
-                $product->type_id = $notes['type_id'];
-                $product->name = $notes['name'];
-                $product->slug = CMS::slug($product->name);
-                $product->price = $notes['price'];
 
-                $product->save(false);
-
-
-
-                if (true) {
-                    // Авто добавление в предков категории
-                    // Нужно выбирать в админки самую последнию категории по уровню.
-                    $category = Category::findOne($notes['category_id']);
-                    $categories = [];
-                    if ($category) {
-                        $tes = $category->ancestors()->excludeRoot()->all();
-                        foreach ($tes as $cat) {
-                            $categories[] = $cat->id;
-                        }
-
-                    }
-                    $categories = array_merge($categories,[]);
-                } else {
-                    $categories = [];
-                }
-
-                $product->setCategories($categories, $notes['category_id']);
-
-                $file = Request::getFile(['file_id' => $notes['image_id']]);
-                if ($file->isOk()) {
-                    $image= $product->attachImage($this->telegram->getDownloadPath().DIRECTORY_SEPARATOR.$file->getResult()->file_path);
-
-                }
 
                 $data['parse_mode'] = 'HTML';
                 $data['reply_markup'] = Keyboard::remove(['selective' => true]);

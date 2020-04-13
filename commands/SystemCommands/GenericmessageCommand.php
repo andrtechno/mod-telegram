@@ -10,54 +10,68 @@
 
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
-use panix\mod\telegram\models\Actions;
-use panix\mod\telegram\models\AuthorizedChat;
-use panix\mod\telegram\models\AuthorizedManagerChat;
-use panix\mod\telegram\models\AuthorizedUsers;
-use panix\mod\telegram\models\Message;
-use panix\mod\telegram\models\Usernames;
-use panix\mod\telegram\TelegramVars;
-use Longman\TelegramBot\Conversation;
-use Longman\TelegramBot\Entities\ServerResponse;
-use Longman\TelegramBot\Request;
 use Longman\TelegramBot\Commands\SystemCommand;
-use Yii;
-use yii\helpers\ArrayHelper;
+use Longman\TelegramBot\Conversation;
+use Longman\TelegramBot\Request;
 
 /**
  * Generic message command
+ *
+ * Gets executed when any type of message is sent.
  */
 class GenericmessageCommand extends SystemCommand
 {
-    /**#@+
-     * {@inheritdoc}
+    /**
+     * @var string
      */
-    protected $name = 'Genericmessage';
-    protected $description = 'Handle generic message';
-    protected $version = '1.0.2';
-    protected $need_mysql = false;
-    /**#@-*/
+    protected $name = 'genericmessage';
 
     /**
-     * Execution if MySQL is required but not available
+     * @var string
+     */
+    protected $description = 'Handle generic message';
+
+    /**
+     * @var string
+     */
+    protected $version = '1.1.0';
+
+    /**
+     * @var bool
+     */
+    protected $need_mysql = true;
+
+    /**
+     * Command execute method if MySQL is required but not available
      *
-     * @return boolean
+     * @return \Longman\TelegramBot\Entities\ServerResponse
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     public function executeNoDb()
     {
-        //Do nothing
+        // Do nothing
         return Request::emptyResponse();
     }
 
-
     /**
-     * Execute command
+     * Command execute method
      *
-     * @return boolean
+     * @return \Longman\TelegramBot\Entities\ServerResponse
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     public function execute()
     {
-        //Do nothing, just for rewriting default Longman command
+        //If a conversation is busy, execute the conversation command after handling the message
+        $conversation = new Conversation(
+            $this->getMessage()->getFrom()->getId(),
+            $this->getMessage()->getChat()->getId()
+        );
+
+        //Fetch conversation command if it exists and execute it
+        if ($conversation->exists() && ($command = $conversation->getCommand())) {
+            return $this->telegram->executeCommand($command);
+        }
+
         return Request::emptyResponse();
     }
 }

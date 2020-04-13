@@ -7,6 +7,8 @@ use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Request;
 use yii\console\Controller;
 use Yii;
+use yii\console\Exception;
+use panix\mod\telegram\components\Api;
 
 class IndexController extends Controller
 {
@@ -51,30 +53,44 @@ class IndexController extends Controller
             'password' => '47228960panix',
             'database' => 'telegram',
         ];
+        /*$date = new \DateTime(date('Y-m-d', time()), new \DateTimeZone('Europe/Kiev'));
+        $date = $date->format('Y-m-d');
+        $logPath = '@runtime/logs/' . $date . '/' . Yii::$app->id.'/telegram';
+        Yii::$app->log->targets[] = [
+            [
+                'class' => 'panix\engine\log\FileTarget',
+                'levels' => ['error', 'warning'],
+                //'categories' => ['yii\db\*'],
+                'logFile' => $logPath . '/error.log',
+            ],
+            ];*/
 //print_r($commands_paths);die;
         try {
+
+            $telegram = new Api($bot_api_key, $bot_username);
+
+            // Add commands paths containing your custom commands
+            $telegram->addCommandsPaths($commands_paths);
+
+            // Enable admin users
+            $telegram->enableAdmins($admin_users);
+
+            // Enable MySQL
+            $telegram->enableMySql($mysql_credentials);
+
+            // Logging (Error, Debug and Raw Updates)
+            // https://github.com/php-telegram-bot/core/blob/master/doc/01-utils.md#logging
+            //
+            // Set custom Upload and Download paths
+            $telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
+            $telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
+            $i=1;
             while (true) {
 
                 sleep(2);
                 // Create Telegram API object
-                $telegram = new \Longman\TelegramBot\Telegram($bot_api_key, $bot_username);
 
-                // Add commands paths containing your custom commands
-                $telegram->addCommandsPaths($commands_paths);
 
-                // Enable admin users
-                $telegram->enableAdmins($admin_users);
-
-                // Enable MySQL
-                $telegram->enableMySql($mysql_credentials);
-
-                // Logging (Error, Debug and Raw Updates)
-                // https://github.com/php-telegram-bot/core/blob/master/doc/01-utils.md#logging
-                //
-                // Set custom Upload and Download paths
-                $telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
-                $telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
-                $ss = $telegram;
                 // Here you can set some command specific parameters
                 // e.g. Google geocode/timezone api key for /date command
                // $telegram->setCommandConfig('date', ['google_api_key' => 'your_google_api_key_here']);
@@ -84,10 +100,6 @@ class IndexController extends Controller
 
                 // Handle telegram getUpdates request
                 $server_response = $telegram->handleGetUpdates();
-
-
-                //$telegram->executeCommand('/echo ff');
-
 
                 if ($server_response->isOk()) {
 
@@ -104,6 +116,9 @@ class IndexController extends Controller
                                 $telegram->executeCommand('catalog');
                             } elseif (preg_match('/^(\x{1F3E0})/iu', trim($text), $match)) { //home emoji
                                 $telegram->executeCommand('start');
+                                $telegram->executeCommand('cancel');
+
+                            } elseif (trim($text) == 'Отмена') {
                                 $telegram->executeCommand('cancel');
                             } elseif (preg_match('/^(\x{2753})/iu', trim($text), $match)) { //help emoji
                                 // $telegram->executeCommand('help');
@@ -129,20 +144,22 @@ class IndexController extends Controller
 
                     }
                     $update_count = count($server_response->getResult());
-                    echo date('Y-m-d H:i:s', time()) . ' - Processed ' . $update_count . ' updates' . PHP_EOL;
+                    echo $i.': '.date('Y-m-d H:i:s', time()) . ' - Processed ' . $update_count . ' updates' . PHP_EOL;
                 } else {
-                    echo date('Y-m-d H:i:s', time()) . ' - Failed to fetch updates' . PHP_EOL;
+                    echo $i.': '.date('Y-m-d H:i:s', time()) . ' - Failed to fetch updates' . PHP_EOL;
                     echo $server_response->printError();
                 }
+                $i++;
             }
-        } catch (\Longman\TelegramBot\Exception\TelegramException $e) {
-            echo $e->getMessage();
+        } catch (\Longman\TelegramBot\Exception\TelegramException $e) { //\Longman\TelegramBot\Exception\TelegramException
+            echo 'TelegramException: '.$e->getMessage();
             // Log telegram errors
+            //Yii::error($e->getMessage(),'telegram');
             \Longman\TelegramBot\TelegramLog::error($e);
         } catch
         (\Longman\TelegramBot\Exception\TelegramLogException $e) {
             // Catch log initialisation errors
-            echo $e->getMessage();
+            echo 'TelegramLogException: '.$e->getMessage();
         }
 
     }

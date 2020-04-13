@@ -12,6 +12,7 @@ namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Request;
+use Yii;
 
 /**
  * Generic command
@@ -55,9 +56,11 @@ class GenericCommand extends SystemCommand
             return $this->telegram->executeCommand('whois');
         }
 
+        $text = Yii::t('telegram/command', 'COMMAND_NOT_FOUND_1', $command) . PHP_EOL;
+        $text .= Yii::t('telegram/command', 'COMMAND_NOT_FOUND_2');
         $data = [
             'chat_id' => $chat_id,
-            'text'    => 'Command /' . $command . ' not found.. :(',
+            'text' => $text,
         ];
 
         return Request::sendMessage($data);

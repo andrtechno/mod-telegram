@@ -4,9 +4,12 @@ namespace panix\mod\telegram\components;
 
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
+use Yii;
 
 abstract class UserCommand extends \Longman\TelegramBot\Commands\UserCommand
 {
+
+
   public function startKeyboards(){
       $keyboards[] = [
           new KeyboardButton(['text' => '📂 Каталог']),
