@@ -289,7 +289,7 @@ print_r($params);
             return $response;
         } elseif (preg_match('/^getCatalogList\/([0-9]+)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
-
+            echo 'zzz';
             if (isset($match[1])) {
 
 

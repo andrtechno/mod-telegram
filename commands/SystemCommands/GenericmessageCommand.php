@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of the TelegramBot package.
  *
@@ -8,16 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Longman\TelegramBot\Commands\SystemCommands;
+namespace panix\mod\telegram\commands\SystemCommands;
 
 use Longman\TelegramBot\Commands\SystemCommand;
-use Longman\TelegramBot\Conversation;
+use Longman\TelegramBot\Entities\ServerResponse;
+use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 
 /**
  * Generic message command
- *
- * Gets executed when any type of message is sent.
  */
 class GenericmessageCommand extends SystemCommand
 {
@@ -34,7 +34,7 @@ class GenericmessageCommand extends SystemCommand
     /**
      * @var string
      */
-    protected $version = '1.1.0';
+    protected $version = '1.2.0';
 
     /**
      * @var bool
@@ -42,34 +42,37 @@ class GenericmessageCommand extends SystemCommand
     protected $need_mysql = true;
 
     /**
-     * Command execute method if MySQL is required but not available
+     * Execution if MySQL is required but not available
      *
-     * @return \Longman\TelegramBot\Entities\ServerResponse
-     * @throws \Longman\TelegramBot\Exception\TelegramException
+     * @return ServerResponse
+     * @throws TelegramException
      */
     public function executeNoDb()
     {
-        // Do nothing
+        // Try to execute any deprecated system commands.
+        if (self::$execute_deprecated && $deprecated_system_command_response = $this->executeDeprecatedSystemCommand()) {
+            return $deprecated_system_command_response;
+        }
+
         return Request::emptyResponse();
     }
 
     /**
-     * Command execute method
+     * Execute command
      *
-     * @return \Longman\TelegramBot\Entities\ServerResponse
-     * @throws \Longman\TelegramBot\Exception\TelegramException
+     * @return ServerResponse
+     * @throws TelegramException
      */
     public function execute()
     {
-        //If a conversation is busy, execute the conversation command after handling the message
-        $conversation = new Conversation(
-            $this->getMessage()->getFrom()->getId(),
-            $this->getMessage()->getChat()->getId()
-        );
+        // Try to continue any active conversation.
+        if ($active_conversation_response = $this->executeActiveConversation()) {
+            return $active_conversation_response;
+        }
 
-        //Fetch conversation command if it exists and execute it
-        if ($conversation->exists() && ($command = $conversation->getCommand())) {
-            return $this->telegram->executeCommand($command);
+        // Try to execute any deprecated system commands.
+        if (self::$execute_deprecated && $deprecated_system_command_response = $this->executeDeprecatedSystemCommand()) {
+            return $deprecated_system_command_response;
         }
 
         return Request::emptyResponse();

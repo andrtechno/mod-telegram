@@ -157,7 +157,7 @@ class KeyboardPagination extends BaseObject implements Linkable
     public function getPage($recalculate = false)
     {
         if ($this->_page === null || $recalculate) {
-            $page = (int) $this->page - 1;
+            $page = (int) $this->getQueryParam($this->pageParam, 1) - 1;
             $this->setPage($page, true);
         }
 
@@ -204,7 +204,7 @@ class KeyboardPagination extends BaseObject implements Linkable
                 $pageSize = $this->defaultPageSize;
                 $this->setPageSize($pageSize);
             } else {
-                $pageSize = (int) $this->getQueryParam($this->pageSize, $this->defaultPageSize);
+                $pageSize = (int) $this->getQueryParam($this->pageSizeParam, $this->defaultPageSize);
                 $this->setPageSize($pageSize, true);
             }
         }

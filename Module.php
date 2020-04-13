@@ -14,7 +14,7 @@ class Module extends WebModule implements \yii\base\BootstrapInterface
 {
     public $api_token = null;
     public $bot_name = null;
-    public $hook_url = 'https://yii2.pixelion.com.ua/telegram/default/hook';
+    public $hook_url;
     public $password = null;
     public $userCommandsPath = '@telegram/commands/UserCommands';
     public $timeBeforeResetChatHandler = 0;
@@ -42,12 +42,12 @@ class Module extends WebModule implements \yii\base\BootstrapInterface
         if (isset($config->password))
             $this->password = $config->password;
 
-
-        if (empty($this->hook_url))
-            throw new UserException('You must set hook_url');
-        // if (empty($config->password))
-        //     throw new UserException('You must set password');
-
+        //if (false) {
+        //    $this->hook_url = 'https://' . Yii::$app->request->getServerName() . '/telegram/hook';
+//
+        //    if (empty($this->hook_url))
+      //          throw new UserException('You must set hook_url');
+       // }
 
         parent::init();
 
@@ -67,8 +67,9 @@ class Module extends WebModule implements \yii\base\BootstrapInterface
         if ($app instanceof \yii\console\Application) {
             $this->controllerNamespace = 'panix\mod\telegram\commands';
         }
-        $rules['telegram/default/<action:[0-9a-zA-Z_\-]+>'] = 'telegram/default/<action>';
+
         $rules['telegram/chat/<action:[0-9a-zA-Z_\-]+>'] = 'telegram/chat/<action>';
+        $rules['telegram/<action:[0-9a-zA-Z_\-]+>'] = 'telegram/default/<action>';
         $app->urlManager->addRules(
             $rules,
             false

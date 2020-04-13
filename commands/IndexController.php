@@ -31,13 +31,13 @@ class IndexController extends Controller
     {
 
 // Define all IDs of admin users in this array (leave as empty array if not used)
-        $admin_users = [812367093, //panix// 343987970 // Сметанин];
+        $admin_users = [812367093];
         $admin_users2 = explode(',', Yii::$app->settings->get('telegram', 'bot_admins'));
 
         $commands_paths = [
-            __DIR__ . '/UserCommands',
             __DIR__ . '/SystemCommands',
             __DIR__ . '/AdminCommands',
+            __DIR__ . '/UserCommands',
         ];
 
 
