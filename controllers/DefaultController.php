@@ -69,6 +69,14 @@ class DefaultController extends Controller
 
     public function actionHook(){
         Yii::info('test hook','application');
+
+        $mysql_credentials = [
+            'host' => 'corner2.mysql.tools',
+            'user' => 'corner2_bot',
+            'password' => 'oHj0!5b4#E',
+            'database' => 'corner2_bot',
+        ];
+
         try {
 
             // Create Telegram API object
@@ -86,7 +94,7 @@ class DefaultController extends Controller
                 realpath($basePath . '/commands') . '/UserCommands',
             ];
 
-
+            $telegram->enableMySql($mysql_credentials);
             $telegram->enableAdmins();
             $telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
             $telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));

@@ -25,17 +25,11 @@ class HelpCommand extends Command
      * {@inheritdoc}
      */
     protected $name = 'help';
-    protected $description = '';
+    protected $description = 'Show bot commands help';
     protected $usage = '/help or /help <command>';
     protected $version = '1.0';
 
-    /**#@-*/
 
-    public function __construct($telegram, $update = NULL)
-    {
-        $this->description = 'Show bot commands help';
-        parent::__construct($telegram, $update);
-    }
 
     /**
      * {@inheritdoc}
@@ -96,8 +90,8 @@ class HelpCommand extends Command
 
             $data['text'] .= PHP_EOL . 'Для полной справки испльзуйте: /help <command>';
 
-            $result = $data;
-            //return Request::sendMessage($data);
+           // $result = $data;
+            return Request::sendMessage($data);
         }
 
         $command_str = str_replace('/', '', $command_str);
@@ -112,8 +106,8 @@ class HelpCommand extends Command
                 $command->getDescription(),
                 $command->getUsage()
             );
-            $result = $data;
-          //  return Request::sendMessage($data);
+           // $result = $data;
+           return Request::sendMessage($data);
         }
 
         $data['text'] = 'No help available: Command /' . $command_str . ' not found';
@@ -123,7 +117,7 @@ class HelpCommand extends Command
 
 
 
-        return Request::sendMessage($result);
+        return Request::sendMessage($data);
     }
 
 

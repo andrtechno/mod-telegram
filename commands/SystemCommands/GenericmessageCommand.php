@@ -71,13 +71,6 @@ class GenericmessageCommand extends SystemCommand
         }
 
 
-
-
-
-
-
-
-
         // Try to execute any deprecated system commands.
         if (self::$execute_deprecated && $deprecated_system_command_response = $this->executeDeprecatedSystemCommand()) {
             return $deprecated_system_command_response;

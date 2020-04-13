@@ -78,13 +78,13 @@ class KeyboardMore extends Component
             if (($page = $currentPage + 1) >= $pageCount - 1) {
                 $page = $pageCount - 1;
             }
-            $this->buttons[0][] = $this->renderPageButton($this->nextPageLabel, $page, $currentPage >= $pageCount - 1, false);
+            $this->buttons[] = $this->renderPageButton($this->nextPageLabel, $page, $currentPage >= $pageCount - 1, false);
         }
 
         // last page
         $lastPageLabel = $this->lastPageLabel === true ? $pageCount : $this->lastPageLabel;
         if ($lastPageLabel !== false) {
-            $this->buttons[0][] = $this->renderPageButton($lastPageLabel, $pageCount - 1, $currentPage >= $pageCount - 1, false);
+            $this->buttons[] = $this->renderPageButton($lastPageLabel, $pageCount - 1, $currentPage >= $pageCount - 1, false);
         }
         return $this->buttons;
     }
@@ -99,17 +99,18 @@ class KeyboardMore extends Component
      * @param bool $active whether this page button is active
      * @return string the rendering result
      */
+
     protected function renderPageButton($label, $page, $disabled, $active)
     {
+        $callback = 'goPage_'.$page;
         if ($active) {
-                return;
+            $callback=time();
         }
         if ($disabled) {
-            return $label;
+            $callback=time();
         }
 
-       // return Html::tag($linkWrapTag, Html::a($label, $this->pagination->createUrl($page), $linkOptions), $options);
-        return new KeyboardButton(['text' => $label, 'callback_data' => 'goPage_'.$page]);
+        // return Html::tag($linkWrapTag, Html::a($label, $this->pagination->createUrl($page), $linkOptions), $options);
+        return new KeyboardButton(['text' => $label, 'callback_data' => $callback]);
     }
-
 }

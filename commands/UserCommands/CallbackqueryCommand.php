@@ -21,6 +21,7 @@ use panix\mod\shop\models\Product;
 use panix\mod\telegram\commands\pager\InlineKeyboardPagination;
 use panix\mod\telegram\components\InlineKeyboardPager;
 use panix\mod\telegram\components\KeyboardMore;
+use panix\mod\telegram\components\KeyboardPager;
 use panix\mod\telegram\components\KeyboardPagination;
 use panix\mod\telegram\models\AuthorizedManagerChat;
 use panix\mod\telegram\models\Order;
@@ -289,18 +290,38 @@ print_r($params);
             return $response;
         } elseif (preg_match('/^getCatalogList\/([0-9]+)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
-            echo 'zzz';
+
             if (isset($match[1])) {
 
 
+
+
+
+
                 $query = Product::find()->published()->sort()->applyCategories($match[1]);
-                $pages = new KeyboardPagination(['totalCount' => $query->count()]);
+                $pages = new KeyboardPagination([
+                    'totalCount' => $query->count(),
+                    'defaultPageSize' => 2,
+                    //'pageSize'=>3
+                ]);
+                $pages->setPage($this->page);
                 $products = $query->offset($pages->offset)
                     ->limit($pages->limit)
                     ->all();
 
 
-                $products = $query->all();
+
+                $pager = new KeyboardPager([
+                    'pagination' => $pages,
+                    'lastPageLabel' => false,
+                    'firstPageLabel' => false,
+                    'maxButtonCount' => 1,
+                    'command' => 'getCart',
+                    'nextPageLabel' => '▶ еще'
+                ]);
+
+
+
                 if ($products) {
 
                     foreach ($products as $index => $product) {
@@ -313,7 +334,7 @@ print_r($params);
                         }
                         //  print_r($this->attributes($product));die;
 
-echo $user_id;
+
                         $orderProduct = OrderProduct::findOne(['product_id' => $product->id, 'client_id' => $user_id]);
                         if ($orderProduct) {
 
@@ -382,13 +403,14 @@ echo $user_id;
                     }
                 }
 
-                $test = new KeyboardMore(['pagination' => $pages]);
+
 
 
                 $keyboards2[] = [
                     new KeyboardButton(['text' => '📂 Каталог', 'callback_data' => 'getCatalog']),
                     new KeyboardButton(['text' => '🛍 Корзина']),
-                    // $test->buttons
+                    new KeyboardButton(['text' => 'еще']),
+                   // new KeyboardMore(['pagination' => $pages])
                 ];
                 $data['chat_id'] = $chat_id;
                 $data['text'] = $pages->page . ' / ' . $pages->totalCount;
@@ -502,6 +524,10 @@ echo $user_id;
             $this->_models[$m->name] = $m;
 
         return $this->_models;
+    }
+
+    public function callbacktest($ccc){
+        echo 'zzz';
     }
 
 }

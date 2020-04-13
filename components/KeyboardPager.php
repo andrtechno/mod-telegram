@@ -106,15 +106,6 @@ class KeyboardPager extends Component
 
 
 
-
-
-        // internal pages
-        list($beginPage, $endPage) = $this->getPageRange();
-
-        for ($i = $beginPage; $i <= $endPage; ++$i) {
-            $this->buttons[] = $this->renderPageButton($i + 1, $i, null, $this->disableCurrentPageButton && $i == $currentPage, $i == $currentPage);
-        }
-
         // next page
         if ($this->nextPageLabel !== false) {
             if (($page = $currentPage + 1) >= $pageCount - 1) {
@@ -142,16 +133,8 @@ class KeyboardPager extends Component
      */
     protected function renderPageButton($label, $page, $disabled, $active)
     {
-        $callback = 'goPage_'.$page;
-        if ($active) {
-            $callback=time();
-        }
-        if ($disabled) {
-            $callback=time();
-        }
-
        // return Html::tag($linkWrapTag, Html::a($label, $this->pagination->createUrl($page), $linkOptions), $options);
-        return new InlineKeyboardButton(['text' => $label, 'callback_data' => $callback]);
+        return new KeyboardButton(['text' => $label]);
     }
 
     /**
@@ -169,5 +152,21 @@ class KeyboardPager extends Component
         }
 
         return [$beginPage, $endPage];
+    }
+
+
+    public $callback_data = 'command={command}&page={page}';
+    public $command = 'command';
+
+    protected function generateCallbackData(int $page): string
+    {
+        return str_replace(['{command}', '{page}'], [$this->command, $page], $this->callback_data);
+    }
+
+    public static function getParametersFromCallbackData($data): array
+    {
+        parse_str($data, $params);
+
+        return $params;
     }
 }

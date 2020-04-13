@@ -63,6 +63,8 @@ class CartCommand extends UserCommand
     {
         $update = $this->getUpdate();
 
+
+
         if ($update->getCallbackQuery()) {
             $callbackQuery = $update->getCallbackQuery();
             $message = $callbackQuery->getMessage();
@@ -83,9 +85,14 @@ class CartCommand extends UserCommand
         }
         $text = trim($message->getText(true));
 
+        $s=Request::getStickerSet(['name'=>'Krtek']);
+
+$z = $s->getResult();
+        print_r($z->stickers[0]);
+        $data['sticker'] = $z->stickers[0]['file_id'];
 
         $data['chat_id'] = $chat_id;
-
+        Request::sendSticker($data);
         $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
         if ($order) {
 
