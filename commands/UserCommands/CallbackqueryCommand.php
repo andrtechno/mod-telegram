@@ -65,14 +65,6 @@ class CallbackqueryCommand extends SystemCommand
         $callback_data = $callback_query->getData();
 
         $data['callback_query_id'] = $callback_query_id;
-        if ($callback_data == '/cart') {
-            $this->telegram->executeCommand('cart');
-            return Request::emptyResponse();
-        }
-
-
-
-
         if ($callback_data == 'getProduct') {
 
             $product = Product::find()->where(['id' => 2665])->one();
@@ -304,7 +296,7 @@ print_r($params);
                     'defaultPageSize' => 2,
                     //'pageSize'=>3
                 ]);
-                $pages->setPage($this->page);
+                $pages->setPage(1);
                 $products = $query->offset($pages->offset)
                     ->limit($pages->limit)
                     ->all();
