@@ -19,6 +19,10 @@ class Api extends \Longman\TelegramBot\Telegram
         $api_key = $this->config->api_token;
         $bot_username = $this->config->bot_name;
         parent::__construct($api_key, $bot_username);
+        $this->enableAdmins();
+        $this->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
+        $this->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
+
     }
 
     public function enableAdmins($admin_ids=[])

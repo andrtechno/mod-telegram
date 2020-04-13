@@ -42,12 +42,12 @@ class Module extends WebModule implements \yii\base\BootstrapInterface
         if (isset($config->password))
             $this->password = $config->password;
 
-        //if (false) {
-        //    $this->hook_url = 'https://' . Yii::$app->request->getServerName() . '/telegram/hook';
-//
-        //    if (empty($this->hook_url))
-      //          throw new UserException('You must set hook_url');
-       // }
+        if (!(Yii::$app instanceof \yii\console\Application)) {
+            $this->hook_url = 'https://' . Yii::$app->request->getServerName() . '/telegram/hook';
+
+            if (empty($this->hook_url))
+                throw new UserException('You must set hook_url');
+        }
 
         parent::init();
 

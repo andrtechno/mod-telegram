@@ -5,6 +5,7 @@ namespace panix\mod\telegram\controllers;
 
 use Longman\TelegramBot\Request;
 use panix\engine\CMS;
+use panix\mod\telegram\components\Api;
 use Yii;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Telegram;
@@ -39,7 +40,7 @@ class DefaultController extends Controller
     }
 
     public function beforeAction($action)
-    {            
+    {
         if ($action->id == 'hook') {
             $this->enableCsrfValidation = false;
         }
@@ -71,20 +72,27 @@ class DefaultController extends Controller
         try {
 
             // Create Telegram API object
-            $telegram = new Telegram(Yii::$app->getModule('telegram')->api_token, Yii::$app->getModule('telegram')->bot_name);
+          //  $telegram = new Telegram(Yii::$app->getModule('telegram')->api_token, Yii::$app->getModule('telegram')->bot_name);
+            $telegram = new Api();
             $basePath = \Yii::$app->getModule('telegram')->basePath;
             // $commandsPath = realpath($basePath . '/commands/SystemCommands');
-            $commandsPath = realpath($basePath . '/commands/UserCommands');
+          //  $commandsPath = realpath($basePath . '/commands/UserCommands');
            // $telegram->setCommandConfig('/sendtochannel',['command'=>'sendtochannel','description'=>'test']);
            // CMS::dump($commandsPath);
-            $telegram->addCommandsPath($commandsPath);
-            if (!empty(\Yii::$app->modules['telegram']->userCommandsPath)){
-                if(!$commandsPath = realpath(\Yii::getAlias(\Yii::$app->modules['telegram']->userCommandsPath))){
-                    $commandsPath = realpath(\Yii::getAlias('@app') . \Yii::$app->modules['telegram']->userCommandsPath);
-                }
+           // $telegram->addCommandsPath($commandsPath);
+            $commands_paths = [
+                realpath($basePath . '/commands') . '/SystemCommands',
+                realpath($basePath . '/commands') . '/AdminCommands',
+                realpath($basePath . '/commands') . '/UserCommands',
+            ];
 
-                $telegram->addCommandsPath($commandsPath);
-            }
+
+            $telegram->enableAdmins();
+            $telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
+            $telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
+
+            $telegram->addCommandsPaths($commands_paths);
+
             // Handle telegram webhook request
        // $telegram->setCustomInput(file_get_contents('php://input'));
             $telegram->handle();

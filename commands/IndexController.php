@@ -31,8 +31,8 @@ class IndexController extends Controller
     {
 
 // Define all IDs of admin users in this array (leave as empty array if not used)
-        $admin_users = [812367093];
-        $admin_users2 = explode(',', Yii::$app->settings->get('telegram', 'bot_admins'));
+      //  $admin_users = [812367093];
+      //  $admin_users2 = explode(',', Yii::$app->settings->get('telegram', 'bot_admins'));
 
         $commands_paths = [
             __DIR__ . '/SystemCommands',
@@ -57,7 +57,7 @@ class IndexController extends Controller
             $telegram->addCommandsPaths($commands_paths);
 
             // Enable admin users
-            $telegram->enableAdmins();
+         //   $telegram->enableAdmins();
 
             // Enable MySQL
             $telegram->enableMySql($mysql_credentials);
@@ -66,8 +66,8 @@ class IndexController extends Controller
             // https://github.com/php-telegram-bot/core/blob/master/doc/01-utils.md#logging
             //
             // Set custom Upload and Download paths
-            $telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
-            $telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
+            //$telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
+            //$telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
             $i=1;
             while (true) {
 
@@ -94,7 +94,7 @@ class IndexController extends Controller
                             // $preg = preg_match('/^(\/catalog)\s([0-9]+)/', trim($message->getText()), $match);
 
                             //
-                            if (preg_match('/^(\x{1F6CD})/iu', trim($text), $match)) { //cart emoji
+                           /* if (preg_match('/^(\x{1F6CD})/iu', trim($text), $match)) { //cart emoji
                                 $telegram->executeCommand('cart');
                             } elseif (preg_match('/^(\x{1F4C2})/iu', trim($text), $match)) { //folder emoji
                                 $telegram->executeCommand('catalog');
@@ -123,7 +123,7 @@ class IndexController extends Controller
 
                               //  $telegram->setCommandConfig('catalog', ['category_id' => '20']);
                               //  $telegram->executeCommand('catalog');
-                            }
+                            }*/
                         }
 
                     }
