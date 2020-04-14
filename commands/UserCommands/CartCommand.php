@@ -87,8 +87,6 @@ class CartCommand extends UserCommand
         $data['chat_id'] = $chat_id;
 
 
-        // $data['text'] = Yii::$app->settings->get('telegram', 'empty_cart_text');
-        // $data['reply_markup'] = $this->startKeyboards();
         // $response = $data;
 
 
@@ -125,54 +123,64 @@ class CartCommand extends UserCommand
 
             $keyboards = [];
 
+            if ($query->count()) {
+                foreach ($products as $product) {
 
-            foreach ($products as $product) {
+                    if ($pager->buttons)
+                        $keyboards[] = $pager->buttons;
 
-                if ($pager->buttons)
-                    $keyboards[] = $pager->buttons;
-
-                $keyboards[] = [
-                    new InlineKeyboardButton(['text' => '—', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/down/cart"]),
-                    new InlineKeyboardButton(['text' => $product->quantity . ' шт.', 'callback_data' => time()]),
-                    new InlineKeyboardButton(['text' => '+', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/up/cart"])
-                ];
-                $keyboards[] = [
-                    new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price), 'callback_data' => 'checkOut']),
-                ];
-                $keyboards[] = [
-                    new InlineKeyboardButton(['text' => '❌', 'callback_data' => "removeProductCart/{$product->product_id}"]),
-                ];
-
-
-                $text = '*Ваша корзина*' . PHP_EOL;
-                //$text .= '[Мой товар](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
-                //$text .= '[' . $product->name . '](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
-                $text .= '['.$product->name.'](https://yii2.pixelion.com.ua'.$product->image.')' . PHP_EOL;
-                $text .= '_описание товара_' . PHP_EOL;
-                $text .= '`' . $product->price . ' грн / ' . $product->quantity . ' шт = ' . ($product->price * $product->quantity) . ' грн`' . PHP_EOL;
-
-                //  $data['chat_id'] = $chat_id;
-                $data['text'] = $text;
-                $data['parse_mode'] = 'Markdown';
+                    $keyboards[] = [
+                        new InlineKeyboardButton(['text' => '—', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/down/cart"]),
+                        new InlineKeyboardButton(['text' => $product->quantity . ' шт.', 'callback_data' => time()]),
+                        new InlineKeyboardButton(['text' => '+', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/up/cart"])
+                    ];
+                    $keyboards[] = [
+                        new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price), 'callback_data' => 'checkOut']),
+                    ];
+                    $keyboards[] = [
+                        new InlineKeyboardButton(['text' => '❌', 'callback_data' => "cartDelete/{$order->id}/{$product->product_id}"]),
+                    ];
 
 
-                $data['reply_markup'] = new InlineKeyboard([
-                    'inline_keyboard' => $keyboards
-                ]);
-                if ($callbackQuery) {
+                    $text = '*Ваша корзина*' . PHP_EOL;
+                    //$text .= '[Мой товар](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
+                    //$text .= '[' . $product->name . '](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
+                    $text .= '[' . $product->name . '](https://yii2.pixelion.com.ua' . $product->image . ')' . PHP_EOL;
+                    $text .= '_описание товара_' . PHP_EOL;
+                    $text .= '`' . $product->price . ' грн / ' . $product->quantity . ' шт = ' . ($product->price * $product->quantity) . ' грн`' . PHP_EOL;
 
-                    $data['message_id'] = $message->getMessageId();
-                    $response = Request::editMessageText($data);
+                    //  $data['chat_id'] = $chat_id;
+                    $data['text'] = $text;
+                    $data['parse_mode'] = 'Markdown';
 
-                    $dataReplyMarkup['reply_markup'] = new InlineKeyboard([
+
+                    $data['reply_markup'] = new InlineKeyboard([
                         'inline_keyboard' => $keyboards
                     ]);
+                    if ($callbackQuery) {
 
-                    return Request::editMessageReplyMarkup(array_merge($data, $dataReplyMarkup));
+                        $data['message_id'] = $message->getMessageId();
+                        $response = Request::editMessageText($data);
+
+                        $dataReplyMarkup['reply_markup'] = new InlineKeyboard([
+                            'inline_keyboard' => $keyboards
+                        ]);
+
+                        return Request::editMessageReplyMarkup(array_merge($data, $dataReplyMarkup));
+                    }
+                    $response = $data;
+
                 }
+            } else {
+                $data['text'] = Yii::$app->settings->get('telegram', 'empty_cart_text');
+                $data['reply_markup'] = $this->startKeyboards();
                 $response = $data;
-
             }
+        } else {
+            $data['text'] = Yii::$app->settings->get('telegram', 'empty_cart_text');
+            $data['reply_markup'] = $this->startKeyboards();
+            $response = $data;
+
         }
 
         return Request::sendMessage($response);

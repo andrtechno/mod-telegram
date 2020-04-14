@@ -195,7 +195,7 @@ class CallbackqueryCommand extends SystemCommand
             return Request::editMessageReplyMarkup($dataEdit);
             //  return Yii::$app->telegram->sendMessage($data);
             // }
-        } elseif (preg_match('/^removeProductCart\/([0-9]+)\/([0-9]+)/iu', trim($callback_data), $match)) {
+        } elseif (preg_match('/^cartDelete\/([0-9]+)\/([0-9]+)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
 
             $this->telegram->setCommandConfig('cartproductremove', [
@@ -203,8 +203,6 @@ class CallbackqueryCommand extends SystemCommand
                 'order_id' => $match[1],
             ]);
             return $this->telegram->executeCommand('cartproductremove');
-
-
         } elseif (preg_match('/^spinner\/([0-9]+)\/([0-9]+)\/(up|down)\/(cart|catalog)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
 
@@ -274,11 +272,12 @@ class CallbackqueryCommand extends SystemCommand
                 }
             }
 
-            $this->telegram->setCommandConfig('cartproductquantity', [
+            $this->telegram->setCommandConfig('catalogproductquantity', [
                 'product_id' => $product->id,
+                'order_id' => $order->id,
                 'quantity' => $quantity
             ]);
-            $response = $this->telegram->executeCommand('cartproductquantity');
+            $response = $this->telegram->executeCommand('catalogproductquantity');
 
             return $response;
 

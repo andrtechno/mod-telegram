@@ -107,7 +107,7 @@ class Order extends \yii\db\ActiveRecord
 
         if (!$this->isNewRecord) {
             $image = NULL;
-            print_r($product);
+
             if($product->getImage()){
                 $image = "/uploads/store/product/{$product->id}/".basename($product->getImage()->getPathToOrigin());
             }

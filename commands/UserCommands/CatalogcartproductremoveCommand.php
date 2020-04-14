@@ -22,17 +22,17 @@ use Yii;
  *
  * Display an inline keyboard with a few buttons.
  */
-class CartproductremoveCommand extends SystemCommand
+class CatalogcartproductremoveCommand extends SystemCommand
 {
     /**
      * @var string
      */
-    protected $name = 'cartproductremove';
+    protected $name = 'catalogcartproductremove';
 
     /**
      * @var string
      */
-    protected $description = 'Remove product in cart';
+    protected $description = 'Remove product in cart catalog';
 
     /**
      * @var string
@@ -74,25 +74,18 @@ class CartproductremoveCommand extends SystemCommand
 
         $order = Order::findOne($this->order_id);
         $orderProduct = OrderProduct::findOne(['product_id' => $this->product_id, 'order_id' => $order->id]);
-        $ss = $order->getProducts()->count();
-
-
-
-
-
         if($orderProduct){
-            $originalProduct = $orderProduct->originalProduct;
-            $orderProduct->delete();
-
-            return $this->telegram->executeCommand('cart');
-
-
+          //  $originalProduct = $orderProduct->originalProduct;
             $keyboards[] = [
                 new InlineKeyboardButton([
-                    'text' => Yii::t('telegram/command','BUTTON_BUY',$originalProduct->price),
+                    'text' => Yii::t('telegram/command','BUTTON_BUY',$orderProduct->price),
                     'callback_data' => "addCart/{$originalProduct->id}"
                 ])
             ];
+            $orderProduct->delete();
+
+
+
            /* if ($this->telegram->isAdmin($chat_id)) {
                 $keyboards[] = [
                     new InlineKeyboardButton(['text' => '✏', 'callback_data' => "productUpdate/{$originalProduct->id}"]),
