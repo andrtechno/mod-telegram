@@ -60,6 +60,7 @@ class InlineKeyboardPager extends Component
     public $disableCurrentPageButton = false;
     public $buttons = [];
     public $internal = true;
+
     /**
      * Initializes the pager.
      */
@@ -104,12 +105,12 @@ class InlineKeyboardPager extends Component
 
 
         // internal pages
-        if($this->internal){
-        list($beginPage, $endPage) = $this->getPageRange();
+        if ($this->internal) {
+            list($beginPage, $endPage) = $this->getPageRange();
 
-        for ($i = $beginPage; $i <= $endPage; ++$i) {
-            $this->buttons[] = $this->renderPageButton(($i + 1) . ' / ' . $totalCount, $i, null, $this->disableCurrentPageButton && $i == $currentPage, $i == $currentPage);
-        }
+            for ($i = $beginPage; $i <= $endPage; ++$i) {
+                $this->buttons[] = $this->renderPageButton(($i + 1) . ' / ' . $totalCount, $i, null, $this->disableCurrentPageButton && $i == $currentPage, $i == $currentPage);
+            }
         }
 
         // next page

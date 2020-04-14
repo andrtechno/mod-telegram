@@ -1,11 +1,12 @@
 <?php
 
-namespace panix\mod\telegram\commands\SystemCommands;
+namespace panix\mod\telegram\commands\UserCommands;
 
-use panix\mod\telegram\components\SystemCommand;
+
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\UserCommand;
 use Yii;
 
 /**
@@ -13,7 +14,7 @@ use Yii;
  *
  * Gets executed when a user first starts using the bot.
  */
-class StartCommand extends SystemCommand
+class StartCommand extends UserCommand
 {
     /**
      * @var string

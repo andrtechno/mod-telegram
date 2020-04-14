@@ -424,11 +424,8 @@ class CallbackqueryCommand extends SystemCommand
 //    $data['text'] = $pages->getOffset() . ' / ' . $pages->totalCount;
 //}
 
-                $begin = $pages->getPage() * $pages->pageSize + 1;
-                $end = $begin + $count - 1;
-                if ($begin > $end) {
-                    $begin = $end;
-                }
+                $begin = $pages->getPage() * $pages->pageSize;
+
 
 
                 $data['chat_id'] = $chat_id;

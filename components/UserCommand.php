@@ -35,6 +35,7 @@ abstract class UserCommand extends Command
     public function homeKeyboards(){
         $keyboards[] = [
             new KeyboardButton(['text' => '🏠 Начало']),
+            new KeyboardButton(['text' => '📂 Каталог']),
             new KeyboardButton(['text' => '🔎 Поиск']),
         ];
 

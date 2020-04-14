@@ -86,11 +86,11 @@ class InlineKeyboardMorePager extends Component
 
 
 
-        $begin = $currentPage * $this->pagination->pageSize + 1;
-        $end = $begin + $count - 1;
-        if ($begin > $end) {
-            $begin = $end;
-        }
+        $begin = $currentPage * $this->pagination->pageSize;
+       // $end = $begin + $count - 1;
+       // if ($begin > $end) {
+       //     $begin = $end;
+       // }
 
 
 
