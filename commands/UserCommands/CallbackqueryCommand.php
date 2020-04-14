@@ -205,7 +205,7 @@ class CallbackqueryCommand extends SystemCommand
             return $this->telegram->executeCommand('cartproductremove');
 
 
-        } elseif (preg_match('/^addCart\/([0-9]+)\/([0-9]+)\/(up|down)\/(cart|catalog)/iu', trim($callback_data), $match)) {
+        } elseif (preg_match('/^spinner\/([0-9]+)\/([0-9]+)\/(up|down)\/(cart|catalog)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
 
             $orderProduct = OrderProduct::findOne([
@@ -248,6 +248,8 @@ class CallbackqueryCommand extends SystemCommand
 
              ];
  */
+
+
             $user_id = $callback_query->getFrom()->getId();
 
             $product = Product::findOne($match[1]);
@@ -347,7 +349,7 @@ class CallbackqueryCommand extends SystemCommand
                             $keyboards[] = [
                                 new InlineKeyboardButton([
                                     'text' => '—',
-                                    'callback_data' => "addCart/{$order->id}/{$product->id}/down/catalog"
+                                    'callback_data' => "spinner/{$order->id}/{$product->id}/down/catalog"
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '' . $orderProduct->quantity . ' шт.',
@@ -355,7 +357,7 @@ class CallbackqueryCommand extends SystemCommand
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '+',
-                                    'callback_data' => "addCart/{$order->id}/{$product->id}/up/catalog"
+                                    'callback_data' => "spinner/{$order->id}/{$product->id}/up/catalog"
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '❌',

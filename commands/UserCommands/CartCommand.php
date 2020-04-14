@@ -132,9 +132,9 @@ class CartCommand extends UserCommand
                     $keyboards[] = $pager->buttons;
 
                 $keyboards[] = [
-                    new InlineKeyboardButton(['text' => '—', 'callback_data' => "addCart/{$order->id}/{$product->product_id}/down"]),
+                    new InlineKeyboardButton(['text' => '—', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/down/cart"]),
                     new InlineKeyboardButton(['text' => $product->quantity . ' шт.', 'callback_data' => time()]),
-                    new InlineKeyboardButton(['text' => '+', 'callback_data' => "addCart/{$order->id}/{$product->product_id}/up"])
+                    new InlineKeyboardButton(['text' => '+', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/up/cart"])
                 ];
                 $keyboards[] = [
                     new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price), 'callback_data' => 'checkOut']),

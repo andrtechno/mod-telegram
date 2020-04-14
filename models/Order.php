@@ -106,10 +106,15 @@ class Order extends \yii\db\ActiveRecord
     {
 
         if (!$this->isNewRecord) {
+            $image = NULL;
+            print_r($product);
+            if($product->getImage()){
+                $image = "/uploads/store/product/{$product->id}/".basename($product->getImage()->getPathToOrigin());
+            }
             $ordered_product = new OrderProduct();
             $ordered_product->order_id = $this->id;
             $ordered_product->product_id = $product->id;
-            $ordered_product->image = "/uploads/store/product/{$product->id}/".basename($product->getImage()->getPathToOrigin());
+            $ordered_product->image = $image;
             //$ordered_product->client_id = $this->client_id;
            // $ordered_product->currency_id = $product->currency_id;
             $ordered_product->name = $product->name;

@@ -72,7 +72,7 @@ class CatalogproductquantityCommand extends SystemCommand
         $keyboards[] = [
             new InlineKeyboardButton([
                 'text' => '—',
-                'callback_data' => "addCart/{$this->order_id}/{$this->product_id}/down/catalog"
+                'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/down/catalog"
             ]),
             new InlineKeyboardButton([
                 'text' => '' . $this->quantity . ' шт.',
@@ -80,7 +80,7 @@ class CatalogproductquantityCommand extends SystemCommand
             ]),
             new InlineKeyboardButton([
                 'text' => '+',
-                'callback_data' => "addCart/{$this->order_id}/{$this->product_id}/up/catalog"
+                'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/up/catalog"
             ]),
             new InlineKeyboardButton([
                 'text' => '❌',

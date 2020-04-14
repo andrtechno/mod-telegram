@@ -15,7 +15,8 @@ use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Request;
-
+use panix\mod\telegram\models\Order;
+use Yii;
 /**
  *
  * Display an inline keyboard with a few buttons.
@@ -69,11 +70,11 @@ class CartproductquantityCommand extends SystemCommand
 
 
         $chat_id = $message->getChat()->getId();
-
+        $order = Order::findOne($this->order_id);
         $keyboards[] = [
             new InlineKeyboardButton([
                 'text' => '—',
-                'callback_data' => "addCart/{$this->order_id}/{$this->product_id}/down/cart"
+                'callback_data' => "spinner/{$order->id}/{$this->product_id}/down/cart"
             ]),
             new InlineKeyboardButton([
                 'text' => '' . $this->quantity . ' шт.',
@@ -81,26 +82,16 @@ class CartproductquantityCommand extends SystemCommand
             ]),
             new InlineKeyboardButton([
                 'text' => '+',
-                'callback_data' => "addCart/{$this->order_id}/{$this->product_id}/up/cart"
-            ]),
-            new InlineKeyboardButton([
-                'text' => '❌',
-                'callback_data' => "removeProductCart/{$this->product_id}"
+                'callback_data' => "spinner/{$order->id}/{$this->product_id}/up/cart"
             ]),
         ];
         $keyboards[] = [
-            new InlineKeyboardButton([
-                'text' => '🛍 Корзина',
-                'callback_data' => "getCart"
-            ])
+            new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price), 'callback_data' => 'checkOut']),
         ];
-        if ($this->telegram->isAdmin($chat_id)) {
-            $keyboards[] = [
-                new InlineKeyboardButton(['text' => '✏', 'callback_data' => "productUpdate/{$this->product_id}"]),
-                new InlineKeyboardButton(['text' => '❌', 'callback_data' => "productDelete/{$this->product_id}"]),
-                new InlineKeyboardButton(['text' => '👁', 'callback_data' => "productHide/{$this->product_id}"])
-            ];
-        }
+        $keyboards[] = [
+            new InlineKeyboardButton(['text' => '❌', 'callback_data' => "removeProductCart/{$product->product_id}"]),
+        ];
+
 
 
         $dataEdit['chat_id'] = $chat_id;
