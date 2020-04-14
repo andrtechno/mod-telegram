@@ -50,7 +50,7 @@ class DateCommand extends UserCommand
      *
      * @var string
      */
-    private $google_api_key = 'AIzaSyAUdoom47Pzn7ILl8gXjKvGnvnM8fHz82g';
+    private $google_api_key = '';
 
     /**
      * Date format
