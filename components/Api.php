@@ -34,8 +34,6 @@ class Api extends \Longman\TelegramBot\Telegram
         foreach ($which as $auth) {
             $command_namespace = 'panix\\mod\\telegram\\commands\\' . $auth . 'Commands\\' . $this->ucfirstUnicode($command) . 'Command';
 
-            echo $command_namespace.PHP_EOL;
-
             if (class_exists($command_namespace)) {
                 return new $command_namespace($this, $this->update);
             }

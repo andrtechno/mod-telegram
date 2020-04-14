@@ -71,4 +71,6 @@ class CallbackqueryCommand extends SystemCommand
     {
         self::$callbacks[] = $callback;
     }
+
+
 }

@@ -28,7 +28,7 @@ class DateCommand extends UserCommand
     protected $description = 'Show date/time by location';
     protected $usage = '/date <location>';
     protected $version = '1.3.0';
-    public $enabled = false;
+    public $enabled = true;
     /**#@-*/
 
     /**
@@ -50,7 +50,7 @@ class DateCommand extends UserCommand
      *
      * @var string
      */
-    private $google_api_key;
+    private $google_api_key = 'AIzaSyAUdoom47Pzn7ILl8gXjKvGnvnM8fHz82g';
 
     /**
      * Date format

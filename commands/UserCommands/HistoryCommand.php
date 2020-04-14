@@ -12,10 +12,14 @@ namespace panix\mod\telegram\commands\UserCommands;
 
 
 use Longman\TelegramBot\Conversation;
+use Longman\TelegramBot\Entities\InlineKeyboard;
+use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Entities\PhotoSize;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\InlineKeyboardPager;
+use panix\mod\telegram\components\KeyboardPagination;
 use panix\mod\telegram\components\UserCommand;
 use panix\mod\telegram\models\Order;
 use Yii;
@@ -46,7 +50,7 @@ class HistoryCommand extends UserCommand
      * @var string
      */
     protected $version = '1.0.0';
-
+    private $page = 0;
 
     /**
      * Command execute method
@@ -56,27 +60,96 @@ class HistoryCommand extends UserCommand
      */
     public function execute()
     {
-        $message = $this->getMessage();
-
-        $chat = $message->getChat();
-        $user = $message->getFrom();
-        $text = trim($message->getText(true));
-        $chat_id = $chat->getId();
-        $user_id = $user->getId();
+        $update = $this->getUpdate();
+        if ($update->getCallbackQuery()) {
+            $callbackQuery = $update->getCallbackQuery();
+            $message = $callbackQuery->getMessage();
+            $chat = $message->getChat();
+            $user = $callbackQuery->getFrom();
+            $chat_id = $chat->getId();
+            $user_id = $user->getId();
+        } else {
+            $callbackQuery = null;
+            $message = $this->getMessage();
+            $chat = $message->getChat();
+            $user = $message->getFrom();
+            $chat_id = $chat->getId();
+            $user_id = $user->getId();
+        }
         $data['chat_id'] = $chat_id;
 
-        $result = Request::emptyResponse();
+        $text = trim($message->getText(true));
 
-        $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 1])->all();
-        if (!$order) {
+
+        $query = Order::find()->where(['client_id' => $user_id, 'checkout' => 1]);
+        $pages = new KeyboardPagination([
+            'totalCount' => $query->count(),
+            'defaultPageSize' => 1,
+            //'pageSize'=>3
+        ]);
+        $pages->setPage($this->page);
+        $orders = $query->offset($pages->offset)
+            ->limit($pages->limit)
+            ->all();
+
+
+        $pager = new InlineKeyboardPager([
+            'pagination' => $pages,
+            'lastPageLabel' => false,
+            'firstPageLabel' => false,
+            'maxButtonCount' => 1,
+            'command' => 'getHistory'
+        ]);
+
+
+        if ($orders) {
+
+            if ($this->getConfig('page')) {
+                $this->page = $this->getConfig('page');
+            }
+
+            $text = '*История заказа*' . PHP_EOL . PHP_EOL;
+            foreach ($orders as $order) {
+                if ($pager->buttons)
+                    $keyboards[] = $pager->buttons;
+
+                foreach ($order->products as $product) {
+                    $text .= '*' . $product->name . '* ` ' . $product->quantity . 'шт. / ' . $product->price . ' грн. `' . PHP_EOL;
+                }
+                $text .= PHP_EOL . PHP_EOL . '*Доставка:* `' . $order->delivery . ' грн.`' . PHP_EOL;
+                $text .= PHP_EOL . PHP_EOL . '*Оплата:* `' . $order->payment . ' грн.`' . PHP_EOL;
+                $text .= PHP_EOL . PHP_EOL . '*Общая стоимость заказа:* `' . $order->total_price . ' грн.`' . PHP_EOL;
+
+            }
+            $data['text'] = $text;
+            $data['parse_mode'] = 'Markdown';
+
+            if ($keyboards) {
+                $data['reply_markup'] = new InlineKeyboard([
+                    'inline_keyboard' => $keyboards
+                ]);
+            }
+
+            if ($callbackQuery) {
+
+                $data['message_id'] = $message->getMessageId();
+                $response = Request::editMessageText($data);
+
+                $dataReplyMarkup['reply_markup'] = new InlineKeyboard([
+                    'inline_keyboard' => $keyboards
+                ]);
+
+                return Request::editMessageReplyMarkup(array_merge($data, $dataReplyMarkup));
+            }
+            $response = $data;
+
+
+        } else {
             $data['text'] = Yii::$app->settings->get('telegram', 'empty_history_text');
             $data['reply_markup'] = $this->startKeyboards();
-            $result = Request::sendMessage($data);
-        } else {
-            $data['text'] = 'Скоро будет работать';
-            $data['reply_markup'] = $this->startKeyboards();
-            $result = Request::sendMessage($data);
+            $response = $data;
+
         }
-        return $result;
+        return Request::sendMessage($response);
     }
 }

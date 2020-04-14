@@ -35,9 +35,11 @@ class IndexController extends Controller
       //  $admin_users2 = explode(',', Yii::$app->settings->get('telegram', 'bot_admins'));
 
         $commands_paths = [
-            __DIR__ . '/SystemCommands',
+
             __DIR__ . '/AdminCommands',
+            __DIR__ . '/SystemCommands',
             __DIR__ . '/UserCommands',
+
         ];
 
 

@@ -8,30 +8,30 @@
  * file that was distributed with this source code.
  */
 
-namespace panix\mod\telegram\commands\UserCommands;
+namespace panix\mod\telegram\commands\SystemCommands;
 
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Request;
-use panix\mod\telegram\models\Order;
-use Yii;
+use panix\mod\telegram\models\OrderProduct;
+
 /**
  *
  * Display an inline keyboard with a few buttons.
  */
-class CartproductquantityCommand extends SystemCommand
+class CatalogproductquantityCommand extends SystemCommand
 {
     /**
      * @var string
      */
-    protected $name = 'cartproductquantity';
+    protected $name = 'catalogproductquantity';
 
     /**
      * @var string
      */
-    protected $description = 'Change product quantity in cart';
+    protected $description = 'Change product quantity in catalog';
 
     /**
      * @var string
@@ -39,8 +39,8 @@ class CartproductquantityCommand extends SystemCommand
     protected $version = '1.0.0';
     public $product_id;
     public $quantity;
-    private $chat_id;
     public $order_id;
+    private $chat_id;
 
     /**
      * Command execute method
@@ -60,7 +60,6 @@ class CartproductquantityCommand extends SystemCommand
         if (($this->order_id = trim($this->getConfig('order_id'))) === '') {
             $this->order_id = NULL;
         }
-
         $update = $this->getUpdate();
         if ($update->getCallbackQuery()) {
             $message = $update->getCallbackQuery()->getMessage();
@@ -70,11 +69,11 @@ class CartproductquantityCommand extends SystemCommand
 
 
         $chat_id = $message->getChat()->getId();
-        $order = Order::findOne($this->order_id);
+      //  $order = OrderProduct::find()->where(['order_id'=>$this->order_id]);
         $keyboards[] = [
             new InlineKeyboardButton([
                 'text' => '—',
-                'callback_data' => "spinner/{$order->id}/{$this->product_id}/down/cart"
+                'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/down/catalog"
             ]),
             new InlineKeyboardButton([
                 'text' => '' . $this->quantity . ' шт.',
@@ -82,16 +81,26 @@ class CartproductquantityCommand extends SystemCommand
             ]),
             new InlineKeyboardButton([
                 'text' => '+',
-                'callback_data' => "spinner/{$order->id}/{$this->product_id}/up/cart"
+                'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/up/catalog"
+            ]),
+            new InlineKeyboardButton([
+                'text' => '❌',
+                'callback_data' => "cartDelete/{$this->order_id}/{$this->product_id}"
             ]),
         ];
         $keyboards[] = [
-            new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price), 'callback_data' => 'checkOut']),
+            new InlineKeyboardButton([
+                'text' => '🛍 Корзина',
+                'callback_data' => "getCart"
+            ])
         ];
-        $keyboards[] = [
-            new InlineKeyboardButton(['text' => '❌', 'callback_data' => "removeProductCart/{$product->product_id}"]),
-        ];
-
+        if ($this->telegram->isAdmin($chat_id)) {
+            $keyboards[] = [
+                new InlineKeyboardButton(['text' => '✏', 'callback_data' => "productUpdate/{$this->product_id}"]),
+                new InlineKeyboardButton(['text' => '❌', 'callback_data' => "productDelete/{$this->product_id}"]),
+                new InlineKeyboardButton(['text' => '👁', 'callback_data' => "productHide/{$this->product_id}"])
+            ];
+        }
 
 
         $dataEdit['chat_id'] = $chat_id;

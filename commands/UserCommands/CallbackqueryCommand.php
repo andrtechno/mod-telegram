@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Longman\TelegramBot\Commands\SystemCommands;
+namespace panix\mod\telegram\commands\UserCommands;
 
 
 use Longman\TelegramBot\Entities\InlineKeyboard;
@@ -236,7 +236,8 @@ class CallbackqueryCommand extends SystemCommand
                 ])
                 ->executeCommand($command);
 
-
+        } elseif (preg_match('/^checkOut/iu', trim($callback_data), $match)) {
+            return $this->telegram->executeCommand('checkout');
         } elseif (preg_match('/^addCart\/([0-9]+)/iu', trim($callback_data), $match)) {
 
             /* $product = Product::find()->published()->where(['id'=>$match[1]])->one();
@@ -283,15 +284,28 @@ class CallbackqueryCommand extends SystemCommand
 
         } elseif (preg_match('/getCart/', trim($callback_data), $match)) { //preg_match('/^getCart\/([0-9]+)/iu', trim($callback_data), $match)
 
-            echo $callback_data;
+
             $params = InlineKeyboardPager::getParametersFromCallbackData($callback_data);
-            echo 'q: ' . $params['page'] . PHP_EOL;
-            if(isset($params['page'])){
-            $this->telegram->setCommandConfig('cart', [
-                'page' => $params['page'],
-            ]);
+
+            if (isset($params['page'])) {
+                $this->telegram->setCommandConfig('cart', [
+                    'page' => $params['page'],
+                ]);
             }
             $response = $this->telegram->executeCommand('cart');
+
+            return $response;
+        } elseif (preg_match('/getHistory/', trim($callback_data), $match)) {
+
+
+            $params = InlineKeyboardPager::getParametersFromCallbackData($callback_data);
+
+            if (isset($params['page'])) {
+                $this->telegram->setCommandConfig('history', [
+                    'page' => $params['page'],
+                ]);
+            }
+            $response = $this->telegram->executeCommand('history');
 
             return $response;
         } elseif (preg_match('/^getCatalogList\/([0-9]+)/iu', trim($callback_data), $match)) {
@@ -335,9 +349,9 @@ class CallbackqueryCommand extends SystemCommand
                         //  print_r($this->attributes($product));die;
 
 
-                        if($order){
+                        if ($order) {
                             $orderProduct = OrderProduct::findOne(['product_id' => $product->id, 'order_id' => $order->id]);
-                        }else{
+                        } else {
                             $orderProduct = null;
                         }
 
@@ -421,7 +435,7 @@ class CallbackqueryCommand extends SystemCommand
                     'keyboard' => $keyboards2
                 ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
                 return Request::sendMessage($data);
-
+                // return  Request::answerCallbackQuery($data);
             }
 
             return Request::emptyResponse();

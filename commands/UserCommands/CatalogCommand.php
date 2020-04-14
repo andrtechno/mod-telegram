@@ -126,6 +126,7 @@ class CatalogCommand extends UserCommand
         ];
         $keyboards[] = [
             new KeyboardButton(['text' => '🏠 Начало', 'callback_data' => 'goHome']),
+            new KeyboardButton(['text' => '🛍 Корзина', 'callback_data' => 'getCart']),
         ];
 
         $dataCatalog['reply_markup'] = (new Keyboard([
@@ -139,5 +140,6 @@ class CatalogCommand extends UserCommand
         return Request::sendMessage($result);
 
     }
+
 
 }
