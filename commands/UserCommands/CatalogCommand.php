@@ -102,7 +102,8 @@ class CatalogCommand extends UserCommand
                         $inlineKeyboards[] = [
                             new InlineKeyboardButton([
                                 'text' => '📄 ' . $category->name . ' (' . $count . ')',
-                                'callback_data' => 'getCatalogList/' . $category->id
+                               // 'callback_data' => 'getCatalogList/' . $category->id
+                                'callback_data' => 'query=getCatalogList&category_id=' . $category->id
                             ])
                         ];
                     }
