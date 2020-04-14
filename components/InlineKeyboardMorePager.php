@@ -14,7 +14,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
 
-class InlineKeyboardPager extends Component
+class InlineKeyboardMorePager extends Component
 {
     /**
      * @var Pagination the pagination object that this pager is associated with.
@@ -81,50 +81,28 @@ class InlineKeyboardPager extends Component
     protected function renderPageButtons()
     {
         $pageCount = $this->pagination->getPageCount();
-        if ($pageCount < 2 && $this->hideOnSinglePage) {
-            return 'empty';
-        }
-        $totalCount = $this->pagination->totalCount;
-        // $this->buttons = [];
+
         $currentPage = $this->pagination->getPage();
 
-        // first page
-        $firstPageLabel = $this->firstPageLabel === true ? '1' : $this->firstPageLabel;
-        if ($firstPageLabel !== false) {
-            $this->buttons[] = $this->renderPageButton($firstPageLabel, 0, $currentPage <= 0, false);
-        }
 
-        // prev page
-        if ($this->prevPageLabel !== false) {
-            if (($page = $currentPage - 1) < 0) {
-                $page = 0;
-            }
-            $this->buttons[] = $this->renderPageButton($this->prevPageLabel, $page, $currentPage <= 0, false);
+
+        $begin = $currentPage * $this->pagination->pageSize + 1;
+        $end = $begin + $count - 1;
+        if ($begin > $end) {
+            $begin = $end;
         }
 
 
-        // internal pages
-        if($this->internal){
-        list($beginPage, $endPage) = $this->getPageRange();
 
-        for ($i = $beginPage; $i <= $endPage; ++$i) {
-           // $this->buttons[] = $this->renderPageButton(($i + 1) . ' / ' . $totalCount, $i, null, $this->disableCurrentPageButton && $i == $currentPage, $i == $currentPage);
+        if ($begin >= $this->pagination->totalCount){
+            $this->nextPageLabel=false;
         }
-        }
+
+
 
         // next page
         if ($this->nextPageLabel !== false) {
-            if (($page = $currentPage + 1) >= $pageCount - 1) {
-                $page = $pageCount - 1;
-            }
-            $this->buttons[] = $this->renderPageButton($this->nextPageLabel, $page, $currentPage >= $pageCount - 1, false);
-        }
-
-
-        // last page
-        $lastPageLabel = $this->lastPageLabel === true ? $pageCount : $this->lastPageLabel;
-        if ($lastPageLabel !== false) {
-            $this->buttons[] = $this->renderPageButton($lastPageLabel, $pageCount - 1, $currentPage >= $pageCount - 1, false);
+            $this->buttons[] = $this->renderPageButton($this->nextPageLabel, $currentPage + 1, false, false);
         }
 
         return $this->buttons;
@@ -148,6 +126,7 @@ class InlineKeyboardPager extends Component
         }
         if ($disabled) {
             $callback = time();
+            $label='Finish';
         }
 
         // return Html::tag($linkWrapTag, Html::a($label, $this->pagination->createUrl($page), $linkOptions), $options);

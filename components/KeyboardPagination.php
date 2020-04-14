@@ -13,84 +13,14 @@ use yii\web\Link;
 use yii\web\Linkable;
 use yii\web\Request;
 
-/**
- * Pagination represents information relevant to pagination of data items.
- *
- * When data needs to be rendered in multiple pages, Pagination can be used to
- * represent information such as [[totalCount|total item count]], [[pageSize|page size]],
- * [[page|current page]], etc. These information can be passed to [[\yii\widgets\LinkPager|pagers]]
- * to render pagination buttons or links.
- *
- * The following example shows how to create a pagination object and feed it
- * to a pager.
- *
- * Controller action:
- *
- * ```php
- * public function actionIndex()
- * {
- *     $query = Article::find()->where(['status' => 1]);
- *     $countQuery = clone $query;
- *     $pages = new Pagination(['totalCount' => $countQuery->count()]);
- *     $models = $query->offset($pages->offset)
- *         ->limit($pages->limit)
- *         ->all();
- *
- *     return $this->render('index', [
- *          'models' => $models,
- *          'pages' => $pages,
- *     ]);
- * }
- * ```
- *
- * View:
- *
- * ```php
- * foreach ($models as $model) {
- *     // display $model here
- * }
- *
- * // display pagination
- * echo LinkPager::widget([
- *     'pagination' => $pages,
- * ]);
- * ```
- *
- * For more details and usage information on Pagination, see the [guide article on pagination](guide:output-pagination).
- *
- * @property int $limit The limit of the data. This may be used to set the LIMIT value for a SQL statement for
- * fetching the current page of data. Note that if the page size is infinite, a value -1 will be returned. This
- * property is read-only.
- * @property array $links The links for navigational purpose. The array keys specify the purpose of the links
- * (e.g. [[LINK_FIRST]]), and the array values are the corresponding URLs. This property is read-only.
- * @property int $offset The offset of the data. This may be used to set the OFFSET value for a SQL statement
- * for fetching the current page of data. This property is read-only.
- * @property int $page The zero-based current page number.
- * @property int $pageCount Number of pages. This property is read-only.
- * @property int $pageSize The number of items per page. If it is less than 1, it means the page size is
- * infinite, and thus a single page contains all items.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
- */
+
 class KeyboardPagination extends BaseObject implements Linkable
 {
     const LINK_NEXT = 'next';
     const LINK_PREV = 'prev';
     const LINK_FIRST = 'first';
     const LINK_LAST = 'last';
-
-    /**
-     * @var string name of the parameter storing the current page index.
-     * @see params
-     */
-    public $pageParam = 'page';
-    /**
-     * @var string name of the parameter storing the page size.
-     * @see params
-     */
-    public $pageSizeParam = 'per-page';
-
+    public $currentPage = 1;
     /**
      * @var array parameters (name => value) that should be used to obtain the current page number
      * and to create new pagination URLs. If not set, all parameters from $_GET will be used instead.
@@ -157,7 +87,8 @@ class KeyboardPagination extends BaseObject implements Linkable
     public function getPage($recalculate = false)
     {
         if ($this->_page === null || $recalculate) {
-            $page = (int) $this->getQueryParam($this->pageParam, 1) - 1;
+          //  $page = (int) $this->getQueryParam($this->pageParam, 1) - 1;
+            $page = (int) $this->currentPage - 1;
             $this->setPage($page, true);
         }
 
@@ -203,8 +134,11 @@ class KeyboardPagination extends BaseObject implements Linkable
             if (empty($this->pageSizeLimit)) {
                 $pageSize = $this->defaultPageSize;
                 $this->setPageSize($pageSize);
+                echo 'zzzzzzzzzzzzz';
             } else {
-                $pageSize = (int) $this->getQueryParam($this->pageSizeParam, $this->defaultPageSize);
+
+               // $pageSize = (int) $this->getQueryParam($this->pageSizeParam, $this->defaultPageSize);
+                $pageSize = (int) $this->currentPage;
                 $this->setPageSize($pageSize, true);
             }
         }

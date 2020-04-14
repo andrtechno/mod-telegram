@@ -19,6 +19,7 @@ use panix\mod\shop\models\Attribute;
 use panix\mod\shop\models\Category;
 use panix\mod\shop\models\Product;
 use panix\mod\telegram\commands\pager\InlineKeyboardPagination;
+use panix\mod\telegram\components\InlineKeyboardMorePager;
 use panix\mod\telegram\components\InlineKeyboardPager;
 use panix\mod\telegram\components\KeyboardMore;
 use panix\mod\telegram\components\KeyboardPager;
@@ -287,46 +288,46 @@ class CallbackqueryCommand extends SystemCommand
             $user_id = $callback_query->getFrom()->getId();
             $order = Order::findOne(['client_id' => $user_id, 'checkout' => 0]);
 
+
+           // $callback_data = 'command=getCatalogList&category_id=31&page=3';
             parse_str($callback_data, $params);
 
-
+//print_r($params);
             if (isset($params['category_id'])) {
 
 
-                $query = Product::find()
-                    ->published()
-                    ->sort()->applyCategories($params['category_id']);
+                $query = Product::find()->published()->sort()->applyCategories($params['category_id']);
                 $pages = new KeyboardPagination([
                     'totalCount' => $query->count(),
-                    'defaultPageSize' => 2,
-                    //'pageSize'=>3
+                   // 'defaultPageSize' => 5,
+                    'pageSize'=>2,
+                    'currentPage'=>(isset($params['page']))?$params['page']:1
                 ]);
 
                 if (isset($params['page'])) {
                     $pages->setPage($params['page']);
 
-
-
                     $deleleMessage = Request::deleteMessage(['chat_id' => $chat_id, 'message_id' => $update->getCallbackQuery()->getMessage()->getMessageId()]);
-                    if ($deleleMessage->isOk()) {
-                        print_r($deleleMessage->getResult());
-                    }
-
                 } else {
-                    $pages->setPage(1);
+                   $pages->setPage(1);
                 }
 
-                $products = $query->offset($pages->offset)
-                    ->limit($pages->limit)
-                    ->all();
+                $products1 = $query->offset($pages->offset - 2)
+                    ->limit($pages->limit);
+
+                echo $products1->createCommand()->rawSql.PHP_EOL;
+
+                $products = $products1->all();
 
 
-                $pager = new InlineKeyboardPager([
+
+                $pager = new InlineKeyboardMorePager([
                     'pagination' => $pages,
                     'lastPageLabel' => false,
                     'firstPageLabel' => false,
                     'prevPageLabel' => false,
                     'maxButtonCount' => 1,
+                    'internal' => false,
                     'command' => 'getCatalogList&category_id=' . $params['category_id'],
                     'nextPageLabel' => '🔄 загрузить еще...'
                 ]);
@@ -417,16 +418,32 @@ class CallbackqueryCommand extends SystemCommand
                     ->setSelective(true);
                 return Request::sendMessage($data);*/
 
+//if($pages->totalCount == $pages->getPage()){
+//    $data['text'] = 'finish';
+//}else{
+//    $data['text'] = $pages->getOffset() . ' / ' . $pages->totalCount;
+//}
 
-                if ($pager->buttons)
-                    $keyboards2[] = $pager->buttons;
+                $begin = $pages->getPage() * $pages->pageSize + 1;
+                $end = $begin + $count - 1;
+                if ($begin > $end) {
+                    $begin = $end;
+                }
+
 
                 $data['chat_id'] = $chat_id;
-                $data['text'] = $pages->getPage() . ' / ' . $pages->getPageCount();
+                if ($begin >= $pages->totalCount){
+                   $data['text'] = ' Все! ';
+                }else{
+                    $data['text'] = $begin . ' / ' . $pages->totalCount;
+               }
 
-                $data['reply_markup'] = new InlineKeyboard([
-                    'inline_keyboard' => $keyboards2
-                ]);
+                if ($pager->buttons) {
+                    $keyboards2[] = $pager->buttons;
+                    $data['reply_markup'] = new InlineKeyboard([
+                        'inline_keyboard' => $keyboards2
+                    ]);
+                }
                 Request::sendMessage($data);
 
 
