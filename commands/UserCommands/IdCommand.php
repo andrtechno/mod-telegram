@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Longman\TelegramBot\Commands\UserCommands;
+namespace panix\mod\telegram\commands\UserCommands;
 
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\ServerResponse;

@@ -11,7 +11,7 @@
  * Written by Jack'lul <jacklul@jacklul.com>
  */
 
-namespace Longman\TelegramBot\Commands\AdminCommands;
+namespace panix\mod\telegram\commands\AdminCommands;
 
 
 use Longman\TelegramBot\DB;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Longman\TelegramBot\Commands\SystemCommands;
+namespace panix\mod\telegram\commands\SystemCommands;
 
 use panix\mod\telegram\components\SystemCommand;
 use Longman\TelegramBot\Entities\Keyboard;

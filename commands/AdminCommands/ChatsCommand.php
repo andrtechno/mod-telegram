@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Longman\TelegramBot\Commands\AdminCommands;
+namespace panix\mod\telegram\commands\AdminCommands;
 
 use panix\mod\telegram\components\AdminCommand;
 use Longman\TelegramBot\DB;

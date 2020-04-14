@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Longman\TelegramBot\Commands\UserCommands;
+namespace panix\mod\telegram\commands\AdminCommands;
 
 
 use Longman\TelegramBot\Commands\AdminCommand;
@@ -37,7 +37,7 @@ class ProductaddCommand extends AdminCommand
     /**
      * @var string
      */
-    protected $description = 'productadd productadd productadd';
+    protected $description = 'Добавление товара';
 
     /**
      * @var string

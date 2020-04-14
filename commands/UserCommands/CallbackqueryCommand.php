@@ -335,7 +335,12 @@ class CallbackqueryCommand extends SystemCommand
                         //  print_r($this->attributes($product));die;
 
 
-                        $orderProduct = OrderProduct::findOne(['product_id' => $product->id, 'order_id' => $order->id]);
+                        if($order){
+                            $orderProduct = OrderProduct::findOne(['product_id' => $product->id, 'order_id' => $order->id]);
+                        }else{
+                            $orderProduct = null;
+                        }
+
                         if ($orderProduct) {
 
                             //  $this->telegram->setCommandConfig('cartproductquantity', [

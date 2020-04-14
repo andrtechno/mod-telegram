@@ -76,6 +76,36 @@ class GenericmessageCommand extends SystemCommand
             return $deprecated_system_command_response;
         }
 
+        $text = trim($this->getMessage()->getText());
+
+        if (preg_match('/^(\x{1F6CD})/iu', $text, $match)) { //cart emoji
+            return $this->telegram->executeCommand('cart');
+        } elseif (preg_match('/^(\x{1F4C2})/iu', $text, $match)) { //folder emoji
+            return $this->telegram->executeCommand('catalog');
+        } elseif (preg_match('/^(\x{1F3E0})/iu', $text, $match)) { //home emoji
+            $this->telegram->executeCommand('start');
+            return $this->telegram->executeCommand('cancel');
+
+        } elseif ($text == 'Отмена') {
+            return $this->telegram->executeCommand('cancel');
+        } elseif (preg_match('/^(\x{2753})/iu', $text, $match)) { //help emoji
+            return $this->telegram->executeCommand('help');
+        } elseif (preg_match('/^(\x{1F4E2})/iu', $text, $match)) { //news emoji
+            return $this->telegram->executeCommand('news');
+        } elseif (preg_match('/^(\x{1F4E6})/iu', $text, $match)) { //my carts emoji
+            //  $telegram->executeCommand('help');
+        } elseif (preg_match('/^(\x{260E}|\x{1F4DE})/iu', $text, $match)) { //phone emoji
+            return $this->telegram->executeCommand('call');
+        } elseif (preg_match('/^(\x{2709})/iu', $text, $match)) { //feedback emoji
+            return $this->telegram->executeCommand('feedback');
+        } elseif (preg_match('/^(\x{1F4E6})/iu', $text, $match)) { //package emoji
+            return $this->telegram->executeCommand('history');
+        } elseif (preg_match('/^(\x{2699})/iu', $text, $match)) { //gear emoji
+            return $this->telegram->executeCommand('settings');
+        } elseif (preg_match('/^(\x{1F50E})/iu', $text, $match)) { //search emoji
+            return $this->telegram->executeCommand('search');
+        }
+
         return Request::emptyResponse();
     }
 }

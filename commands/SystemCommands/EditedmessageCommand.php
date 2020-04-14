@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Longman\TelegramBot\Commands\SystemCommands;
+namespace panix\mod\telegram\commands\SystemCommands;
 
 use Longman\TelegramBot\Commands\SystemCommand;
 
