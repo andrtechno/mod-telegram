@@ -108,7 +108,7 @@ class InlineKeyboardPager extends Component
         list($beginPage, $endPage) = $this->getPageRange();
 
         for ($i = $beginPage; $i <= $endPage; ++$i) {
-           // $this->buttons[] = $this->renderPageButton(($i + 1) . ' / ' . $totalCount, $i, null, $this->disableCurrentPageButton && $i == $currentPage, $i == $currentPage);
+            $this->buttons[] = $this->renderPageButton(($i + 1) . ' / ' . $totalCount, $i, null, $this->disableCurrentPageButton && $i == $currentPage, $i == $currentPage);
         }
         }
 
