@@ -7,26 +7,10 @@ use Longman\TelegramBot\Entities\KeyboardButton;
 
 abstract class AdminCommand extends \Longman\TelegramBot\Commands\AdminCommand
 {
-  public function startKeyboards(){
-      $keyboards[] = [
-          new KeyboardButton(['text' => '📂 Каталог']),
-          new KeyboardButton(['text' => '🔎 Поиск']),
-          new KeyboardButton(['text' => '🛍 Корзина'])
-      ];
-      $keyboards[] = [
-          new KeyboardButton(['text' => '📢 Новости']),
-          new KeyboardButton(['text' => '📦 Мои заказы'])
-      ];
-      $keyboards[] = [
-          new KeyboardButton(['text' => '⚙ Настройки']),
-          new KeyboardButton(['text' => '❓ Помощь'])
-      ];
-      $data = (new Keyboard([
-          'keyboard' => $keyboards
-      ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
-
-      return $data;
-  }
+    /**
+     * @var bool
+     */
+    protected $private_only = true;
 
     public function homeKeyboards(){
         $keyboards[] = [

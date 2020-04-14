@@ -6,7 +6,7 @@ use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Yii;
 
-abstract class UserCommand extends \Longman\TelegramBot\Commands\UserCommand
+abstract class UserCommand extends Command
 {
 
 

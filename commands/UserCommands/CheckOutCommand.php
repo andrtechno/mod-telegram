@@ -12,6 +12,8 @@ namespace panix\mod\telegram\commands\UserCommands;
 
 
 use Longman\TelegramBot\Conversation;
+use Longman\TelegramBot\Entities\InlineKeyboard;
+use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Entities\PhotoSize;
@@ -138,7 +140,7 @@ class CheckOutCommand extends SystemCommand
                     $this->conversation->update();
                     //print_r($user);
                     if ($user->getFirstName() && $user->getLastName()) {
-                       // $data['text'] = $user->getFirstName() . ' ' . $user->getLastName();
+                        // $data['text'] = $user->getFirstName() . ' ' . $user->getLastName();
                         $data['text'] = 'Введите Ваше имя или веберите из клавиатуры';
                         //  $text = $data['text'];
 
@@ -287,9 +289,21 @@ class CheckOutCommand extends SystemCommand
                 ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
 
                 $data['text'] = $content;
-                $this->conversation->stop();
-
                 $result = Request::sendMessage($data);
+
+
+                if ($result->isOk()) {
+                    $inlineKeyboards[] = [
+                        new InlineKeyboardButton(['text' => Yii::t('telegram/command','BUTTON_PAY',$order->total_price), 'callback_data' => "getPayment/{$order->id}"]),
+                    ];
+                    $data['reply_markup'] = new InlineKeyboard([
+                        'inline_keyboard' => $inlineKeyboards
+                    ]);
+                    $data['text'] = '🙍🏼‍♀ Наш менеджер свяжеться с вами!';
+                    $result = Request::sendMessage($data);
+                }
+
+                $this->conversation->stop();
                 break;
         }
 

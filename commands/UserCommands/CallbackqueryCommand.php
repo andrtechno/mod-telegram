@@ -429,12 +429,18 @@ class CallbackqueryCommand extends SystemCommand
                     new KeyboardButton(['text' => 'еще']),
                     // new KeyboardMore(['pagination' => $pages])
                 ];
+
+
                 $data['chat_id'] = $chat_id;
                 $data['text'] = $pages->page . ' / ' . $pages->totalCount;
                 $data['reply_markup'] = (new Keyboard([
                     'keyboard' => $keyboards2
-                ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
+                ]))->setResizeKeyboard(true)
+                    ->setOneTimeKeyboard(true)
+                    ->setSelective(true);
                 return Request::sendMessage($data);
+
+
                 // return  Request::answerCallbackQuery($data);
             }
 

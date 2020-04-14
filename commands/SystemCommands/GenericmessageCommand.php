@@ -11,6 +11,7 @@
 
 namespace panix\mod\telegram\commands\SystemCommands;
 
+
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Entities\ServerResponse;
 use Longman\TelegramBot\Exception\TelegramException;
@@ -99,6 +100,8 @@ class GenericmessageCommand extends SystemCommand
         } elseif (preg_match('/^(\x{2709})/iu', $text, $match)) { //feedback emoji
             return $this->telegram->executeCommand('feedback');
         } elseif (preg_match('/^(\x{1F4E6})/iu', $text, $match)) { //package emoji
+            echo $text;
+            echo 'zzzzzzzzzzzz history history';
             return $this->telegram->executeCommand('history');
         } elseif (preg_match('/^(\x{2699})/iu', $text, $match)) { //gear emoji
             return $this->telegram->executeCommand('settings');
