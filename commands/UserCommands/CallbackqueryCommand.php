@@ -196,18 +196,24 @@ print_r($params);
             return Request::editMessageReplyMarkup($dataEdit);
             //  return Yii::$app->telegram->sendMessage($data);
             // }
-        } elseif (preg_match('/^removeProductCart\/([0-9]+)/iu', trim($callback_data), $match)) {
+        } elseif (preg_match('/^removeProductCart\/([0-9]+)\/([0-9]+)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
 
             $this->telegram->setCommandConfig('cartproductremove', [
-                'product_id' => $match[1],
+                'product_id' => $match[2],
+                'order_id' => $match[1],
             ]);
             return $this->telegram->executeCommand('cartproductremove');
 
-        } elseif (preg_match('/^addCart\/([0-9]+)\/(up|down)/iu', trim($callback_data), $match)) {
+        } elseif (preg_match('/^addCart\/([0-9]+)\/([0-9]+)\/(up|down)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
-            $orderProduct = OrderProduct::findOne(['product_id' => $match[1], 'client_id' => $user_id]);
-            if ($match[2] == 'up') {
+
+            $orderProduct = OrderProduct::findOne([
+                'order_id' => $match[1],
+                'product_id' => $match[2],
+              //  'client_id' => $user_id
+            ]);
+            if ($match[3] == 'up') {
                 $orderProduct->quantity++;
             } else {
                 $orderProduct->quantity--;
@@ -215,9 +221,9 @@ print_r($params);
             if ($orderProduct->quantity >= 1) {
                 $orderProduct->save(false);
             } else {
-                return $this->telegram
-                    ->setCommandConfig('cartproductremove', ['product_id' => $orderProduct->product_id])
-                    ->executeCommand('cartproductremove');
+                //return $this->telegram
+                //    ->setCommandConfig('cartproductremove', ['product_id' => $orderProduct->product_id])
+                //    ->executeCommand('cartproductremove');
             }
 
             return $this->telegram
@@ -282,11 +288,8 @@ print_r($params);
             return $response;
         } elseif (preg_match('/^getCatalogList\/([0-9]+)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
-
+            $order = Order::findOne(['client_id'=>$user_id,'checkout'=>0]);
             if (isset($match[1])) {
-
-
-
 
 
 
@@ -327,7 +330,7 @@ print_r($params);
                         //  print_r($this->attributes($product));die;
 
 
-                        $orderProduct = OrderProduct::findOne(['product_id' => $product->id, 'client_id' => $user_id]);
+                        $orderProduct = OrderProduct::findOne(['product_id' => $product->id, 'order_id' => $order->id]);
                         if ($orderProduct) {
 
                             //  $this->telegram->setCommandConfig('cartproductquantity', [
@@ -340,7 +343,7 @@ print_r($params);
                             $keyboards[] = [
                                 new InlineKeyboardButton([
                                     'text' => '—',
-                                    'callback_data' => "addCart/{$product->id}/down"
+                                    'callback_data' => "addCart/{$order->id}/{$product->id}/down"
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '' . $orderProduct->quantity . ' шт.',
@@ -348,11 +351,11 @@ print_r($params);
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '+',
-                                    'callback_data' => "addCart/{$product->id}/up"
+                                    'callback_data' => "addCart/{$order->id}/{$product->id}/up"
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '❌',
-                                    'callback_data' => "removeProductCart/{$product->id}"
+                                    'callback_data' => "removeProductCart/{$order->id}/{$product->id}"
                                 ]),
                             ];
                             $keyboards[] = [
@@ -367,7 +370,7 @@ print_r($params);
                         } else {
                             $keyboards[] = [
                                 new InlineKeyboardButton([
-                                    'text' => '👉 ' . $product->price . ' UAH. — Купить 👈',
+                                    'text' => Yii::t('telegram/command','BUTTON_BUY',$product->price),
                                     'callback_data' => "addCart/{$product->id}"
                                 ])
                             ];
@@ -425,45 +428,6 @@ print_r($params);
           ];*/
 
         return Request::answerCallbackQuery($data);
-
-        $callbackDataArr = explode(' ', $callback_data);
-
-        if ($callbackDataArr[0] == 'client_chat_id') {
-
-            $data['show_alert'] = true;
-            //Закрепляем чат за авторизованным менеджером
-            $authChat = AuthorizedManagerChat::findOne(intval($chatId));
-            $authChat->client_chat_id = $callbackDataArr[1];
-            if ($authChat->validate() && $authChat->save()) {
-                $data['text'] = Yii::t('telegram/default', 'Start conversation with chat ') . $callbackDataArr[1];
-                Request::answerCallbackQuery($data);
-                unset($data['show_alert'], $data['callback_query_id']);
-                $data['chat_id'] = $chatId;
-                return Yii::$app->telegram->sendMessage($data);
-                // return Request::sendMessage($data);
-            } else {
-                try {
-                    $authChat = AuthorizedManagerChat::find()->where(['client_chat_id' => $callbackDataArr[1]])->one();
-                    $manager = Usernames::find()->where(['chat_id' => $authChat->chat_id])->one();
-                    $data['text'] = Yii::t('telegram/default', 'Conversation already in progress in this chat. Responsible: ') . ($manager->username ? $manager->username : "not_found");
-                } catch (\Exception $e) {
-                    $data['text'] = Yii::t('telegram/default', 'Seems conversation already in progress in this chat.');
-                }
-                unset($data['show_alert'], $data['callback_query_id']);
-                $data['chat_id'] = $chatId;
-
-
-                return Yii::$app->telegram->sendMessage($data);
-
-                //return Request::sendMessage($data);
-            }
-        } else {
-            $data['text'] = Yii::t('telegram/default', 'Unknown command.');
-            $data['show_alert'] = false;
-
-            // return Yii::$app->telegram->sendMessage($data);
-            return Request::answerCallbackQuery($data);
-        }
 
     }
 

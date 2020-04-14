@@ -58,7 +58,7 @@ class CallbackqueryCommand extends SystemCommand
         foreach (self::$callbacks as $callback) {
             $answer = $callback($callback_query);
         }
-
+print_r(self::$callbacks);
         return ($answer instanceof ServerResponse) ? $answer : $callback_query->answer();
     }
 

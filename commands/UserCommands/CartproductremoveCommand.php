@@ -38,6 +38,7 @@ class CartproductremoveCommand extends SystemCommand
      */
     protected $version = '1.0.0';
     public $product_id;
+    public $order_id;
 
     /**
      * Command execute method
@@ -51,7 +52,9 @@ class CartproductremoveCommand extends SystemCommand
         if (($this->product_id = trim($this->getConfig('product_id'))) === '') {
             $this->product_id = NULL;
         }
-
+        if (($this->order_id = trim($this->getConfig('order_id'))) === '') {
+            $this->order_id = NULL;
+        }
 
 
 
@@ -69,7 +72,7 @@ class CartproductremoveCommand extends SystemCommand
         $chat_id = $message->getChat()->getId();
 
 
-        $orderProduct = OrderProduct::findOne(['product_id' => $this->product_id, 'client_id' => $user_id]);
+        $orderProduct = OrderProduct::findOne(['product_id' => $this->product_id, 'order_id' => $this->order_id]);
         if($orderProduct){
             $originalProduct = $orderProduct->originalProduct;
             $orderProduct->delete();
@@ -77,7 +80,7 @@ class CartproductremoveCommand extends SystemCommand
 
             $keyboards[] = [
                 new InlineKeyboardButton([
-                    'text' => '👉 ' . $originalProduct->price . ' UAH. — Купить 👈',
+                    'text' => Yii::t('telegram/command','BUTTON_BUY',$originalProduct->price),
                     'callback_data' => "addCart/{$originalProduct->id}"
                 ])
             ];
