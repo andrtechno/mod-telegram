@@ -20,17 +20,17 @@ use Longman\TelegramBot\Request;
  *
  * Display an inline keyboard with a few buttons.
  */
-class CartproductquantityCommand extends SystemCommand
+class CatalogproductquantityCommand extends SystemCommand
 {
     /**
      * @var string
      */
-    protected $name = 'cartproductquantity';
+    protected $name = 'catalogproductquantity';
 
     /**
      * @var string
      */
-    protected $description = 'Change product quantity in cart';
+    protected $description = 'Change product quantity in catalog';
 
     /**
      * @var string
@@ -38,8 +38,8 @@ class CartproductquantityCommand extends SystemCommand
     protected $version = '1.0.0';
     public $product_id;
     public $quantity;
-    private $chat_id;
     public $order_id;
+    private $chat_id;
 
     /**
      * Command execute method
@@ -59,7 +59,6 @@ class CartproductquantityCommand extends SystemCommand
         if (($this->order_id = trim($this->getConfig('order_id'))) === '') {
             $this->order_id = NULL;
         }
-
         $update = $this->getUpdate();
         if ($update->getCallbackQuery()) {
             $message = $update->getCallbackQuery()->getMessage();
@@ -73,7 +72,7 @@ class CartproductquantityCommand extends SystemCommand
         $keyboards[] = [
             new InlineKeyboardButton([
                 'text' => '—',
-                'callback_data' => "addCart/{$this->order_id}/{$this->product_id}/down/cart"
+                'callback_data' => "addCart/{$this->order_id}/{$this->product_id}/down/catalog"
             ]),
             new InlineKeyboardButton([
                 'text' => '' . $this->quantity . ' шт.',
@@ -81,7 +80,7 @@ class CartproductquantityCommand extends SystemCommand
             ]),
             new InlineKeyboardButton([
                 'text' => '+',
-                'callback_data' => "addCart/{$this->order_id}/{$this->product_id}/up/cart"
+                'callback_data' => "addCart/{$this->order_id}/{$this->product_id}/up/catalog"
             ]),
             new InlineKeyboardButton([
                 'text' => '❌',

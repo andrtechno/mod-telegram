@@ -107,14 +107,14 @@ class CallbackqueryCommand extends SystemCommand
 
         } elseif ($callback_data == 'goHome') {
             return $this->telegram->executeCommand('start');
-        } elseif (strpos(trim($callback_data),'command_pager')) {
+        } elseif (strpos(trim($callback_data), 'command_pager')) {
 
             return $this->telegram
                 ->setCommandConfig('cart', ['page' => $orderProduct->product_id])
                 ->executeCommand('cart');
 
             $params = InlineKeyboardPagination::getParametersFromCallbackData($callback_data);
-print_r($params);
+            print_r($params);
 //$params = [
 //    'command' => 'testCommand',
 //    'oldPage' => '10',
@@ -123,7 +123,6 @@ print_r($params);
 
 // or, just use PHP directly if you like. (literally what the helper does!)
             print_r(parse_str($callback_data, $params));
-
 
 
             return Request::emptyResponse();
@@ -205,13 +204,14 @@ print_r($params);
             ]);
             return $this->telegram->executeCommand('cartproductremove');
 
-        } elseif (preg_match('/^addCart\/([0-9]+)\/([0-9]+)\/(up|down)/iu', trim($callback_data), $match)) {
+
+        } elseif (preg_match('/^addCart\/([0-9]+)\/([0-9]+)\/(up|down)\/(cart|catalog)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
 
             $orderProduct = OrderProduct::findOne([
                 'order_id' => $match[1],
                 'product_id' => $match[2],
-              //  'client_id' => $user_id
+                //  'client_id' => $user_id
             ]);
             if ($match[3] == 'up') {
                 $orderProduct->quantity++;
@@ -225,13 +225,18 @@ print_r($params);
                 //    ->setCommandConfig('cartproductremove', ['product_id' => $orderProduct->product_id])
                 //    ->executeCommand('cartproductremove');
             }
-
+            if ($match[4] == 'cart') {
+                $command = 'cartproductquantity';
+            } else {
+                $command = 'catalogproductquantity';
+            }
             return $this->telegram
-                ->setCommandConfig('cartproductquantity', [
+                ->setCommandConfig($command, [
+                    'order_id' => $match[1],
                     'product_id' => $orderProduct->product_id,
                     'quantity' => $orderProduct->quantity
                 ])
-                ->executeCommand('cartproductquantity');
+                ->executeCommand($command);
 
 
         } elseif (preg_match('/^addCart\/([0-9]+)/iu', trim($callback_data), $match)) {
@@ -279,18 +284,19 @@ print_r($params);
 
             echo $callback_data;
             $params = InlineKeyboardPager::getParametersFromCallbackData($callback_data);
-            echo 'q: '. $params['page'].PHP_EOL;
+            echo 'q: ' . $params['page'] . PHP_EOL;
+            if(isset($params['page'])){
             $this->telegram->setCommandConfig('cart', [
                 'page' => $params['page'],
             ]);
+            }
             $response = $this->telegram->executeCommand('cart');
 
             return $response;
         } elseif (preg_match('/^getCatalogList\/([0-9]+)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
-            $order = Order::findOne(['client_id'=>$user_id,'checkout'=>0]);
+            $order = Order::findOne(['client_id' => $user_id, 'checkout' => 0]);
             if (isset($match[1])) {
-
 
 
                 $query = Product::find()->published()->sort()->applyCategories($match[1]);
@@ -305,7 +311,6 @@ print_r($params);
                     ->all();
 
 
-
                 $pager = new KeyboardPager([
                     'pagination' => $pages,
                     'lastPageLabel' => false,
@@ -314,7 +319,6 @@ print_r($params);
                     'command' => 'getCart',
                     'nextPageLabel' => '▶ еще'
                 ]);
-
 
 
                 if ($products) {
@@ -343,7 +347,7 @@ print_r($params);
                             $keyboards[] = [
                                 new InlineKeyboardButton([
                                     'text' => '—',
-                                    'callback_data' => "addCart/{$order->id}/{$product->id}/down"
+                                    'callback_data' => "addCart/{$order->id}/{$product->id}/down/catalog"
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '' . $orderProduct->quantity . ' шт.',
@@ -351,7 +355,7 @@ print_r($params);
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '+',
-                                    'callback_data' => "addCart/{$order->id}/{$product->id}/up"
+                                    'callback_data' => "addCart/{$order->id}/{$product->id}/up/catalog"
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '❌',
@@ -370,7 +374,7 @@ print_r($params);
                         } else {
                             $keyboards[] = [
                                 new InlineKeyboardButton([
-                                    'text' => Yii::t('telegram/command','BUTTON_BUY',$product->price),
+                                    'text' => Yii::t('telegram/command', 'BUTTON_BUY', $product->price),
                                     'callback_data' => "addCart/{$product->id}"
                                 ])
                             ];
@@ -399,13 +403,11 @@ print_r($params);
                 }
 
 
-
-
                 $keyboards2[] = [
                     new KeyboardButton(['text' => '📂 Каталог', 'callback_data' => 'getCatalog']),
                     new KeyboardButton(['text' => '🛍 Корзина']),
                     new KeyboardButton(['text' => 'еще']),
-                   // new KeyboardMore(['pagination' => $pages])
+                    // new KeyboardMore(['pagination' => $pages])
                 ];
                 $data['chat_id'] = $chat_id;
                 $data['text'] = $pages->page . ' / ' . $pages->totalCount;
@@ -482,7 +484,8 @@ print_r($params);
         return $this->_models;
     }
 
-    public function callbacktest($ccc){
+    public function callbacktest($ccc)
+    {
         echo 'zzz';
     }
 

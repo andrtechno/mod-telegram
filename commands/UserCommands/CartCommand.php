@@ -62,7 +62,7 @@ class CartCommand extends UserCommand
     {
         $update = $this->getUpdate();
 
-        // print_r($update);
+
         if ($update->getCallbackQuery()) {
             $callbackQuery = $update->getCallbackQuery();
             $message = $callbackQuery->getMessage();
@@ -87,9 +87,9 @@ class CartCommand extends UserCommand
         $data['chat_id'] = $chat_id;
 
 
-        $data['text'] = Yii::$app->settings->get('telegram', 'empty_cart_text');
-        $data['reply_markup'] = $this->startKeyboards();
-        $response = $data;
+        // $data['text'] = Yii::$app->settings->get('telegram', 'empty_cart_text');
+        // $data['reply_markup'] = $this->startKeyboards();
+        // $response = $data;
 
 
         $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
@@ -128,11 +128,13 @@ class CartCommand extends UserCommand
 
             foreach ($products as $product) {
 
-                $keyboards[] = $pager->buttons;
+                if ($pager->buttons)
+                    $keyboards[] = $pager->buttons;
+
                 $keyboards[] = [
-                    new InlineKeyboardButton(['text' => '—'.$product->product_id, 'callback_data' => "addCart/{$order->id}/{$product->product_id}/down"]),
-                    new InlineKeyboardButton(['text' => $product->quantity . ' шт.', 'callback_data' => 'get']),
-                    new InlineKeyboardButton(['text' => '+'.$product->product_id, 'callback_data' => "addCart/{$order->id}/{$product->product_id}/up"])
+                    new InlineKeyboardButton(['text' => '—', 'callback_data' => "addCart/{$order->id}/{$product->product_id}/down"]),
+                    new InlineKeyboardButton(['text' => $product->quantity . ' шт.', 'callback_data' => time()]),
+                    new InlineKeyboardButton(['text' => '+', 'callback_data' => "addCart/{$order->id}/{$product->product_id}/up"])
                 ];
                 $keyboards[] = [
                     new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price), 'callback_data' => 'checkOut']),
