@@ -73,7 +73,9 @@ class HelpCommand extends Command
 
 
         list($all_commands, $user_commands, $admin_commands) = $this->getUserAdminCommands();
-
+        echo count($all_commands).PHP_EOL;
+        echo count($user_commands).PHP_EOL;
+        echo count($admin_commands).PHP_EOL;
         // If no command parameter is passed, show the list.
         if ($command_str === '') {
             $data['text'] = '*'.Yii::t('telegram/command','COMMAND_LIST').'*:' . PHP_EOL;

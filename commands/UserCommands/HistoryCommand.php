@@ -79,7 +79,9 @@ class HistoryCommand extends UserCommand
         $data['chat_id'] = $chat_id;
 
         $text = trim($message->getText(true));
-
+        if ($this->getConfig('page')) {
+            $this->page = $this->getConfig('page');
+        }
 
         $query = Order::find()->where(['client_id' => $user_id, 'checkout' => 1]);
         $pages = new KeyboardPagination([
@@ -104,21 +106,26 @@ class HistoryCommand extends UserCommand
 
         if ($orders) {
 
-            if ($this->getConfig('page')) {
-                $this->page = $this->getConfig('page');
-            }
+
 
             $text = '*История заказа*' . PHP_EOL . PHP_EOL;
             foreach ($orders as $order) {
                 if ($pager->buttons)
                     $keyboards[] = $pager->buttons;
 
+                if(!$order->pay)
+                    $keyboards[] = [
+                        new InlineKeyboardButton([
+                            'text' => Yii::t('telegram/command','BUTTON_PAY',$order->total_price),
+                            'callback_data' => 'payment/' . $order->id
+                        ])];
+
                 foreach ($order->products as $product) {
-                    $text .= '*' . $product->name . '* ` ' . $product->quantity . 'шт. / ' . $product->price . ' грн. `' . PHP_EOL;
+                    $text .= '*' . $product->name . '* `' . $product->quantity . 'шт. / ' . $product->price . ' грн. `' . PHP_EOL;
                 }
-                $text .= PHP_EOL . PHP_EOL . '*Доставка:* `' . $order->delivery . ' грн.`' . PHP_EOL;
-                $text .= PHP_EOL . PHP_EOL . '*Оплата:* `' . $order->payment . ' грн.`' . PHP_EOL;
-                $text .= PHP_EOL . PHP_EOL . '*Общая стоимость заказа:* `' . $order->total_price . ' грн.`' . PHP_EOL;
+                $text .= PHP_EOL . PHP_EOL . 'Доставка: *' . $order->delivery . '*' . PHP_EOL;
+                $text .= 'Оплата: *' . $order->payment . '*' . PHP_EOL;
+                $text .= 'Общая стоимость заказа: *' . $order->total_price . ' грн.*' . PHP_EOL;
 
             }
             $data['text'] = $text;

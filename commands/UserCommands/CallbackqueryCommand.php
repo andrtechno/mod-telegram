@@ -23,11 +23,12 @@ use panix\mod\telegram\components\InlineKeyboardPager;
 use panix\mod\telegram\components\KeyboardMore;
 use panix\mod\telegram\components\KeyboardPager;
 use panix\mod\telegram\components\KeyboardPagination;
+use panix\mod\telegram\components\SystemCommand;
 use panix\mod\telegram\models\AuthorizedManagerChat;
 use panix\mod\telegram\models\Order;
 use panix\mod\telegram\models\OrderProduct;
 use panix\mod\telegram\models\Usernames;
-use Longman\TelegramBot\Commands\SystemCommand;
+
 use Longman\TelegramBot\Request;
 use Yii;
 
@@ -107,6 +108,12 @@ class CallbackqueryCommand extends SystemCommand
 
         } elseif ($callback_data == 'goHome') {
             return $this->telegram->executeCommand('start');
+        } elseif (preg_match('/^payment\/([0-9]+)/iu', trim($callback_data), $match)) {
+
+            return $this->telegram
+                ->setCommandConfig('payment', ['order_id' => $match[1]])
+                ->executeCommand('payment');
+
         } elseif (strpos(trim($callback_data), 'command_pager')) {
 
             return $this->telegram

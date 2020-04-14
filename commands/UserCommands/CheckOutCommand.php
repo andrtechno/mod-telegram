@@ -294,7 +294,7 @@ class CheckOutCommand extends SystemCommand
 
                 if ($result->isOk()) {
                     $inlineKeyboards[] = [
-                        new InlineKeyboardButton(['text' => Yii::t('telegram/command','BUTTON_PAY',$order->total_price), 'callback_data' => "getPayment/{$order->id}"]),
+                        new InlineKeyboardButton(['text' => Yii::t('telegram/command','BUTTON_PAY',$order->total_price), 'callback_data' => "payment/{$order->id}"]),
                     ];
                     $data['reply_markup'] = new InlineKeyboard([
                         'inline_keyboard' => $inlineKeyboards

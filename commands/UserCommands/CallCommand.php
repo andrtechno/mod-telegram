@@ -2,8 +2,9 @@
 
 namespace panix\mod\telegram\commands\UserCommands;
 
-use Longman\TelegramBot\Commands\UserCommand;
+
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\UserCommand;
 use Yii;
 /**
  * User "/cell" command

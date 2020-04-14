@@ -10,13 +10,14 @@
 
 namespace panix\mod\telegram\commands\UserCommands;
 
-use Longman\TelegramBot\Commands\UserCommand;
+
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Request;
 use panix\mod\shop\models\Category;
+use panix\mod\telegram\components\UserCommand;
 use Yii;
 
 /**
@@ -119,21 +120,12 @@ class CatalogCommand extends UserCommand
         ];
 
 
-        $dataCatalog = [
-            'chat_id' => $chat_id,
-            'text' => '⬇ Каталог продукции',
 
-        ];
-        $keyboards[] = [
-            new KeyboardButton(['text' => '🏠 Начало', 'callback_data' => 'goHome']),
-            new KeyboardButton(['text' => '🛍 Корзина', 'callback_data' => 'getCart']),
-        ];
-
-        $dataCatalog['reply_markup'] = (new Keyboard([
-            'keyboard' => $keyboards
-        ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
-        Request::sendMessage($dataCatalog);
-
+        $dataCatalog['text'] = '⬇ Каталог продукции';
+        $dataCatalog['chat_id'] = $chat_id;
+        $dataCatalog['reply_markup'] = $this->homeKeyboards();
+        $buttonsResponse = Request::sendMessage($dataCatalog);
+        echo 'oo';
 
         $result = $data;
 

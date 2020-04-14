@@ -10,12 +10,13 @@
 
 namespace panix\mod\telegram\commands\UserCommands;
 
-use Longman\TelegramBot\Commands\UserCommand;
+
 use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Entities\PhotoSize;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\UserCommand;
 use Yii;
 
 /**

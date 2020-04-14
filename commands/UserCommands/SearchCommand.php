@@ -111,7 +111,7 @@ class SearchCommand extends UserCommand
         //Every time a step is achieved the track is updated
         switch ($state) {
             case 0:
-                if ($text === ''|| preg_match('/^(\x{1F50E})/iu', trim($text), $match)) {
+                if ($text === '') {
                     $notes['state'] = 0;
                     $this->conversation->update();
 
