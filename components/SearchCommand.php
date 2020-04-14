@@ -121,6 +121,10 @@ class SearchCommand extends UserCommand
                         $data['text'] = 'Введите название товара или артикул:';
                     }
                     $result = Request::sendMessage($data);
+                    if($result->getOk()){
+                        echo $text;
+                       // print_r($result->getResult());
+                    }
                     break;
                 }
 
@@ -130,32 +134,56 @@ class SearchCommand extends UserCommand
             // no break
             case 1:
 
-                if ($text === '') {
-                    $notes['state'] = 1;
+
                     $query = Product::find()->sort()->published()->groupBy(Product::tableName() . '.`id`');
                     $query->applySearch($notes['query']);
 
-                    $count = $query->count();
+                    $resultQuery = $query->all();
+                    if ($resultQuery) {
+                        $notes['state'] = 1;
+                        $notes['status'] = true;
+                        $this->conversation->update();
+                        $inline_keyboard = new InlineKeyboard([
+                            [
+                                'text' => '👉 ' . Yii::t('shop/default', 'SEARCH_RESULT', [
+                                        'query' => $notes['query'],
+                                        'count' => count($resultQuery),
+                                    ]),
+                                'url' => 'https://yii2.pixelion.com.ua/search?q=' . $notes['query'],
 
-                    $data = [
-                        'chat_id' => $chat_id,
-                        'parse_mode' => 'Markdown',
-                        'text' => Yii::t('shop/default', 'SEARCH_RESULT', [
-                            'query' => '*'.$notes['query'].'*',
-                            'count' => $count,
-                        ]),
-                        'reply_markup' => $this->homeKeyboards(),
-                    ];
+                            ],
+                        ]);
 
-                    $notes['status'] = ($resultQuery) ? true : false;
+                        $data = [
+                            'chat_id' => $chat_id,
+                            'parse_mode' => 'HTML',
+                            'text' => Yii::t('shop/default', 'SEARCH_RESULT', [
+                                'query' => $text,
+                                'count' => count($resultQuery),
+                            ]),
+                            'reply_markup' => $inline_keyboard,
+                        ];
+                    } else {
+                        $notes['status'] = false;
+                        $notes['state'] = 1;
+                        $this->conversation->update();
+                        $data = [
+                            'chat_id' => $chat_id,
+                            'parse_mode' => 'HTML',
+                            'text' => Yii::t('shop/default', 'SEARCH_RESULT', [
+                                'query' => $text,
+                                'count' => 0,
+                            ]),
+                            'reply_markup' => $this->homeKeyboards(),
+                        ];
+                        $text = '';
+                       // $this->conversation->cancel();
+                    }
 
-                    $this->conversation->update();
-                    $this->conversation->stop();
                     $result = Request::sendMessage($data);
-
                     break;
-                }
-
+     
+                $this->conversation->stop();
                 $notes['query'] = $text;
 
                 break;

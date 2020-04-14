@@ -88,12 +88,6 @@ class CatalogproductquantityCommand extends SystemCommand
                 'callback_data' => "cartDelete/{$this->order_id}/{$this->product_id}"
             ]),
         ];
-        $keyboards[] = [
-            new InlineKeyboardButton([
-                'text' => '🛍 Корзина',
-                'callback_data' => "getCart"
-            ])
-        ];
         if ($this->telegram->isAdmin($chat_id)) {
             $keyboards[] = [
                 new InlineKeyboardButton(['text' => '✏', 'callback_data' => "productUpdate/{$this->product_id}"]),

@@ -64,6 +64,7 @@ class CartCommand extends UserCommand
 
 
         if ($update->getCallbackQuery()) {
+            print_r($update->getCallbackQuery());
             $callbackQuery = $update->getCallbackQuery();
             $message = $callbackQuery->getMessage();
             //  $chat = $callbackQuery->getMessage()->getChat();

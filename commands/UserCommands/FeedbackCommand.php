@@ -43,9 +43,10 @@ class FeedbackCommand extends UserCommand
      * @var string
      */
     protected $version = '1.0';
+
+
     protected $conversation;
-    protected $need_mysql = true;
-    // public $enabled = false;
+
 
     /**
      * Command execute method

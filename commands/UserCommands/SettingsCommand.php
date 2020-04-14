@@ -112,7 +112,7 @@ class SettingsCommand extends UserCommand
             //$pagination['keyboard'][0]['callback_data']; // command=testCommand&oldPage=10&newPage=1
             //$pagination['keyboard'][1]['callback_data']; // command=testCommand&oldPage=10&newPage=7
 
-echo 'zzz';
+
             $data['reply_markup'] = [
                 'inline_keyboard' => [
                     $pagination['keyboard'],

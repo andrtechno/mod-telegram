@@ -66,47 +66,7 @@ class CallbackqueryCommand extends SystemCommand
         $callback_data = $callback_query->getData();
 
         $data['callback_query_id'] = $callback_query_id;
-        if ($callback_data == 'getProduct') {
-
-            $product = Product::find()->where(['id' => 2665])->one();
-            $inline_keyboard = new InlineKeyboard([
-                ['text' => '👉 ' . $product->price . ' грн. Купить', 'callback_data' => 'callbackqueryproduct']], [
-                ['text' => '🏆  🛒 🎁 Характеристики', 'callback_data' => 'product_attributes'],
-                ['text' => '🤝  🚚 callback thumb up ', 'callback_data' => 'thumb up'],
-            ]);
-
-
-            $data = [
-                'chat_id' => $chat_id,
-                'parse_mode' => 'HTML',
-                'callback_query_id' => $callback_query_id,
-                'text' => Yii::$app->view->render('@telegram/views/default/test', ['product' => $product]),
-                'reply_markup' => $inline_keyboard,
-            ];
-            $sendPhoto = Yii::$app->telegram->sendPhoto([
-                'photo' => Yii::getAlias('@app/web/uploads') . DIRECTORY_SEPARATOR . '1.jpg',
-                'chat_id' => $chat_id,
-                'parse_mode' => 'HTML',
-                'caption' => 'LALAL 💵 💴 💶 💷 💰 💳  ✉️📦 📁 📄 📞 ✔ 🔴 🇺🇦<strong>sadsasdadsa sad as dasdas das d asd asd asd asd asdsdadsa</strong>',
-                'reply_markup' => $inline_keyboard,
-            ]);
-            return Yii::$app->telegram->sendMessage($data);
-        } elseif ($callback_data == 'product_attributes') {
-            $product = Product::find()->where(['id' => 2665])->one();
-            $eav = $product->getEavAttributes();
-            $data = [
-                'chat_id' => $chat_id,
-                // 'parse_mode' => 'HTML',
-                'callback_query_id' => $callback_query_id,
-                'show_alert' => true,
-                'text' => 'Тут будут параметры ' . $callback_query_id,
-                // 'reply_markup' => $inline_keyboard,
-            ];
-
-
-            return Request::answerCallbackQuery($data);
-
-        } elseif ($callback_data == 'goHome') {
+        if ($callback_data == 'goHome') {
             return $this->telegram->executeCommand('start');
         } elseif (preg_match('/^payment\/([0-9]+)/iu', trim($callback_data), $match)) {
 
@@ -115,31 +75,13 @@ class CallbackqueryCommand extends SystemCommand
                 ->executeCommand('payment');
 
         } elseif (strpos(trim($callback_data), 'command_pager')) {
-
             return $this->telegram
                 ->setCommandConfig('cart', ['page' => $orderProduct->product_id])
                 ->executeCommand('cart');
-
             $params = InlineKeyboardPagination::getParametersFromCallbackData($callback_data);
             print_r($params);
-//$params = [
-//    'command' => 'testCommand',
-//    'oldPage' => '10',
-//    'newPage' => '1',
-//];
-
-// or, just use PHP directly if you like. (literally what the helper does!)
-            print_r(parse_str($callback_data, $params));
-
-
             return Request::emptyResponse();
-
-
         } elseif (preg_match('/^getCatalog\s+([0-9]+)/iu', trim($callback_data), $match)) {
-
-
-//print_r($message);die;
-
             $id = (isset($match[1])) ? $match[1] : 1;
             $root = Category::findOne($id);
 
@@ -202,6 +144,9 @@ class CallbackqueryCommand extends SystemCommand
             return Request::editMessageReplyMarkup($dataEdit);
             //  return Yii::$app->telegram->sendMessage($data);
             // }
+
+
+
         } elseif (preg_match('/^cartDelete\/([0-9]+)\/([0-9]+)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
 
@@ -210,6 +155,35 @@ class CallbackqueryCommand extends SystemCommand
                 'order_id' => $match[1],
             ]);
             return $this->telegram->executeCommand('cartproductremove');
+        } elseif (preg_match('/^cartDeleteInCatalog\/([0-9]+)\/([0-9]+)/iu', trim($callback_data), $match)) {
+            $user_id = $callback_query->getFrom()->getId();
+            $price = $match[2];
+            $product_id = $match[1];
+            $keyboards[] = [
+                new InlineKeyboardButton([
+                    'text' => Yii::t('telegram/command', 'BUTTON_BUY', $price),
+                    'callback_data' => "addCart/{$product_id}"
+                ])
+            ];
+            if ($this->telegram->isAdmin($chat_id)) {
+                $keyboards[] = [
+                    new InlineKeyboardButton(['text' => '✏', 'callback_data' => "productUpdate/{$product_id}"]),
+                    new InlineKeyboardButton(['text' => '❌', 'callback_data' => "productDelete/{$product_id}"]),
+                    new InlineKeyboardButton(['text' => '👁', 'callback_data' => "productHide/{$product_id}"])
+                ];
+            }
+
+
+            $dataEdit['chat_id'] = $chat_id;
+            $dataEdit['message_id'] = $message->getMessageId();
+            $dataEdit['reply_markup'] = new InlineKeyboard([
+                'inline_keyboard' => $keyboards
+            ]);
+
+
+            return Request::editMessageReplyMarkup($dataEdit);
+
+
         } elseif (preg_match('/^spinner\/([0-9]+)\/([0-9]+)\/(up|down)\/(cart|catalog)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
 
@@ -225,16 +199,9 @@ class CallbackqueryCommand extends SystemCommand
             }
             if ($orderProduct->quantity >= 1) {
                 $orderProduct->save(false);
-            } else {
-                //return $this->telegram
-                //    ->setCommandConfig('cartproductremove', ['product_id' => $orderProduct->product_id])
-                //    ->executeCommand('cartproductremove');
             }
-            if ($match[4] == 'cart') {
-                $command = 'cartproductquantity';
-            } else {
-                $command = 'catalogproductquantity';
-            }
+            $command = ($match[4] == 'cart') ?'cartproductquantity':'catalogproductquantity';
+
             return $this->telegram
                 ->setCommandConfig($command, [
                     'order_id' => $match[1],
@@ -246,14 +213,6 @@ class CallbackqueryCommand extends SystemCommand
         } elseif (preg_match('/^checkOut/iu', trim($callback_data), $match)) {
             return $this->telegram->executeCommand('checkout');
         } elseif (preg_match('/^addCart\/([0-9]+)/iu', trim($callback_data), $match)) {
-
-            /* $product = Product::find()->published()->where(['id'=>$match[1]])->one();
-             $dataCatalog = [
-                 'chat_id' => $chat_id,
-                 'text' => 'addCart',
-
-             ];
- */
 
 
             $user_id = $callback_query->getFrom()->getId();
@@ -353,8 +312,6 @@ class CallbackqueryCommand extends SystemCommand
                         foreach ($this->attributes($product) as $name => $value) {
                             $caption .= '<strong>' . $name . '</strong>: ' . $value . PHP_EOL;
                         }
-                        //  print_r($this->attributes($product));die;
-
 
                         if ($order) {
                             $orderProduct = OrderProduct::findOne(['product_id' => $product->id, 'order_id' => $order->id]);
@@ -363,14 +320,6 @@ class CallbackqueryCommand extends SystemCommand
                         }
 
                         if ($orderProduct) {
-
-                            //  $this->telegram->setCommandConfig('cartproductquantity', [
-                            //      'product_id' => $orderProduct->product_id,
-                            //      'quantity' => $orderProduct->quantity
-                            //  ]);
-                            // $response = $this->telegram->executeCommand('cartproductquantity');
-
-                            //   return new CartproductquantityCommand()->getKeyboards();
                             $keyboards[] = [
                                 new InlineKeyboardButton([
                                     'text' => '—',
@@ -386,17 +335,9 @@ class CallbackqueryCommand extends SystemCommand
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '❌',
-                                    'callback_data' => "removeProductCart/{$order->id}/{$product->id}"
+                                    'callback_data' => "cartDeleteInCatalog/{$order->id}/{$product->price}"
                                 ]),
                             ];
-                            $keyboards[] = [
-                                new InlineKeyboardButton([
-                                    'text' => '🛍 Корзина',
-                                    'callback_data' => "getCart"
-                                ])
-                            ];
-
-
                             //   $keyboards[] = $this->telegram->executeCommand('cartproductquantity')->getKeywords();
                         } else {
                             $keyboards[] = [
@@ -417,7 +358,6 @@ class CallbackqueryCommand extends SystemCommand
 
                         $dataPhoto = [
                             'photo' => $product->getImage()->getPathToOrigin(),
-                            // 'photo' => 'https://yii2.pixelion.com.ua'.$product->getImage()->getUrl(),
                             'chat_id' => $chat_id,
                             'parse_mode' => 'HTML',
                             'caption' => $caption,
@@ -432,8 +372,8 @@ class CallbackqueryCommand extends SystemCommand
 
                 $keyboards2[] = [
                     new KeyboardButton(['text' => '📂 Каталог', 'callback_data' => 'getCatalog']),
-                    new KeyboardButton(['text' => '🛍 Корзина']),
-                    new KeyboardButton(['text' => 'еще']),
+                    new KeyboardButton(['text' => '🛍 Корзина', 'callback_data' => 'getCart']),
+                   // new KeyboardButton(['text' => 'еще']),
                     // new KeyboardMore(['pagination' => $pages])
                 ];
 
@@ -447,8 +387,6 @@ class CallbackqueryCommand extends SystemCommand
                     ->setSelective(true);
                 return Request::sendMessage($data);
 
-
-                // return  Request::answerCallbackQuery($data);
             }
 
             return Request::emptyResponse();
