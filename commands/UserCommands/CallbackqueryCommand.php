@@ -11,6 +11,7 @@
 namespace panix\mod\telegram\commands\UserCommands;
 
 
+
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
@@ -24,19 +25,16 @@ use panix\mod\telegram\components\InlineKeyboardPager;
 use panix\mod\telegram\components\KeyboardMore;
 use panix\mod\telegram\components\KeyboardPager;
 use panix\mod\telegram\components\KeyboardPagination;
-use panix\mod\telegram\components\UserCommand;
-use panix\mod\telegram\models\AuthorizedManagerChat;
+use panix\mod\telegram\components\SystemCommand;
 use panix\mod\telegram\models\Order;
 use panix\mod\telegram\models\OrderProduct;
-use panix\mod\telegram\models\Usernames;
-
 use Longman\TelegramBot\Request;
 use Yii;
 
 /**
  * Callback query command
  */
-class CallbackqueryCommand extends UserCommand
+class CallbackqueryCommand extends SystemCommand
 {
     /**#@+
      * {@inheritdoc}

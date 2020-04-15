@@ -20,7 +20,7 @@ class SettingsCommand extends UserCommand
     protected $description = 'setting user profile';
     protected $usage = '/settings <name> <value>';
     protected $version = '1.0.1';
-    public $enabled = true;
+    public $enabled = false;
     public $private_only = true;
 
     public $notification = true;

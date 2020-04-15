@@ -33,27 +33,7 @@ abstract class UserCommand extends Command
         return $data;
     }
 
-    public function productAdminKeywords($chat_id, $product_id)
-    {
-        $keyboards = [];
-        if ($this->telegram->isAdmin($chat_id)) {
-            $keyboards = [
-                new InlineKeyboardButton([
-                    'text' => '✏',
-                    'callback_data' => 'query=productUpdate&id=' . $product_id
-                ]),
-                new InlineKeyboardButton([
-                    'text' => '👁',
-                    'callback_data' => 'query=productSwitch&id=' . $product_id
-                ]),
-                new InlineKeyboardButton([
-                    'text' => '❌',
-                    'callback_data' => 'query=productDelete&id=' . $product_id
-                ]),
-            ];
-        }
-        return $keyboards;
-    }
+
 
     public function homeKeyboards()
     {

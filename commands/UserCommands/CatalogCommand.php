@@ -35,7 +35,7 @@ class CatalogCommand extends UserCommand
     /**
      * @var string
      */
-    protected $description = 'get catalog';
+    protected $description = 'Каталог продукции';
 
     /**
      * @var string
@@ -46,7 +46,6 @@ class CatalogCommand extends UserCommand
      * @var string
      */
     protected $version = '1.0';
-    protected $private_only = true;
     /**
      * The Google API Key from the command config
      *
@@ -54,7 +53,7 @@ class CatalogCommand extends UserCommand
      */
     private $category_id;
     private $page;
-    // public $enabled = false;
+    public $private_only = true;
 
     /**
      * Command execute method
@@ -75,9 +74,9 @@ class CatalogCommand extends UserCommand
             $this->category_id = 1;
         }
 
-       // $preg = preg_match('/^(\/catalog)\s([0-9]+)/', trim($message->getText()), $match);
+        // $preg = preg_match('/^(\/catalog)\s([0-9]+)/', trim($message->getText()), $match);
         //if ($message->getText() == '/catalog' || $preg) {
-       // $id = (isset($match[1])) ? $match[1] : 1;
+        // $id = (isset($match[1])) ? $match[1] : 1;
         $root = Category::findOne($this->category_id);
         $categories = $root->children()->all();
 
@@ -102,7 +101,7 @@ class CatalogCommand extends UserCommand
                         $inlineKeyboards[] = [
                             new InlineKeyboardButton([
                                 'text' => '📄 ' . $category->name . ' (' . $count . ')',
-                               // 'callback_data' => 'getCatalogList/' . $category->id
+                                // 'callback_data' => 'getCatalogList/' . $category->id
                                 'callback_data' => 'query=getCatalogList&category_id=' . $category->id
                             ])
                         ];
@@ -119,7 +118,6 @@ class CatalogCommand extends UserCommand
                 'inline_keyboard' => $inlineKeyboards
             ]),
         ];
-
 
 
         $dataCatalog['text'] = '⬇ Каталог продукции';

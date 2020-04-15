@@ -47,7 +47,7 @@ class ProductCommand extends UserCommand
      * @var string
      */
     protected $version = '1.0';
-
+    public $enabled=false;
     /**
      * Command execute method
      *
