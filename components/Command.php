@@ -64,13 +64,14 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
             new KeyboardButton(['text' => '🛍 Корзина'])
         ];
         $keyboards[] = [
-            new KeyboardButton(['text' => '📢 Новости']),
-            new KeyboardButton(['text' => '📦 Мои заказы'])
-        ];
-        $keyboards[] = [
-            new KeyboardButton(['text' => '⚙ Настройки']),
+            //  new KeyboardButton(['text' => '📢 Новости']),
+            new KeyboardButton(['text' => '📦 Мои заказы']),
             new KeyboardButton(['text' => '❓ Помощь'])
         ];
+        // $keyboards[] = [
+        //  new KeyboardButton(['text' => '⚙ Настройки']),
+        //   new KeyboardButton(['text' => '❓ Помощь'])
+        // ];
 
         $data = (new Keyboard([
             'keyboard' => $keyboards
@@ -79,6 +80,10 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
         return $data;
     }
 
+    public function number_format($sum)
+    {
+        return number_format($sum, 1, '.', ' ');
+    }
 
     public function catalogKeyboards()
     {
@@ -90,7 +95,8 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
 
         $keyboards[] = [
             new KeyboardButton(['text' => '🛍 Корзина']),
-            new KeyboardButton(['text' => '📦 Мои заказы'])
+            new KeyboardButton(['text' => '📦 Мои заказы']),
+            new KeyboardButton(['text' => '❓ Помощь'])
         ];
 
         $data = (new Keyboard([

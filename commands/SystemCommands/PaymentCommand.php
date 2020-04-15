@@ -59,16 +59,16 @@ class PaymentCommand extends SystemCommand
         $callback_data = $callback_query->getData();
 
 
-        echo $this->order_id.'zzzzzzz';
-        $order = Order::find()->where(['id'=>$this->order_id])->one();
+       // echo $this->order_id.'zzzzzzz';
+       // $order = Order::find()->where(['id'=>$this->order_id])->one();
 
-        echo $order->total_price;
-if($order){
-        $prices[] = new LabeledPrice(['label'=>'UAH','amount'=>150]);
+       // echo $order->total_price;
+if(false){
+        $prices[] = new LabeledPrice(['label'=>'UAH','amount'=>500]);
         $data['chat_id']=$chat_id;
         $data['title']='title';
         $data['description']='description';
-        $data['payload']='order-'.$order->id;
+        $data['payload']='order-123123123';
         $data['provider_token']='632593626:TEST:i56982357197';
         $data['start_parameter']=CMS::gen(10);
         $data['currency']='UAH';

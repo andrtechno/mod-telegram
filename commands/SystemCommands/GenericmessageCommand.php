@@ -79,6 +79,17 @@ class GenericmessageCommand extends SystemCommand
 
         $text = trim($this->getMessage()->getText());
 
+
+
+        /*$message = $this->getMessage();
+
+        //You can use $command as param
+        $chat_id = $message->getChat()->getId();
+        $data['text'] = 'ЯЯ май фюрер';
+        $data['chat_id'] = $chat_id;
+        $req =  Request::sendMessage($data);*/
+
+
         if (preg_match('/^(\x{1F6CD})/iu', $text, $match)) { //cart emoji
             return $this->telegram->executeCommand('cart');
         } elseif (preg_match('/^(\x{1F4C2})/iu', $text, $match)) { //folder emoji

@@ -2,6 +2,9 @@
 
 namespace panix\mod\telegram\components;
 
+use Longman\TelegramBot\Entities\Update;
+use Longman\TelegramBot\Exception\TelegramException;
+use Longman\TelegramBot\Request;
 use Yii;
 
 //defined('TB_BASE_PATH') || define('TB_BASE_PATH', __DIR__);
@@ -25,6 +28,31 @@ class Api extends \Longman\TelegramBot\Telegram
         $this->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
 
     }
+
+    public function handle()
+    {
+        if (empty($this->bot_username)) {
+            throw new TelegramException('Bot Username is not defined!');
+        }
+
+        $this->input = Request::getInput();
+
+        if (empty($this->input)) {
+            throw new TelegramException('Input is empty!');
+        }
+
+        $post = json_decode($this->input, true);
+        if (empty($post)) {
+            throw new TelegramException('Invalid JSON!');
+        }
+
+        if ($response = $this->processUpdate(new Update($post, $this->bot_username))) {
+            return $response->isOk();
+        }
+
+        return false;
+    }
+
     public function getCommandObject($command)
     {
         $which = ['System'];

@@ -113,13 +113,19 @@ class HistoryCommand extends UserCommand
                 if ($pager->buttons)
                     $keyboards[] = $pager->buttons;
 
-                if(!$order->pay)
+                if($order->pay) {
                     $keyboards[] = [
                         new InlineKeyboardButton([
-                            'text' => 'payment/' . $order->id,//Yii::t('telegram/command','BUTTON_PAY',$order->total_price),
+                            'text' => Yii::t('telegram/command', '✅ ОПЛАЧЕНО!'),
+                            'callback_data' => time()
+                        ])];
+                }else{
+                    $keyboards[] = [
+                        new InlineKeyboardButton([
+                            'text' => Yii::t('telegram/command', 'BUTTON_PAY', $this->number_format($order->total_price)),
                             'callback_data' => 'payment/' . $order->id
                         ])];
-
+                }
                 foreach ($order->products as $product) {
                     $text .= '*' . $product->name . '* `' . $product->quantity . 'шт. / ' . $product->price . ' грн. `' . PHP_EOL;
                 }

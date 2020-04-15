@@ -51,7 +51,7 @@ class CartCommand extends UserCommand
      */
     protected $version = '1.0';
     private $page = 0;
-
+    protected $private_only = true;
     /**
      * Command execute method
      *
@@ -138,7 +138,7 @@ class CartCommand extends UserCommand
                         $keyboards[] = $pager->buttons;
 
                     $keyboards[] = [
-                        new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price), 'callback_data' => 'checkOut']),
+                        new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $this->number_format($order->total_price)), 'callback_data' => 'checkOut']),
                     ];
 
 
@@ -148,7 +148,7 @@ class CartCommand extends UserCommand
                     //$text .= '[' . $product->name . '](https://images.ua.prom.st/1866772551_w640_h640_1866772551.jpg)' . PHP_EOL;
                     $text .= '[' . $product->name . '](https://bot.7roddom.org.ua' . $product->image . ')' . PHP_EOL;
                     $text .= '_описание товара_' . PHP_EOL;
-                    $text .= '`' . $product->price . ' грн / ' . $product->quantity . ' шт = ' . ($product->price * $product->quantity) . ' грн`' . PHP_EOL;
+                    $text .= '`' . $this->number_format($product->price) . ' грн / ' . $product->quantity . ' шт = ' . $this->number_format(($product->price * $product->quantity)) . ' грн`' . PHP_EOL;
 
                     //  $data['chat_id'] = $chat_id;
                     $data['text'] = $text;

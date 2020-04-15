@@ -44,7 +44,7 @@ class CheckOutCommand extends SystemCommand
     /**
      * @var string
      */
-    protected $usage = '/checkout <go>';
+    protected $usage = '/checkout';
 
     /**
      * @var string
@@ -82,7 +82,6 @@ class CheckOutCommand extends SystemCommand
 
         if ($update->getCallbackQuery()) {
             $callbackQuery = $update->getCallbackQuery();
-
             $message = $callbackQuery->getMessage();
             //  $chat = $callbackQuery->getMessage()->getChat();
             //  $user = $message->getFrom();
@@ -98,7 +97,6 @@ class CheckOutCommand extends SystemCommand
             $chat_id = $chat->getId();
             $user_id = $user->getId();
         }
-
 
         $data['chat_id'] = $chat_id;
         $text = trim($message->getText(true));
@@ -138,55 +136,50 @@ class CheckOutCommand extends SystemCommand
         }
         $result = Request::emptyResponse();
 
-
         //State machine
         //Entrypoint of the machine state if given by the track
         //Every time a step is achieved the track is updated
         switch ($state) {
             case 0:
-                if ($text === '' || !in_array($text, ['➡ Продолжить', '❌ Отмена'], true)) {
+
+                if ($state == 0) {
+
                     $notes['state'] = 0;
                     $this->conversation->update();
+                    if ($user->getFirstName() && $user->getLastName()) {
+                        $data['text'] = 'Введите Ваше имя или веберите из клавиатуры';
+                        $data['reply_markup'] = (new Keyboard([$user->getFirstName() . ' ' . $user->getLastName(), 'Отмена']))
+                            ->setResizeKeyboard(true)
+                            ->setOneTimeKeyboard(true)
+                            ->setSelective(true);
 
-                    $data['reply_markup'] = (new Keyboard(['➡ Продолжить', '❌ Отмена']))
-                        ->setResizeKeyboard(true)
-                        ->setOneTimeKeyboard(true)
-                        ->setSelective(true);
+                        $result = Request::sendMessage($data);
 
-                    $data['text'] = 'Продолжить:';
-                    if ($text !== '') {
-                        $data['text'] = 'Выберите вариант, на клавиатуры:';
+                        if ($text) {
+                            $notes['state'] = 1;
+                            $notes['name'] = $text;
+                            $this->conversation->update();
+
+                        }
                     }
-
+                    break;
+                } else {
+                    $data['text'] = 'ФИО:';
+                    $data['reply_markup'] = Keyboard::remove(['selective' => true]);
                     $result = Request::sendMessage($data);
+                    if ($text) {
+                        $notes['state'] = 1;
+                        $notes['name'] = $text;
+                        $this->conversation->update();
+
+                    }
                     break;
                 }
-                if ($text === 'Да') {
-                    $notes['confirm'] = $text;
-                    $text = '';
-                } else {
-                    return $this->telegram->executeCommand('cancel');
-                }
-            case 1:
-                if ($text === '' || $notes['confirm'] == '➡ Продолжить') {
-                    $notes['state'] = 1;
-                    $this->conversation->update();
 
-                    $data['reply_markup'] = (new Keyboard([$user->getFirstName() . ' ' . $user->getLastName(), 'Отмена']))
-                        ->setResizeKeyboard(true)
-                        ->setOneTimeKeyboard(true)
-                        ->setSelective(true);
-
-                    $data['text'] = 'Ваше имя:';
-                    if (empty($text)) {
-                        $result = Request::sendMessage($data);
-                        break;
-                    }
-                }
-                $notes['name'] = $text;
                 $text = '';
+
             // no break
-            case 2:
+            case 1:
 
                 $delivery = Delivery::find()->all();
                 $deliveryList = [];
@@ -206,7 +199,7 @@ class CheckOutCommand extends SystemCommand
 
 
                 if ($text === '' || !in_array($text, $deliveryList, true)) {
-                    $notes['state'] = 2;
+                    $notes['state'] = 1;
                     $this->conversation->update();
 
                     $data['reply_markup'] = $buttons;
@@ -223,7 +216,7 @@ class CheckOutCommand extends SystemCommand
                 $notes['delivery'] = $text;
                 $notes['delivery_id'] = array_search($text, $deliveryList);
             // no break
-            case 3:
+            case 2:
 
                 $payments = Payment::find()->all();
                 $paymentList = [];
@@ -241,7 +234,7 @@ class CheckOutCommand extends SystemCommand
                     ->setSelective(true);
 
                 if ($text === '' || !in_array($text, $paymentList, true)) {
-                    $notes['state'] = 3;
+                    $notes['state'] = 2;
                     $this->conversation->update();
 
                     $data['reply_markup'] = $buttons;
@@ -258,9 +251,9 @@ class CheckOutCommand extends SystemCommand
                 $notes['payment'] = $text;
                 $notes['payment_id'] = array_search($text, $paymentList);
             // no break
-            case 4:
+            case 3:
                 if ($message->getContact() === null) {
-                    $notes['state'] = 4;
+                    $notes['state'] = 3;
                     $this->conversation->update();
 
                     $data['reply_markup'] = (new Keyboard(
@@ -280,21 +273,21 @@ class CheckOutCommand extends SystemCommand
                 $notes['phone_number'] = $message->getContact()->getPhoneNumber();
 
             // no break
-            case 5:
+            case 4:
                 $this->conversation->update();
                 $content = '✅ Ваш заказ успешно оформлен' . PHP_EOL;
                 $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
                 if ($order) {
                     if ($order->products) {
                         foreach ($order->products as $product) {
-                            $content .= '*' . $product->name . ' (' . $product->quantity . ' шт.)*: ' . $this->number_format($product->price) . ' грн.' . PHP_EOL;
+                            $content .= '<strong>' . $product->name . '</strong>: ' . $product->price . '' . PHP_EOL;
                         }
                     }
                 }
-                $content .= 'Суммка заказа: *' . $this->number_format($order->total_price) . '* грн.' . PHP_EOL;
+                $content .= 'Суммка заказа: ' . $order->total_price . '' . PHP_EOL;
                 unset($notes['state']);
                 foreach ($notes as $k => $v) {
-                    $content .= PHP_EOL . '*' . ucfirst($k) . '*: ' . $v;
+                    $content .= PHP_EOL . '<strong>' . ucfirst($k) . '</strong>: ' . $v;
                 }
 
                 $order->delivery = $notes['delivery'];
@@ -304,7 +297,7 @@ class CheckOutCommand extends SystemCommand
                 $order->checkout = 1;
                 $order->save();
 
-                $data['parse_mode'] = 'Markdown';
+                $data['parse_mode'] = 'HTML';
                 $data['reply_markup'] = $this->homeKeyboards();
                 $data['text'] = $content;
                 $result = Request::sendMessage($data);
@@ -312,7 +305,7 @@ class CheckOutCommand extends SystemCommand
 
                 if ($result->isOk()) {
                     $inlineKeyboards[] = [
-                        new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_PAY', $this->number_format($order->total_price)), 'callback_data' => "payment/{$order->id}"]),
+                        new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_PAY', $order->total_price), 'callback_data' => "payment/{$order->id}"]),
                     ];
                     $data['reply_markup'] = new InlineKeyboard([
                         'inline_keyboard' => $inlineKeyboards
@@ -327,6 +320,4 @@ class CheckOutCommand extends SystemCommand
 
         return $result;
     }
-
-
 }

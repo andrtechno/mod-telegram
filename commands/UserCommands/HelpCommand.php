@@ -51,11 +51,13 @@ class HelpCommand extends Command
 
 
         $keyboards[] = [
+            new KeyboardButton(['text' => '🏠 Начало']),
             new KeyboardButton(['text' => '☎ Позвонить']),
-            new KeyboardButton(['text' => '✉ Написать']),
+
         ];
         $keyboards[] = [
-            new KeyboardButton(['text' => '⚙ Настройки']),
+            new KeyboardButton(['text' => '✉ Написать']),
+          //  new KeyboardButton(['text' => '⚙ Настройки']),
         ];
 
         $reply_markup = (new Keyboard([
@@ -102,11 +104,6 @@ class HelpCommand extends Command
         }
 
         $data['text'] = 'Помощь не доступна: Команда /' . $command_str . ' не найдена';
-
-
-
-
-
 
         return Request::sendMessage($data);
     }

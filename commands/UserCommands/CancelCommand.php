@@ -34,7 +34,7 @@ class CancelCommand extends SystemCommand
     protected $version = '1.0.0';
     protected $need_mysql = true;
     public $enabled = true;
-    
+
     /**#@-*/
 
     /**
@@ -42,7 +42,7 @@ class CancelCommand extends SystemCommand
      */
     public function execute()
     {
-        $text = 'No active conversation!';
+        // $text = 'No active conversation!';
 
         //Cancel current conversation if any
         $conversation = new Conversation(
@@ -52,14 +52,18 @@ class CancelCommand extends SystemCommand
 
         if ($conversation_command = $conversation->getCommand()) {
             $conversation->cancel();
-            $text='';
-            if($this->telegram->isAdmin($this->getMessage()->getFrom()->getId())){
-                $text.=ucfirst($conversation_command).': ';
+            $text = '';
+            if ($this->telegram->isAdmin($this->getMessage()->getFrom()->getId())) {
+                $text .= ucfirst($conversation_command) . ': ';
             }
             $text = 'Отменено!';
         }
+        if ($text) {
+            return $this->hideKeyboard($text);
+        } else {
+            return Request::emptyResponse();
+        }
 
-        return $this->hideKeyboard($text);
     }
 
     /**
@@ -80,9 +84,9 @@ class CancelCommand extends SystemCommand
     private function hideKeyboard($text)
     {
         return Request::sendMessage([
-            'reply_markup' => Keyboard::remove(['selective' => true]),
-            'chat_id'      => $this->getMessage()->getChat()->getId(),
-            'text'         => $text,
+            // 'reply_markup' => Keyboard::remove(['selective' => true]),
+            'chat_id' => $this->getMessage()->getChat()->getId(),
+            'text' => $text,
         ]);
     }
 }

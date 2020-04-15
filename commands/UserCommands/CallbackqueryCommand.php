@@ -163,7 +163,7 @@ class CallbackqueryCommand extends SystemCommand
 
             $keyboards[] = [
                 new InlineKeyboardButton([
-                    'text' => Yii::t('telegram/command', 'BUTTON_BUY', $price),
+                    'text' => Yii::t('telegram/command', 'BUTTON_BUY', $this->number_format($price)),
                     'callback_data' => "addCart/{$product_id}"
                 ])
             ];
@@ -207,7 +207,19 @@ class CallbackqueryCommand extends SystemCommand
                 ->executeCommand($command);
 
         } elseif (preg_match('/^checkOut/iu', trim($callback_data), $match)) {
-            return $this->telegram->executeCommand('checkout');
+            $result = $this->replyToChat(
+                'Введите',
+                [
+                    'parse_mode' => 'markdown',
+                    'reply_markup' => Keyboard::remove(['selective' => true]),
+                ]
+            );
+           return $this->telegram->executeCommand('checkout');
+
+
+
+          //  return Request::emptyResponse();
+          //  return $this->telegram->getCommandObject('checkout')->execute();
         } elseif (preg_match('/^addCart\/([0-9]+)/iu', trim($callback_data), $match)) {
 
 
@@ -342,7 +354,7 @@ class CallbackqueryCommand extends SystemCommand
                     foreach ($products as $index => $product) {
                         $keyboards = [];
                         $caption = '<strong>' . $product->name . '</strong>' . PHP_EOL;
-                        $caption .= $product->price . ' грн' . PHP_EOL . PHP_EOL;
+                        $caption .= $this->number_format($product->price) . ' грн' . PHP_EOL . PHP_EOL;
                         $caption .= '<strong>Характеристики:</strong>' . PHP_EOL;
                         foreach ($this->attributes($product) as $name => $value) {
                             $caption .= '<strong>' . $name . '</strong>: ' . $value . PHP_EOL;
@@ -377,7 +389,7 @@ class CallbackqueryCommand extends SystemCommand
                         } else {
                             $keyboards[] = [
                                 new InlineKeyboardButton([
-                                    'text' => Yii::t('telegram/command', 'BUTTON_BUY', $product->price),
+                                    'text' => Yii::t('telegram/command', 'BUTTON_BUY', $this->number_format($product->price)),
                                     'callback_data' => "addCart/{$product->id}"
                                 ])
                             ];
@@ -393,7 +405,7 @@ class CallbackqueryCommand extends SystemCommand
                                 'inline_keyboard' => $keyboards
                             ]),
                         ];
-                        $response = Request::sendPhoto($dataPhoto);
+                        Request::sendPhoto($dataPhoto);
                     }
                 }
 
@@ -438,10 +450,10 @@ class CallbackqueryCommand extends SystemCommand
                         'inline_keyboard' => $keyboards2
                     ]);
                 }
-                Request::sendMessage($data);
+                return Request::sendMessage($data);
 
 
-                return $response;
+
             }
 
             return Request::emptyResponse();

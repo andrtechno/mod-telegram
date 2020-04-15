@@ -144,7 +144,7 @@ class SearchCommand extends UserCommand
                             'query' => '*'.$notes['query'].'*',
                             'count' => $count,
                         ]),
-                        'reply_markup' => $this->homeKeyboards(),
+                        'reply_markup' => $this->catalogKeyboards(),
                     ];
 
                     $notes['status'] = ($count) ? true : false;
