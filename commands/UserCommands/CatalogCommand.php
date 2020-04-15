@@ -122,7 +122,7 @@ class CatalogCommand extends UserCommand
 
         $dataCatalog['text'] = '⬇ Каталог продукции';
         $dataCatalog['chat_id'] = $chat_id;
-        $dataCatalog['reply_markup'] = $this->homeKeyboards();
+        $dataCatalog['reply_markup'] = $this->catalogKeyboards();
         $buttonsResponse = Request::sendMessage($dataCatalog);
 
         $result = $data;

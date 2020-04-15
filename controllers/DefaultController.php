@@ -73,7 +73,9 @@ class DefaultController extends Controller
     public function actionHook(){
         Yii::$app->user->enableSession = false;
         Yii::$app->user->enableAutoLogin = false;
+        $session = Yii::$app->session;
 
+$session->destroy();
 Yii::$app->response->format = Response::FORMAT_HTML;
         $mysql_credentials = [
             'host' => 'corner2.mysql.tools',

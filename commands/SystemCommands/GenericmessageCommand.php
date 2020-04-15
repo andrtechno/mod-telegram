@@ -87,21 +87,17 @@ class GenericmessageCommand extends SystemCommand
             $this->telegram->executeCommand('start');
             return $this->telegram->executeCommand('cancel');
 
-        } elseif ($text == 'Отмена') {
-            return $this->telegram->executeCommand('cancel');
+        //} elseif ($text == 'Отмена') {
+        //    return $this->telegram->executeCommand('cancel');
         } elseif (preg_match('/^(\x{2753})/iu', $text, $match)) { //help emoji
             return $this->telegram->executeCommand('help');
         } elseif (preg_match('/^(\x{1F4E2})/iu', $text, $match)) { //news emoji
             return $this->telegram->executeCommand('news');
-        } elseif (preg_match('/^(\x{1F4E6})/iu', $text, $match)) { //my carts emoji
-            //  $telegram->executeCommand('help');
         } elseif (preg_match('/^(\x{260E}|\x{1F4DE})/iu', $text, $match)) { //phone emoji
             return $this->telegram->executeCommand('call');
         } elseif (preg_match('/^(\x{2709})/iu', $text, $match)) { //feedback emoji
             return $this->telegram->executeCommand('feedback');
         } elseif (preg_match('/^(\x{1F4E6})/iu', $text, $match)) { //package emoji
-           // echo $text;
-            //echo 'zzzzzzzzzzzz history history';
             return $this->telegram->executeCommand('history');
         } elseif (preg_match('/^(\x{2699})/iu', $text, $match)) { //gear emoji
             return $this->telegram->executeCommand('settings');

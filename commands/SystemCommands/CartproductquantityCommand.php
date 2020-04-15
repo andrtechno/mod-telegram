@@ -89,7 +89,7 @@ class CartproductquantityCommand extends SystemCommand
             new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price), 'callback_data' => 'checkOut']),
         ];
         $keyboards[] = [
-            new InlineKeyboardButton(['text' => '❌', 'callback_data' => "removeProductCart/{$product->product_id}"]),
+            new InlineKeyboardButton(['text' => '❌', 'callback_data' => "removeProductCart/{$this->product_id}"]),
         ];
 
 

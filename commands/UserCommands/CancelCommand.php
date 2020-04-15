@@ -52,7 +52,11 @@ class CancelCommand extends SystemCommand
 
         if ($conversation_command = $conversation->getCommand()) {
             $conversation->cancel();
-            $text = ucfirst($conversation_command) . ': Отменено!';
+            $text='';
+            if($this->telegram->isAdmin($this->getMessage()->getFrom()->getId())){
+                $text.=ucfirst($conversation_command).': ';
+            }
+            $text = 'Отменено!';
         }
 
         return $this->hideKeyboard($text);
