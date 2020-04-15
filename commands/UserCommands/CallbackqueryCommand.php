@@ -69,9 +69,10 @@ class CallbackqueryCommand extends SystemCommand
             return $this->telegram->executeCommand('start');
         } elseif (preg_match('/^payment\/([0-9]+)/iu', trim($callback_data), $match)) {
 
-            return $this->telegram
-                ->setCommandConfig('payment', ['order_id' => $match[1]])
-                ->executeCommand('payment');
+            $this->telegram->setCommandConfig('payment', [
+                'order_id' => $match[1]
+            ]);
+            return $this->telegram->executeCommand('payment');
 
         } elseif (strpos(trim($callback_data), 'command_pager')) {
             return $this->telegram

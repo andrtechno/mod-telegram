@@ -127,20 +127,20 @@ class CartCommand extends UserCommand
             if ($query->count()) {
                 foreach ($products as $product) {
 
+                    $keyboards[] = [
+                        new InlineKeyboardButton(['text' => '❌', 'callback_data' => "cartDelete/{$order->id}/{$product->product_id}"]),
+                        new InlineKeyboardButton(['text' => '—', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/down/cart"]),
+                        new InlineKeyboardButton(['text' => $product->quantity . ' шт.', 'callback_data' => time()]),
+                        new InlineKeyboardButton(['text' => '+', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/up/cart"])
+                    ]; // 🔺 🔻
+
                     if ($pager->buttons)
                         $keyboards[] = $pager->buttons;
 
                     $keyboards[] = [
-                        new InlineKeyboardButton(['text' => '—', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/down/cart"]),
-                        new InlineKeyboardButton(['text' => $product->quantity . ' шт.', 'callback_data' => time()]),
-                        new InlineKeyboardButton(['text' => '+', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/up/cart"])
-                    ];
-                    $keyboards[] = [
                         new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price), 'callback_data' => 'checkOut']),
                     ];
-                    $keyboards[] = [
-                        new InlineKeyboardButton(['text' => '❌', 'callback_data' => "cartDelete/{$order->id}/{$product->product_id}"]),
-                    ];
+
 
 
                     $text = '*Ваша корзина*' . PHP_EOL;

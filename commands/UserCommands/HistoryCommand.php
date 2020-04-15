@@ -116,7 +116,7 @@ class HistoryCommand extends UserCommand
                 if(!$order->pay)
                     $keyboards[] = [
                         new InlineKeyboardButton([
-                            'text' => Yii::t('telegram/command','BUTTON_PAY',$order->total_price),
+                            'text' => 'payment/' . $order->id,//Yii::t('telegram/command','BUTTON_PAY',$order->total_price),
                             'callback_data' => 'payment/' . $order->id
                         ])];
 

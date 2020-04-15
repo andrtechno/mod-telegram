@@ -51,17 +51,11 @@ class HelpCommand extends Command
 
 
         $keyboards[] = [
-            new KeyboardButton(['text' => '☎ Позвонить']), //260E
-            new KeyboardButton(['text' => '✉ Написать']), //2709
-            //  new KeyboardButton(['text' => '📞 Написать']) //1F4DE
+            new KeyboardButton(['text' => '☎ Позвонить']),
+            new KeyboardButton(['text' => '✉ Написать']),
         ];
-        // $keyboards[] = [
-
-        //  new KeyboardButton(['text' => '📦 Мои заказы'])
-        // ];
         $keyboards[] = [
             new KeyboardButton(['text' => '⚙ Настройки']),
-           // new KeyboardButton(['text' => '❓ Помощь'])
         ];
 
         $reply_markup = (new Keyboard([
@@ -77,7 +71,7 @@ class HelpCommand extends Command
         //echo count($user_commands).PHP_EOL;
         //echo count($admin_commands).PHP_EOL;
         // If no command parameter is passed, show the list.
-        if ($command_str === '') {
+        if ($command_str === '' || preg_match('/^(\x{2753})/iu', $command_str, $match)) {
             $data['text'] = '*'.Yii::t('telegram/command','COMMAND_LIST').'*:' . PHP_EOL;
             foreach ($user_commands as $user_command) {
                 $data['text'] .= '/' . $user_command->getName() . ' - ' . $user_command->getDescription() . PHP_EOL;
@@ -112,7 +106,7 @@ class HelpCommand extends Command
            return Request::sendMessage($data);
         }
 
-        $data['text'] = 'No help available: Command /' . $command_str . ' not found';
+        $data['text'] = 'Помощь не доступна: Команда /' . $command_str . ' не найдена';
 
 
 

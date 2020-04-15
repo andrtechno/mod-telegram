@@ -12,9 +12,12 @@ namespace panix\mod\telegram\commands\SystemCommands;
 
 use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Entities\Keyboard;
+use Longman\TelegramBot\Entities\Payments\LabeledPrice;
 use Longman\TelegramBot\Entities\ReplyKeyboardHide;
 use Longman\TelegramBot\Request;
+use panix\engine\CMS;
 use panix\mod\telegram\components\SystemCommand;
+use panix\mod\telegram\models\Order;
 
 /**
  *
@@ -54,6 +57,26 @@ class PaymentCommand extends SystemCommand
 
         $callback_query_id = $callback_query->getId();
         $callback_data = $callback_query->getData();
+
+
+        echo $this->order_id.'zzzzzzz';
+        $order = Order::find()->where(['id'=>$this->order_id])->one();
+
+        echo $order->total_price;
+if($order){
+        $prices[] = new LabeledPrice(['label'=>'UAH','amount'=>150]);
+        $data['chat_id']=$chat_id;
+        $data['title']='title';
+        $data['description']='description';
+        $data['payload']='order-'.$order->id;
+        $data['provider_token']='632593626:TEST:i56982357197';
+        $data['start_parameter']=CMS::gen(10);
+        $data['currency']='UAH';
+        $data['prices']=$prices;
+        $pay = Request::sendInvoice($data);
+        print_r($pay);
+}
+
 
 
         $data = [
