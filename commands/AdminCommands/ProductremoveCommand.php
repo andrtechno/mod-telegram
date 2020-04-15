@@ -121,7 +121,7 @@ class ProductremoveCommand extends AdminCommand
                     } else {
 
                         $this->conversation->update();
-                        echo $text;
+                      //  echo $text;
                         $product = Product::findOne($text);
 
                         if ($product) {

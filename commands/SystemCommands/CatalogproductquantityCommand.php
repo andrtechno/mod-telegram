@@ -15,6 +15,7 @@ use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\models\Order;
 use panix\mod\telegram\models\OrderProduct;
 
 /**
@@ -68,6 +69,7 @@ class CatalogproductquantityCommand extends SystemCommand
         }
 
 
+        $product = OrderProduct::find()->where(['order_id'=>$this->order_id,'product_id'=>$this->product_id])->one();
         $chat_id = $message->getChat()->getId();
       //  $order = OrderProduct::find()->where(['order_id'=>$this->order_id]);
         $keyboards[] = [
@@ -85,7 +87,7 @@ class CatalogproductquantityCommand extends SystemCommand
             ]),
             new InlineKeyboardButton([
                 'text' => '❌',
-                'callback_data' => "cartDelete/{$this->order_id}/{$this->product_id}"
+                'callback_data' => "cartDeleteInCatalog/{$product->id}/{$product->price}"
             ]),
         ];
         if ($this->telegram->isAdmin($chat_id)) {

@@ -126,7 +126,6 @@ class CatalogCommand extends UserCommand
         $dataCatalog['chat_id'] = $chat_id;
         $dataCatalog['reply_markup'] = $this->homeKeyboards();
         $buttonsResponse = Request::sendMessage($dataCatalog);
-        echo 'oo';
 
         $result = $data;
 

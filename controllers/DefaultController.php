@@ -33,7 +33,7 @@ class DefaultController extends Controller
                 'actions' => [
                     'destroy-chat' => ['post'],
                     'init-chat' => ['post'],
-                  //  'hook' => ['post'],
+                    'hook' => ['post'],
                 ],
             ],
         ];
@@ -42,7 +42,10 @@ class DefaultController extends Controller
     public function beforeAction($action)
     {
         if ($action->id == 'hook') {
+            Yii::$app->user->enableSession = false;
+            Yii::$app->user->enableAutoLogin = false;
             $this->enableCsrfValidation = false;
+
         }
         return parent::beforeAction($action);
     }
@@ -68,8 +71,10 @@ class DefaultController extends Controller
     }
 
     public function actionHook(){
-        Yii::info('test hook','application');
+        Yii::$app->user->enableSession = false;
+        Yii::$app->user->enableAutoLogin = false;
 
+Yii::$app->response->format = Response::FORMAT_HTML;
         $mysql_credentials = [
             'host' => 'corner2.mysql.tools',
             'user' => 'corner2_bot',
@@ -95,9 +100,9 @@ class DefaultController extends Controller
             ];
 
             $telegram->enableMySql($mysql_credentials);
-            $telegram->enableAdmins();
-            $telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
-            $telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
+           // $telegram->enableAdmins();
+            //$telegram->setDownloadPath(Yii::getAlias('@app/web/downloads/telegram'));
+            //$telegram->setUploadPath(Yii::getAlias('@app/web/uploads/telegram'));
 
             $telegram->addCommandsPaths($commands_paths);
 

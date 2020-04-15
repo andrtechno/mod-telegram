@@ -2,6 +2,7 @@
 
 namespace panix\mod\telegram\components;
 
+use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Yii;
@@ -9,7 +10,8 @@ use Yii;
 abstract class UserCommand extends Command
 {
 
-    public function startKeyboards(){
+    public function startKeyboards()
+    {
         $keyboards[] = [
             new KeyboardButton(['text' => '📂 Каталог']),
             new KeyboardButton(['text' => '🔎 Поиск']),
@@ -31,8 +33,30 @@ abstract class UserCommand extends Command
         return $data;
     }
 
+    public function productAdminKeywords($chat_id, $product_id)
+    {
+        $keyboards = [];
+        if ($this->telegram->isAdmin($chat_id)) {
+            $keyboards = [
+                new InlineKeyboardButton([
+                    'text' => '✏',
+                    'callback_data' => 'query=productUpdate&id=' . $product_id
+                ]),
+                new InlineKeyboardButton([
+                    'text' => '👁',
+                    'callback_data' => 'query=productSwitch&id=' . $product_id
+                ]),
+                new InlineKeyboardButton([
+                    'text' => '❌',
+                    'callback_data' => 'query=productDelete&id=' . $product_id
+                ]),
+            ];
+        }
+        return $keyboards;
+    }
 
-    public function homeKeyboards(){
+    public function homeKeyboards()
+    {
         $keyboards[] = [
             new KeyboardButton(['text' => '🏠 Начало']),
             new KeyboardButton(['text' => '📂 Каталог']),

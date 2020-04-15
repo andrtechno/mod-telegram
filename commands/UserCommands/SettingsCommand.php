@@ -40,7 +40,7 @@ class SettingsCommand extends UserCommand
             $text = 'Command usage: ' . $this->getUsage();
         }
         $text2 = trim($message->getText(false));
-        echo $text . ' - ' . $text2 . PHP_EOL;
+        //echo $text . ' - ' . $text2 . PHP_EOL;
 
         $dataPoll = [
             'chat_id' => $chat_id,
@@ -71,7 +71,7 @@ class SettingsCommand extends UserCommand
                   'users'       => true,
               ]
           );*/
-        echo $dataPoll['options'].PHP_EOL;
+       // echo $dataPoll['options'].PHP_EOL;
         $data = [
             'chat_id' => $chat_id,
             'text' => $text,

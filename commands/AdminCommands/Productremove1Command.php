@@ -120,7 +120,7 @@ class Productremove1Command extends AdminCommand
                 if ($text !== '' || is_numeric($text)){
                     $notes['state'] = 0;
                     $this->conversation->update();
-                    echo $text;
+                   // echo $text;
                     $product = Product::findOne($text);
 
                     if ($product) {

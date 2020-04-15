@@ -24,7 +24,7 @@ use panix\mod\telegram\components\InlineKeyboardPager;
 use panix\mod\telegram\components\KeyboardMore;
 use panix\mod\telegram\components\KeyboardPager;
 use panix\mod\telegram\components\KeyboardPagination;
-use panix\mod\telegram\components\SystemCommand;
+use panix\mod\telegram\components\UserCommand;
 use panix\mod\telegram\models\AuthorizedManagerChat;
 use panix\mod\telegram\models\Order;
 use panix\mod\telegram\models\OrderProduct;
@@ -36,7 +36,7 @@ use Yii;
 /**
  * Callback query command
  */
-class CallbackqueryCommand extends SystemCommand
+class CallbackqueryCommand extends UserCommand
 {
     /**#@+
      * {@inheritdoc}
@@ -158,22 +158,18 @@ class CallbackqueryCommand extends SystemCommand
             return $this->telegram->executeCommand('cartproductremove');
         } elseif (preg_match('/^cartDeleteInCatalog\/([0-9]+)\/([0-9]+)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
+            $message = $callback_query->getMessage();
             $price = $match[2];
             $product_id = $match[1];
+
             $keyboards[] = [
                 new InlineKeyboardButton([
                     'text' => Yii::t('telegram/command', 'BUTTON_BUY', $price),
                     'callback_data' => "addCart/{$product_id}"
                 ])
             ];
-            if ($this->telegram->isAdmin($chat_id)) {
-                $keyboards[] = [
-                    new InlineKeyboardButton(['text' => '✏', 'callback_data' => "productUpdate/{$product_id}"]),
-                    new InlineKeyboardButton(['text' => '❌', 'callback_data' => "productDelete/{$product_id}"]),
-                    new InlineKeyboardButton(['text' => '👁', 'callback_data' => "productHide/{$product_id}"])
-                ];
-            }
 
+            $keyboards[] = $this->productAdminKeywords($chat_id, $product_id);
 
             $dataEdit['chat_id'] = $chat_id;
             $dataEdit['message_id'] = $message->getMessageId();
@@ -284,12 +280,22 @@ class CallbackqueryCommand extends SystemCommand
             /// /
             /// /
             ///
+        } elseif (preg_match('/(productDelete|productUpdate|productSwitch)/iu', trim($callback_data), $match)) {
+            parse_str($callback_data, $params);
+            print_r($params);
+
+            $data = [
+                'callback_query_id' => $callback_query_id,
+                'text' => 'Это демо версия!',
+               // 'show_alert' => true,
+                'cache_time' => 100,
+            ];
+
+            return Request::answerCallbackQuery($data);
         } elseif (preg_match('/getCatalogList/iu', trim($callback_data), $match)) { //preg_match('/^getCatalogList\/([0-9]+)/iu', trim($callback_data), $match)
             $user_id = $callback_query->getFrom()->getId();
             $order = Order::findOne(['client_id' => $user_id, 'checkout' => 0]);
 
-
-           // $callback_data = 'command=getCatalogList&category_id=31&page=3';
             parse_str($callback_data, $params);
 
 //print_r($params);
@@ -299,9 +305,9 @@ class CallbackqueryCommand extends SystemCommand
                 $query = Product::find()->published()->sort()->applyCategories($params['category_id']);
                 $pages = new KeyboardPagination([
                     'totalCount' => $query->count(),
-                   // 'defaultPageSize' => 5,
-                    'pageSize'=>2,
-                    'currentPage'=>(isset($params['page']))?$params['page']:1
+                    // 'defaultPageSize' => 5,
+                    'pageSize' => 2,
+                    'currentPage' => (isset($params['page'])) ? $params['page'] : 1
                 ]);
 
                 if (isset($params['page'])) {
@@ -309,16 +315,15 @@ class CallbackqueryCommand extends SystemCommand
 
                     $deleleMessage = Request::deleteMessage(['chat_id' => $chat_id, 'message_id' => $update->getCallbackQuery()->getMessage()->getMessageId()]);
                 } else {
-                   $pages->setPage(1);
+                    $pages->setPage(1);
                 }
 
                 $products1 = $query->offset($pages->offset - 2)
                     ->limit($pages->limit);
 
-                echo $products1->createCommand()->rawSql.PHP_EOL;
+                // echo $products1->createCommand()->rawSql.PHP_EOL;
 
                 $products = $products1->all();
-
 
 
                 $pager = new InlineKeyboardMorePager([
@@ -379,14 +384,7 @@ class CallbackqueryCommand extends SystemCommand
                             ];
                         }
 
-                        if ($this->telegram->isAdmin($chat_id)) {
-                            $keyboards[] = [
-                                new InlineKeyboardButton(['text' => '✏', 'callback_data' => "productUpdate/{$product->id}"]),
-                                new InlineKeyboardButton(['text' => '❌', 'callback_data' => "productDelete/{$product->id}"]),
-                                new InlineKeyboardButton(['text' => '👁', 'callback_data' => "productHide/{$product->id}"])
-                            ];
-                        }
-
+                        $keyboards[] = $this->productAdminKeywords($chat_id, $product->id);
                         $dataPhoto = [
                             'photo' => $product->getImage()->getPathToOrigin(),
                             'chat_id' => $chat_id,
@@ -427,13 +425,13 @@ class CallbackqueryCommand extends SystemCommand
                 $begin = $pages->getPage() * $pages->pageSize;
 
 
-
                 $data['chat_id'] = $chat_id;
-                if ($begin >= $pages->totalCount){
-                   $data['text'] = ' Все! ';
-                }else{
+                if ($begin >= $pages->totalCount) {
+                    $data['text'] = ' Все! ';
+                } else {
                     $data['text'] = $begin . ' / ' . $pages->totalCount;
-               }
+                }
+                $data['disable_notification'] = false;
 
                 if ($pager->buttons) {
                     $keyboards2[] = $pager->buttons;
@@ -515,7 +513,7 @@ class CallbackqueryCommand extends SystemCommand
 
     public function callbacktest($ccc)
     {
-        echo 'zzz';
+        // echo 'zzz';
     }
 
 }
