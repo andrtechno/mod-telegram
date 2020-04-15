@@ -36,7 +36,7 @@ class WhoisCommand extends AdminCommand
     /**
      * @var string
      */
-    protected $description = 'Lookup user or group info';
+    protected $description = 'Информации о пользователе или группе';
 
     /**
      * @var string
@@ -132,7 +132,7 @@ class WhoisCommand extends AdminCommand
             if ($chat !== null) {
                 if ($chat->isPrivateChat()) {
                     $text = 'User ID: ' . $user_id . PHP_EOL;
-                    $text .= 'Name: ' . $chat->getFirstName() . ' ' . $chat->getLastName() . PHP_EOL;
+                    $text .= 'Имя Фамилия: ' . $chat->getFirstName() . ' ' . $chat->getLastName() . PHP_EOL;
 
                     $username = $chat->getUsername();
                     if ($username !== null && $username !== '') {
@@ -140,7 +140,7 @@ class WhoisCommand extends AdminCommand
                     }
 
                     $text .= 'First time seen: ' . $created_at . PHP_EOL;
-                    $text .= 'Last activity: ' . $updated_at . PHP_EOL;
+                    $text .= 'Последния активность: ' . $updated_at . PHP_EOL;
 
                     //Code from Whoami command
                     $limit    = 10;
@@ -171,16 +171,16 @@ class WhoisCommand extends AdminCommand
                         }
                     }
                 } elseif ($chat->isGroupChat()) {
-                    $text = 'Chat ID: ' . $user_id . (!empty($old_id) ? ' (previously: ' . $old_id . ')' : '') . PHP_EOL;
-                    $text .= 'Type: ' . ucfirst($chat->getType()) . PHP_EOL;
+                    $text = 'Чат ID: ' . $user_id . (!empty($old_id) ? ' (previously: ' . $old_id . ')' : '') . PHP_EOL;
+                    $text .= 'Тип: ' . ucfirst($chat->getType()) . PHP_EOL;
                     $text .= 'Title: ' . $chat->getTitle() . PHP_EOL;
                     $text .= 'First time added to group: ' . $created_at . PHP_EOL;
-                    $text .= 'Last activity: ' . $updated_at . PHP_EOL;
+                    $text .= 'Последния активность: ' . $updated_at . PHP_EOL;
                 }
             } elseif (is_array($results) && count($results) > 1) {
-                $text = 'Multiple chats matched!';
+                $text = 'Несколько чатов совпадают!';
             } else {
-                $text = 'Chat not found!';
+                $text = 'Чат не найден';
             }
         }
 

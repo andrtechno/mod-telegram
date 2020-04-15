@@ -67,9 +67,6 @@ class HelpCommand extends Command
 
 
         list($all_commands, $user_commands, $admin_commands) = $this->getUserAdminCommands();
-        //echo count($all_commands).PHP_EOL;
-        //echo count($user_commands).PHP_EOL;
-        //echo count($admin_commands).PHP_EOL;
         // If no command parameter is passed, show the list.
         if ($command_str === '' || preg_match('/^(\x{2753})/iu', $command_str, $match)) {
             $data['text'] = '*'.Yii::t('telegram/command','COMMAND_LIST').'*:' . PHP_EOL;
@@ -85,8 +82,6 @@ class HelpCommand extends Command
             }
 
             $data['text'] .= PHP_EOL . 'Для полной справки испльзуйте: /help <command>';
-
-           // $result = $data;
             return Request::sendMessage($data);
         }
 
