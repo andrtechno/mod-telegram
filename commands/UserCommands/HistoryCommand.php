@@ -39,7 +39,7 @@ class HistoryCommand extends UserCommand
     /**
      * @var string
      */
-    protected $description = 'Order history';
+    protected $description = 'Моя история заказов';
 
     /**
      * @var string

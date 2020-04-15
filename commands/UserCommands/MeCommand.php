@@ -22,16 +22,16 @@ use Longman\TelegramBot\Request;
 use Yii;
 
 /**
- * User "/whoami" command
+ * User "/me" command
  */
-class WhoamiCommand extends UserCommand
+class MeCommand extends UserCommand
 {
     /**#@+
      * {@inheritdoc}
      */
-    protected $name = 'whoami';
-    protected $description = 'Show your id, name and username';
-    protected $usage = '/whoami';
+    protected $name = 'me';
+    protected $description = 'Информация обо мне';
+    protected $usage = '/me';
     protected $version = '1.0.1';
     protected $public = true;
     public $enabled = true;

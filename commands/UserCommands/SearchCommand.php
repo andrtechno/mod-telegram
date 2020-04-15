@@ -36,7 +36,7 @@ class SearchCommand extends UserCommand
     /**
      * @var string
      */
-    protected $description = 'Survery for bot users';
+    protected $description = 'Поиск товаров';
 
     /**
      * @var string

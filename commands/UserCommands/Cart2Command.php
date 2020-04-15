@@ -50,7 +50,7 @@ class Cart2Command extends UserCommand
      */
     protected $version = '1.0';
     public $page = 1;
-    // public $enabled = false;
+    public $enabled = false;
 
     /**
      * Command execute method
