@@ -305,11 +305,11 @@ class CheckOutCommand extends SystemCommand
                     //    $content .= PHP_EOL . '*' . ucfirst($k) . '*: ' . $v;
                     //}
 
-                    $content .= PHP_EOL . '*Имя*: ' . $notes['name'] . PHP_EOL;
+                    $content .= PHP_EOL . '*Имя*: ' . $notes['name'];
+                    $content .= PHP_EOL . '*Телефон*: ' . $notes['phone_number'] . PHP_EOL;
+
                     $content .= PHP_EOL . '*Доставка*: ' . $notes['delivery'];
                     $content .= PHP_EOL . '*Оплата*: ' . $notes['payment'];
-                    $content .= PHP_EOL . '*Телефон*: ' . $notes['phone_number'];
-
 
                     $content .= PHP_EOL . PHP_EOL . 'Сумма заказа: *' . $this->number_format($order->total_price) . '* грн.';
 

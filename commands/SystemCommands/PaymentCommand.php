@@ -77,14 +77,7 @@ if(false){
         print_r($pay);
 }
 
-
-
-        $data = [
-            'chat_id' => $chat_id,
-            'text' => 'Система оплаты в разработке!!! ID:'.$this->getConfig('order_id'),
-        ];
-
-        return Request::sendMessage($data);
+        return $this->notify('Система оплаты не настроена','info');
     }
 
 
