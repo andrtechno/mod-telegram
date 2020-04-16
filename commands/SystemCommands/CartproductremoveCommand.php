@@ -10,11 +10,11 @@
 
 namespace panix\mod\telegram\commands\SystemCommands;
 
-use Longman\TelegramBot\Commands\SystemCommand;
-use Longman\TelegramBot\Commands\UserCommand;
+
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\SystemCommand;
 use panix\mod\telegram\models\Order;
 use panix\mod\telegram\models\OrderProduct;
 use Yii;
@@ -90,7 +90,7 @@ class CartproductremoveCommand extends SystemCommand
             $keyboards[] = [
                 new InlineKeyboardButton([
                     'text' => Yii::t('telegram/command','BUTTON_BUY',$originalProduct->price),
-                    'callback_data' => "addCart/{$originalProduct->id}"
+                     'callback_data' => "query=addCart&product_id={$originalProduct->product_id}"
                 ])
             ];
            /* if ($this->telegram->isAdmin($chat_id)) {

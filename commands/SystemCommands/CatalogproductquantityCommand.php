@@ -10,11 +10,12 @@
 
 namespace panix\mod\telegram\commands\SystemCommands;
 
-use Longman\TelegramBot\Commands\SystemCommand;
-use Longman\TelegramBot\Commands\UserCommand;
+
+
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\SystemCommand;
 use panix\mod\telegram\models\Order;
 use panix\mod\telegram\models\OrderProduct;
 
@@ -69,38 +70,33 @@ class CatalogproductquantityCommand extends SystemCommand
         }
 
 
-        $product = OrderProduct::find()->where(['order_id'=>$this->order_id,'product_id'=>$this->product_id])->one();
+        $product = OrderProduct::find()->where(['order_id' => $this->order_id, 'product_id' => $this->product_id])->one();
         $chat_id = $message->getChat()->getId();
-      //  $order = OrderProduct::find()->where(['order_id'=>$this->order_id]);
-        $keyboards[] = [
-            new InlineKeyboardButton([
-                'text' => '—',
-                //'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/down/catalog"
-                'callback_data' => "query=productSpinner&order_id={$this->order_id}&product_id={$this->product_id}&type=down"
-            ]),
-            new InlineKeyboardButton([
-                'text' => '' . $this->quantity . ' шт.',
-                'callback_data' => time()
-            ]),
-            new InlineKeyboardButton([
-                'text' => '+',
-               // 'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/up/catalog"
-                'callback_data' => "query=productSpinner&order_id={$this->order_id}&product_id={$this->product_id}&type=up"
-            ]),
-            new InlineKeyboardButton([
-                'text' => '❌',
-                //'callback_data' => "cartDeleteInCatalog/{$this->order_id}/{$this->product_id}"
-                'callback_data' => "query=deleteInCart&product_id={$product->id}"
-            ]),
-        ];
-        if ($this->telegram->isAdmin($chat_id)) {
+        //  $order = OrderProduct::find()->where(['order_id'=>$this->order_id]);
+        if ($product) {
             $keyboards[] = [
-                new InlineKeyboardButton(['text' => '✏', 'callback_data' => "productUpdate/{$this->product_id}"]),
-                new InlineKeyboardButton(['text' => '❌', 'callback_data' => "productDelete/{$this->product_id}"]),
-                new InlineKeyboardButton(['text' => '👁', 'callback_data' => "productHide/{$this->product_id}"])
+                new InlineKeyboardButton([
+                    'text' => '—',
+                    //'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/down/catalog"
+                    'callback_data' => "query=productSpinner&order_id={$this->order_id}&product_id={$this->product_id}&type=down"
+                ]),
+                new InlineKeyboardButton([
+                    'text' => '' . $this->quantity . ' шт.',
+                    'callback_data' => time()
+                ]),
+                new InlineKeyboardButton([
+                    'text' => '+',
+                    // 'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/up/catalog"
+                    'callback_data' => "query=productSpinner&order_id={$this->order_id}&product_id={$this->product_id}&type=up"
+                ]),
+                new InlineKeyboardButton([
+                    'text' => "❌",
+                    //'callback_data' => "cartDeleteInCatalog/{$this->order_id}/{$this->product_id}"
+                    'callback_data' => "query=deleteInCart&id={$product->id}"
+                ]),
             ];
         }
-
+        $keyboards[] = $this->productAdminKeywords($chat_id, $this->product_id);
 
         $dataEdit['chat_id'] = $chat_id;
         $dataEdit['message_id'] = $message->getMessageId();
