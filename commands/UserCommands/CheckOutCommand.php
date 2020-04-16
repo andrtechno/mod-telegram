@@ -68,6 +68,7 @@ class CheckOutCommand extends SystemCommand
      */
     protected $conversation;
     public $id;
+
     /**
      * Command execute method
      *
@@ -91,7 +92,7 @@ class CheckOutCommand extends SystemCommand
             $chat_id = $chat->getId();
             $user_id = $user->getId();
             parse_str($callbackQuery->getData(), $params);
-            $order = Order::find()->where(['id'=>$params['id'],'checkout'=>0])->one();
+            $order = Order::find()->where(['id' => $params['id'], 'checkout' => 0])->one();
 
         } else {
             $message = $this->getMessage();
@@ -100,9 +101,8 @@ class CheckOutCommand extends SystemCommand
 
             $chat_id = $chat->getId();
             $user_id = $user->getId();
-            $order = Order::find()->where(['client_id'=>$user_id,'checkout'=>0])->one();
+            $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
         }
-
 
 
         $data['chat_id'] = $chat_id;
@@ -289,20 +289,29 @@ class CheckOutCommand extends SystemCommand
                 // no break
                 case 5:
                     $this->conversation->update();
-                    $content = '✅ Ваш заказ успешно оформлен' . PHP_EOL;
+                    $content = '*✅ Ваш заказ успешно оформлен*' . PHP_EOL . PHP_EOL;
                     $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
                     if ($order) {
-                        if ($order->products) {
-                            foreach ($order->products as $product) {
+                        $products = $order->products;
+                        if ($products) {
+                            foreach ($products as $product) {
                                 $content .= '*' . $product->name . ' (' . $product->quantity . ' шт.)*: ' . $this->number_format($product->price) . ' грн.' . PHP_EOL;
                             }
                         }
                     }
-                    $content .= 'Суммка заказа: *' . $this->number_format($order->total_price) . '* грн.' . PHP_EOL;
+
                     unset($notes['state']);
-                    foreach ($notes as $k => $v) {
-                        $content .= PHP_EOL . '*' . ucfirst($k) . '*: ' . $v;
-                    }
+                    //foreach ($notes as $k => $v) {
+                    //    $content .= PHP_EOL . '*' . ucfirst($k) . '*: ' . $v;
+                    //}
+
+                    $content .= PHP_EOL . '*Имя*: ' . $notes['name'] . PHP_EOL;
+                    $content .= PHP_EOL . '*Доставка*: ' . $notes['delivery'];
+                    $content .= PHP_EOL . '*Оплата*: ' . $notes['payment'];
+                    $content .= PHP_EOL . '*Телефон*: ' . $notes['phone_number'];
+
+
+                    $content .= PHP_EOL . PHP_EOL . 'Сумма заказа: *' . $this->number_format($order->total_price) . '* грн.';
 
                     $order->delivery = $notes['delivery'];
                     $order->payment = $notes['payment'];

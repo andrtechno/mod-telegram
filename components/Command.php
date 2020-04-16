@@ -86,19 +86,39 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
         return number_format($sum, 1, '.', ' ');
     }
 
-    public function errorMessage()
+    public function errorMessage($message = null)
     {
-
-
         if ($this->getUpdate()->getCallbackQuery()) {
             $data['chat_id'] = $this->getUpdate()->getCallbackQuery()->getMessage()->getChat()->getId();
         } else {
             $data['chat_id'] = $this->getUpdate()->getMessage()->getChat()->getId();
         }
+        $data['text'] = ($message) ? $message : 'Ошибка';
+        return Request::sendMessage($data);
+    }
 
-
-        $data['text'] = 'Ошибка';
-
+    public function notify($message = null, $type = 'info')
+    {
+        if (!in_array($type, ['info', 'success', 'error', 'warning'])) {
+            $type = 'info';
+        }
+        if ($type == 'success') {
+            $preText = '*✅ Успех:*'.PHP_EOL;
+        } elseif ($type == 'error') {
+            $preText = '*🚫 Ошибка:*'.PHP_EOL;
+        } elseif ($type == 'warning') {
+            $preText = '*⚠ Внимание:*'.PHP_EOL;
+        } else {
+            $preText = '*ℹ Информация:*'.PHP_EOL;
+        }
+        $update = $this->getUpdate();
+        if ($update->getCallbackQuery()) {
+            $data['chat_id'] = $update->getCallbackQuery()->getMessage()->getChat()->getId();
+        } else {
+            $data['chat_id'] = $update->getMessage()->getChat()->getId();
+        }
+        $data['parse_mode']='Markdown';
+        $data['text'] = $preText . ' `'.$message.'`';
         return Request::sendMessage($data);
     }
 

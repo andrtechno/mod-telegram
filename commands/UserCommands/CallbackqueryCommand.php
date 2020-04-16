@@ -167,14 +167,14 @@ class CallbackqueryCommand extends SystemCommand
             $id = $params['id'];
 
 
-            $orderProduct = OrderProduct::findOne((int) $id);
+            $orderProduct = OrderProduct::findOne((int)$id);
 
             if ($orderProduct) {
 
                 $keyboards[] = [
                     new InlineKeyboardButton([
                         'text' => Yii::t('telegram/command', 'BUTTON_BUY', $this->number_format($orderProduct->price)),
-                       // 'callback_data' => "addCart/{$orderProduct->product_id}"
+                        // 'callback_data' => "addCart/{$orderProduct->product_id}"
                         'callback_data' => "query=addCart&product_id={$orderProduct->product_id}"
                     ])
                 ];
@@ -203,22 +203,24 @@ class CallbackqueryCommand extends SystemCommand
                 'order_id' => $params['order_id'],
                 'product_id' => $params['product_id'],
             ]);
-            if ($params['type'] == 'up') {
-                $orderProduct->quantity++;
-            } else {
-                $orderProduct->quantity--;
+            if ($orderProduct) {
+                if ($params['type'] == 'up') {
+                    $orderProduct->quantity++;
+                } else {
+                    $orderProduct->quantity--;
+                }
+                if ($orderProduct->quantity >= 1) {
+                    $orderProduct->save(false);
+                }
+
+                return $this->telegram
+                    ->setCommandConfig('cart', [
+                        'page' => $params['page']
+                    ])
+                    ->executeCommand('cart');
             }
-            if ($orderProduct->quantity >= 1) {
-                $orderProduct->save(false);
-            }
 
-            return $this->telegram
-                ->setCommandConfig('cart', [
-                    'page' => $params['page']
-                ])
-                ->executeCommand('cart');
-
-
+            return $this->errorMessage();
         } elseif (preg_match('/productSpinner/iu', trim($callback_data), $match)) {
 
 
@@ -229,25 +231,27 @@ class CallbackqueryCommand extends SystemCommand
                 'order_id' => $params['order_id'],
                 'product_id' => $params['product_id'],
             ]);
-            if ($params['type'] == 'up') {
-                $orderProduct->quantity++;
-            } else {
-                $orderProduct->quantity--;
+            if ($orderProduct) {
+                if ($params['type'] == 'up') {
+                    $orderProduct->quantity++;
+                } else {
+                    $orderProduct->quantity--;
+                }
+                if ($orderProduct->quantity >= 1) {
+                    $orderProduct->save(false);
+                }
+
+                $command = 'catalogproductquantity';
+
+                return $this->telegram
+                    ->setCommandConfig($command, [
+                        'order_id' => $params['order_id'],
+                        'product_id' => $orderProduct->product_id,
+                        'quantity' => $orderProduct->quantity
+                    ])
+                    ->executeCommand($command);
             }
-            if ($orderProduct->quantity >= 1) {
-                $orderProduct->save(false);
-            }
-
-            $command = 'catalogproductquantity';
-
-            return $this->telegram
-                ->setCommandConfig($command, [
-                    'order_id' => $params['order_id'],
-                    'product_id' => $orderProduct->product_id,
-                    'quantity' => $orderProduct->quantity
-                ])
-                ->executeCommand($command);
-
+            return $this->notify('Товара ранее был удален и корзины','info');
 
         } elseif (preg_match('/checkOut/iu', trim($callback_data), $match)) {
             parse_str($callback_data, $params);
@@ -261,7 +265,7 @@ class CallbackqueryCommand extends SystemCommand
             return $this->errorMessage();
 
 
-        }elseif(preg_match('/addCart/iu', trim($callback_data), $match)){
+        } elseif (preg_match('/addCart/iu', trim($callback_data), $match)) {
             parse_str($callback_data, $params);
             $user_id = $callback_query->getFrom()->getId();
             $product_id = $params['product_id'];
@@ -289,7 +293,6 @@ class CallbackqueryCommand extends SystemCommand
                 'quantity' => $quantity
             ]);
             return $this->telegram->executeCommand('catalogproductquantity');
-
 
 
         } elseif (preg_match('/^addCart2\/([0-9]+)/iu', trim($callback_data), $match)) {
@@ -480,7 +483,7 @@ class CallbackqueryCommand extends SystemCommand
                             $keyboards[] = [
                                 new InlineKeyboardButton([
                                     'text' => Yii::t('telegram/command', 'BUTTON_BUY', $this->number_format($product->price)),
-                                   // 'callback_data' => "addCart/{$product->id}"
+                                    // 'callback_data' => "addCart/{$product->id}"
                                     'callback_data' => "query=addCart&product_id={$product->id}"
                                 ])
                             ];
