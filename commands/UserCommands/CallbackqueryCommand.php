@@ -30,6 +30,7 @@ use panix\mod\telegram\models\Order;
 use panix\mod\telegram\models\OrderProduct;
 use Longman\TelegramBot\Request;
 use Yii;
+use yii\helpers\Url;
 
 /**
  * Callback query command
@@ -396,8 +397,11 @@ class CallbackqueryCommand extends SystemCommand
                         }
 
                         $keyboards[] = $this->productAdminKeywords($chat_id, $product->id);
+
+
+                        Yii::$app->urlManager->setHostInfo('https://bot.7roddom.org.ua');
                         $dataPhoto = [
-                            'photo' => $product->getImage()->getPathToOrigin(),
+                            'photo' => Url::to($product->getImage()->getUrl(),true),
                             'chat_id' => $chat_id,
                             'parse_mode' => 'HTML',
                             'caption' => $caption,

@@ -35,16 +35,10 @@ $results = \Longman\TelegramBot\Request::sendToActiveChats(
     ]
 );
 
-$pref = preg_match('/^(\x{1F4E6})/iu', '📦 Мои заказы', $match);
-var_dump($pref);
-print_r($match);
 
 
-$str = "🐘";
-echo  htmlspecialchars($str);
 
 
-echo $this->context->module->hook_url;
 
 ?>
 
