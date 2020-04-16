@@ -150,12 +150,11 @@ class CallbackqueryCommand extends SystemCommand
             // }
 
 
-        } elseif (preg_match('/^cartDelete\/([0-9]+)\/([0-9]+)/iu', trim($callback_data), $match)) {
+        } elseif (preg_match('/^cartDelete\/([0-9]+)/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
 
             $this->telegram->setCommandConfig('cartproductremove', [
-                'product_id' => $match[2],
-                'order_id' => $match[1],
+                'id' => $match[1],
             ]);
             return $this->telegram->executeCommand('cartproductremove');
 

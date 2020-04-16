@@ -52,6 +52,7 @@ class CartCommand extends UserCommand
     protected $version = '1.0';
     private $page = 0;
     protected $private_only = true;
+
     /**
      * Command execute method
      *
@@ -126,11 +127,11 @@ class CartCommand extends UserCommand
                     $keyboards[] = [
                         new InlineKeyboardButton([
                             'text' => '❌',
-                            'callback_data' => "cartDelete/{$order->id}/{$product->product_id}"
+                            'callback_data' => "cartDelete/{$product->id}"
                         ]),
                         new InlineKeyboardButton([
                             'text' => '—',
-                           // 'callback_data' => "spinner/{$order->id}/{$product->product_id}/down/cart"
+                            // 'callback_data' => "spinner/{$order->id}/{$product->product_id}/down/cart"
                             'callback_data' => "query=cartSpinner&order_id={$order->id}&product_id={$product->product_id}&page={$this->page}&type=down"
                         ]),
                         new InlineKeyboardButton([
@@ -139,7 +140,7 @@ class CartCommand extends UserCommand
                         ]),
                         new InlineKeyboardButton([
                             'text' => '+',
-                           // 'callback_data' => "spinner/{$order->id}/{$product->product_id}/up/cart"
+                            // 'callback_data' => "spinner/{$order->id}/{$product->product_id}/up/cart"
                             'callback_data' => "query=cartSpinner&order_id={$order->id}&product_id={$product->product_id}&page={$this->page}&type=up"
                         ])
                     ]; // 🔺 🔻
@@ -150,12 +151,11 @@ class CartCommand extends UserCommand
                     $keyboards[] = [
                         new InlineKeyboardButton([
                             'text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $this->number_format($order->total_price)),
-                           // 'callback_data' => "checkOut/{$order->id}"
+                            // 'callback_data' => "checkOut/{$order->id}"
                             'callback_data' => 'query=checkOut&id=' . $order->id
 
                         ]),
                     ];
-
 
 
                     $text = '*Ваша корзина*' . PHP_EOL;
@@ -188,6 +188,10 @@ class CartCommand extends UserCommand
 
                 }
             } else {
+                if ($update->getCallbackQuery()) {
+                    $deleleMessage = Request::deleteMessage(['chat_id' => $chat_id, 'message_id' => $update->getCallbackQuery()->getMessage()->getMessageId()]);
+                }
+
                 $data['text'] = Yii::$app->settings->get('telegram', 'empty_cart_text');
                 $data['reply_markup'] = $this->startKeyboards();
                 $response = $data;

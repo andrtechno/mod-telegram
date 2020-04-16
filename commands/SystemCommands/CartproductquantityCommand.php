@@ -74,7 +74,7 @@ class CartproductquantityCommand extends SystemCommand
         $keyboards[] = [
             new InlineKeyboardButton([
                 'text' => '❌',
-                'callback_data' => "cartDelete/{$order->id}/{$this->product_id}"
+                'callback_data' => "cartDelete/{$this->product_id}"
             ]),
             new InlineKeyboardButton([
                 'text' => '—',

@@ -38,8 +38,7 @@ class CartproductremoveCommand extends SystemCommand
      * @var string
      */
     protected $version = '1.0.0';
-    public $product_id;
-    public $order_id;
+    public $id;
 
     /**
      * Command execute method
@@ -50,14 +49,9 @@ class CartproductremoveCommand extends SystemCommand
     public function execute()
     {
 
-        if (($this->product_id = trim($this->getConfig('product_id'))) === '') {
-            $this->product_id = NULL;
+        if (($this->id = trim($this->getConfig('id'))) === '') {
+            $this->id = NULL;
         }
-        if (($this->order_id = trim($this->getConfig('order_id'))) === '') {
-            $this->order_id = NULL;
-        }
-
-
 
 
         $update = $this->getUpdate();
@@ -72,12 +66,8 @@ class CartproductremoveCommand extends SystemCommand
 
         $chat_id = $message->getChat()->getId();
 
-        $order = Order::findOne($this->order_id);
-        $orderProduct = OrderProduct::findOne(['product_id' => $this->product_id, 'order_id' => $order->id]);
-        $ss = $order->getProducts()->count();
 
-
-
+        $orderProduct = OrderProduct::findOne($this->id);
 
 
         if($orderProduct){
@@ -87,20 +77,12 @@ class CartproductremoveCommand extends SystemCommand
             return $this->telegram->executeCommand('cart');
 
 
-            $keyboards[] = [
+           /* $keyboards[] = [
                 new InlineKeyboardButton([
                     'text' => Yii::t('telegram/command','BUTTON_BUY',$originalProduct->price),
                      'callback_data' => "query=addCart&product_id={$originalProduct->product_id}"
                 ])
             ];
-           /* if ($this->telegram->isAdmin($chat_id)) {
-                $keyboards[] = [
-                    new InlineKeyboardButton(['text' => '✏', 'callback_data' => "productUpdate/{$originalProduct->id}"]),
-                    new InlineKeyboardButton(['text' => '❌', 'callback_data' => "productDelete/{$originalProduct->id}"]),
-                    new InlineKeyboardButton(['text' => '👁', 'callback_data' => "productHide/{$originalProduct->id}"])
-                ];
-            }*/
-
 
             $dataEdit['chat_id'] = $chat_id;
             $dataEdit['message_id'] = $message->getMessageId();
@@ -109,7 +91,7 @@ class CartproductremoveCommand extends SystemCommand
             ]);
 
 
-            return Request::editMessageReplyMarkup($dataEdit);
+            return Request::editMessageReplyMarkup($dataEdit);*/
         }
 
         return Request::emptyResponse();
