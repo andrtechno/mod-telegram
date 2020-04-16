@@ -5,6 +5,7 @@ namespace panix\mod\telegram\components;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
+use Longman\TelegramBot\Request;
 
 abstract class Command extends \Longman\TelegramBot\Commands\Command
 {
@@ -84,13 +85,23 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
     {
         return number_format($sum, 1, '.', ' ');
     }
+
     public function errorMessage()
     {
-        $data['chat_id'] = $this->getUpdate()->getMessage()->getChat()->getId();
+
+
+        if ($this->getUpdate()->getCallbackQuery()) {
+            $data['chat_id'] = $this->getUpdate()->getCallbackQuery()->getMessage()->getChat()->getId();
+        } else {
+            $data['chat_id'] = $this->getUpdate()->getMessage()->getChat()->getId();
+        }
+
+
         $data['text'] = 'Ошибка';
 
         return Request::sendMessage($data);
     }
+
     public function catalogKeyboards()
     {
         $keyboards[] = [

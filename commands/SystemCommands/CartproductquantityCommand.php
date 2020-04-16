@@ -72,7 +72,10 @@ class CartproductquantityCommand extends SystemCommand
         $chat_id = $message->getChat()->getId();
         $order = Order::findOne($this->order_id);
         $keyboards[] = [
-
+            new InlineKeyboardButton([
+                'text' => '❌',
+                'callback_data' => "cartDelete/{$order->id}/{$this->product_id}"
+            ]),
             new InlineKeyboardButton([
                 'text' => '—',
                 'callback_data' => "spinner/{$order->id}/{$this->product_id}/down/cart"
@@ -85,10 +88,7 @@ class CartproductquantityCommand extends SystemCommand
                 'text' => '+',
                 'callback_data' => "spinner/{$order->id}/{$this->product_id}/up/cart"
             ]),
-            new InlineKeyboardButton([
-                'text' => '❌',
-                'callback_data' => "cartDelete/{$this->product_id}"
-            ]),
+
         ];
         $keyboards[] = [
             new InlineKeyboardButton([

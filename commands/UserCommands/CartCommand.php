@@ -64,7 +64,6 @@ class CartCommand extends UserCommand
 
 
         if ($update->getCallbackQuery()) {
-            print_r($update->getCallbackQuery());
             $callbackQuery = $update->getCallbackQuery();
             $message = $callbackQuery->getMessage();
             //  $chat = $callbackQuery->getMessage()->getChat();
@@ -86,9 +85,6 @@ class CartCommand extends UserCommand
 
 
         $data['chat_id'] = $chat_id;
-
-
-        // $response = $data;
 
 
         $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
@@ -128,10 +124,24 @@ class CartCommand extends UserCommand
                 foreach ($products as $product) {
 
                     $keyboards[] = [
-                        new InlineKeyboardButton(['text' => '❌', 'callback_data' => "cartDelete/{$order->id}/{$product->product_id}"]),
-                        new InlineKeyboardButton(['text' => '—', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/down/cart"]),
-                        new InlineKeyboardButton(['text' => $product->quantity . ' шт.', 'callback_data' => time()]),
-                        new InlineKeyboardButton(['text' => '+', 'callback_data' => "spinner/{$order->id}/{$product->product_id}/up/cart"])
+                        new InlineKeyboardButton([
+                            'text' => '❌',
+                            'callback_data' => "cartDelete/{$order->id}/{$product->product_id}"
+                        ]),
+                        new InlineKeyboardButton([
+                            'text' => '—',
+                           // 'callback_data' => "spinner/{$order->id}/{$product->product_id}/down/cart"
+                            'callback_data' => "query=cartSpinner&order_id={$order->id}&product_id={$product->product_id}&page={$this->page}&type=down"
+                        ]),
+                        new InlineKeyboardButton([
+                            'text' => $product->quantity . ' шт.',
+                            'callback_data' => time()
+                        ]),
+                        new InlineKeyboardButton([
+                            'text' => '+',
+                           // 'callback_data' => "spinner/{$order->id}/{$product->product_id}/up/cart"
+                            'callback_data' => "query=cartSpinner&order_id={$order->id}&product_id={$product->product_id}&page={$this->page}&type=up"
+                        ])
                     ]; // 🔺 🔻
 
                     if ($pager->buttons)
@@ -205,7 +215,7 @@ class CartCommand extends UserCommand
             new InlineKeyboardButton(['text' => '➡', 'callback_data' => 'get'])
         ];
         $keyboards[] = [
-            new InlineKeyboardButton(['text' => '✅ Заказ на 130 грн. Офрормить', 'callback_data' => 'get']),
+            new InlineKeyboardButton(['text' => '✅ Заказ на 130 грн. Оформить', 'callback_data' => 'get']),
         ];
         $keyboards[] = [
             new InlineKeyboardButton(['text' => '❌', 'callback_data' => 'get']),

@@ -187,7 +187,7 @@ class Cart2Command extends UserCommand
                     new InlineKeyboardButton(['text' => '➡' . ($this->page + 1), 'callback_data' => 'getCart/' . ($this->page + 1)])
                 ];
                 $keyboards[] = [
-                    new InlineKeyboardButton(['text' => '✅ Заказ на 130 грн. Офрормить', 'callback_data' => 'checkOut']),
+                    new InlineKeyboardButton(['text' => '✅ Заказ на 130 грн. Оформить', 'callback_data' => 'checkOut']),
                 ];
                 $keyboards[] = [
                     new InlineKeyboardButton(['text' => '❌', 'callback_data' => "removeProductCart/{$product->product_id}"]),
@@ -289,7 +289,7 @@ print_r($response);
             new InlineKeyboardButton(['text' => '➡', 'callback_data' => 'get'])
         ];
         $keyboards[] = [
-            new InlineKeyboardButton(['text' => '✅ Заказ на 130 грн. Офрормить', 'callback_data' => 'get']),
+            new InlineKeyboardButton(['text' => '✅ Заказ на 130 грн. Оформить', 'callback_data' => 'get']),
         ];
         $keyboards[] = [
             new InlineKeyboardButton(['text' => '❌', 'callback_data' => 'get']),

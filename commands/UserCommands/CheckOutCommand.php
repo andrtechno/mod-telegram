@@ -67,7 +67,7 @@ class CheckOutCommand extends SystemCommand
      * @var \Longman\TelegramBot\Conversation
      */
     protected $conversation;
-
+    public $id;
     /**
      * Command execute method
      *
@@ -90,7 +90,9 @@ class CheckOutCommand extends SystemCommand
             $user = $callbackQuery->getFrom();
             $chat_id = $chat->getId();
             $user_id = $user->getId();
-            $order = Order::findOne($this->getConfig('id'));
+            parse_str($callbackQuery->getData(), $params);
+            $order = Order::find()->where(['id'=>$params['id'],'checkout'=>0])->one();
+
         } else {
             $message = $this->getMessage();
             $chat = $message->getChat();
@@ -100,8 +102,6 @@ class CheckOutCommand extends SystemCommand
             $user_id = $user->getId();
             $order = Order::find()->where(['client_id'=>$user_id,'checkout'=>0])->one();
         }
-
-
 
 
 
@@ -333,6 +333,8 @@ class CheckOutCommand extends SystemCommand
             }
         } else {
             $data['text'] = 'Уже оформлен!';
+            $data['reply_markup'] = $this->startKeyboards();
+
             $result = Request::sendMessage($data);
         }
         return $result;

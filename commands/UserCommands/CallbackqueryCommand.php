@@ -64,8 +64,8 @@ class CallbackqueryCommand extends SystemCommand
         $callback_query_id = $callback_query->getId();
         $callback_data = $callback_query->getData();
 
-       // if(YII_DEBUG){
-            echo 'Callback: '.$callback_data.PHP_EOL;
+        // if(YII_DEBUG){
+        // echo 'Callback: '.$callback_data.PHP_EOL;
         //}
         $data['callback_query_id'] = $callback_query_id;
         if ($callback_data == 'goHome') {
@@ -158,40 +158,53 @@ class CallbackqueryCommand extends SystemCommand
                 'order_id' => $match[1],
             ]);
             return $this->telegram->executeCommand('cartproductremove');
-        } elseif (preg_match('/^cartDeleteInCatalog\/([0-9]+)\/([0-9]+)/iu', trim($callback_data), $match)) {
+
+
+        } elseif (preg_match('/deleteInCart/iu', trim($callback_data), $match)) { //preg_match('/^cartDeleteInCatalog\/([0-9]+)\/([0-9]+)/iu', trim($callback_data), $match)
+            parse_str($callback_data, $params);
+
             $user_id = $callback_query->getFrom()->getId();
             $message = $callback_query->getMessage();
-            $price = $match[2];
-            $product_id = $match[1];
+            $product_id = $params['product_id'];
 
-            $keyboards[] = [
-                new InlineKeyboardButton([
-                    'text' => Yii::t('telegram/command', 'BUTTON_BUY', $this->number_format($price)),
-                    'callback_data' => "addCart/{$product_id}"
-                ])
-            ];
+            echo $product_id.PHP_EOL;
 
-            $keyboards[] = $this->productAdminKeywords($chat_id, $product_id);
+            $orderProduct = OrderProduct::findOne((int) $product_id);
+            print_r($orderProduct);
+            if ($orderProduct) {
 
-            $dataEdit['chat_id'] = $chat_id;
-            $dataEdit['message_id'] = $message->getMessageId();
-            $dataEdit['reply_markup'] = new InlineKeyboard([
-                'inline_keyboard' => $keyboards
-            ]);
+                $keyboards[] = [
+                    new InlineKeyboardButton([
+                        'text' => Yii::t('telegram/command', 'BUTTON_BUY', $this->number_format($orderProduct->price)),
+                        'callback_data' => "addCart/{$product_id}"
+                    ])
+                ];
 
+                $keyboards[] = $this->productAdminKeywords($chat_id, $product_id);
 
-            return Request::editMessageReplyMarkup($dataEdit);
+                $dataEdit['chat_id'] = $chat_id;
+                $dataEdit['message_id'] = $message->getMessageId();
+                $dataEdit['reply_markup'] = new InlineKeyboard([
+                    'inline_keyboard' => $keyboards
+                ]);
+                $orderProduct->delete();
 
+               // if ($orderProduct->order)
+               //     $orderProduct->order->updateTotalPrice();
 
-        } elseif (preg_match('/^spinner\/([0-9]+)\/([0-9]+)\/(up|down)\/(cart|catalog)/iu', trim($callback_data), $match)) {
+                return Request::editMessageReplyMarkup($dataEdit);
+            }
+            return $this->errorMessage();
+
+        } elseif (preg_match('/cartSpinner/iu', trim($callback_data), $match)) {
             $user_id = $callback_query->getFrom()->getId();
+            parse_str($callback_data, $params);
 
             $orderProduct = OrderProduct::findOne([
-                'order_id' => $match[1],
-                'product_id' => $match[2],
-                //  'client_id' => $user_id
+                'order_id' => $params['order_id'],
+                'product_id' => $params['product_id'],
             ]);
-            if ($match[3] == 'up') {
+            if ($params['type'] == 'up') {
                 $orderProduct->quantity++;
             } else {
                 $orderProduct->quantity--;
@@ -199,18 +212,47 @@ class CallbackqueryCommand extends SystemCommand
             if ($orderProduct->quantity >= 1) {
                 $orderProduct->save(false);
             }
-            $command = ($match[4] == 'cart') ? 'cartproductquantity' : 'catalogproductquantity';
+
+            return $this->telegram
+                ->setCommandConfig('cart', [
+                    'page' => $params['page']
+                ])
+                ->executeCommand('cart');
+
+
+        } elseif (preg_match('/productSpinner/iu', trim($callback_data), $match)) {
+
+
+            $user_id = $callback_query->getFrom()->getId();
+            parse_str($callback_data, $params);
+
+            $orderProduct = OrderProduct::findOne([
+                'order_id' => $params['order_id'],
+                'product_id' => $params['product_id'],
+            ]);
+            if ($params['type'] == 'up') {
+                $orderProduct->quantity++;
+            } else {
+                $orderProduct->quantity--;
+            }
+            if ($orderProduct->quantity >= 1) {
+                $orderProduct->save(false);
+            }
+
+            $command = 'catalogproductquantity';
 
             return $this->telegram
                 ->setCommandConfig($command, [
-                    'order_id' => $match[1],
+                    'order_id' => $params['order_id'],
                     'product_id' => $orderProduct->product_id,
                     'quantity' => $orderProduct->quantity
                 ])
                 ->executeCommand($command);
 
+
         } elseif (preg_match('/checkOut/iu', trim($callback_data), $match)) {
             parse_str($callback_data, $params);
+            print_r($params);
             if (isset($params['id'])) {
                 return $this->telegram->setCommandConfig('checkout', [
                     'order_id' => $params['id'],
@@ -225,7 +267,7 @@ class CallbackqueryCommand extends SystemCommand
             $user_id = $callback_query->getFrom()->getId();
 
             $product = Product::findOne($match[1]);
-            $order = Order::findOne(['client_id' => $user_id, 'checkout' => 0]);
+            $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
             $quantity = 1;
             if (!$order) {
                 $order = new Order;
@@ -236,11 +278,12 @@ class CallbackqueryCommand extends SystemCommand
 
                 $order->addProduct($product, $quantity, $product->price);
             } else {
-                $op = OrderProduct::findOne(['product_id' => $product->id, 'order_id' => $order->id]);
+                $op = OrderProduct::find()->where(['product_id' => $product->id, 'order_id' => $order->id])->one();
                 if ($op) {
-                    $op->quantity++;
-                    $quantity = $op->quantity;
-                    $op->save(false);
+                    // $op->quantity++;
+                    // $quantity = $op->quantity;
+                    //  $op->save(false);
+                    //$op->delete();
                 } else {
                     $order->addProduct($product, $quantity, $product->price);
                 }
@@ -268,6 +311,24 @@ class CallbackqueryCommand extends SystemCommand
             $response = $this->telegram->executeCommand('cart');
 
             return $response;
+
+        } elseif (preg_match('/search/', trim($callback_data), $match)) {
+            $user_id = $callback_query->getFrom()->getId();
+            parse_str($callback_data, $params);
+
+
+            $config['string'] = $params['string'];
+            $config['page'] = (isset($params['page'])) ? $params['page'] : 1;
+            if (isset($params['string'])) {
+
+
+                return $this->telegram
+                    ->setCommandConfig('searchresult', $config)
+                    ->executeCommand('searchresult');
+            }
+
+            return Request::emptyResponse();
+
         } elseif (preg_match('/getHistory/', trim($callback_data), $match)) {
 
 
@@ -316,22 +377,20 @@ class CallbackqueryCommand extends SystemCommand
                 $pages = new KeyboardPagination([
                     'totalCount' => $query->count(),
                     // 'defaultPageSize' => 5,
-                    'pageSize' => 2,
+                    'pageSize' => 5,
                     'currentPage' => (isset($params['page'])) ? $params['page'] : 1
                 ]);
 
                 if (isset($params['page'])) {
                     $pages->setPage($params['page']);
-
                     $deleleMessage = Request::deleteMessage(['chat_id' => $chat_id, 'message_id' => $update->getCallbackQuery()->getMessage()->getMessageId()]);
                 } else {
                     $pages->setPage(1);
                 }
 
-                $products1 = $query->offset($pages->offset - 2)
+                $products1 = $query->offset($pages->offset - 5)
                     ->limit($pages->limit);
 
-                // echo $products1->createCommand()->rawSql.PHP_EOL;
 
                 $products = $products1->all();
 
@@ -354,10 +413,10 @@ class CallbackqueryCommand extends SystemCommand
                         $keyboards = [];
                         $caption = '<strong>' . $product->name . '</strong>' . PHP_EOL;
                         $caption .= $this->number_format($product->price) . ' грн' . PHP_EOL . PHP_EOL;
-                        $caption .= '<strong>Характеристики:</strong>' . PHP_EOL;
-                        foreach ($this->attributes($product) as $name => $value) {
-                            $caption .= '<strong>' . $name . '</strong>: ' . $value . PHP_EOL;
-                        }
+                        //$caption .= '<strong>Характеристики:</strong>' . PHP_EOL;
+                        //foreach ($this->attributes($product) as $name => $value) {
+                        //    $caption .= '<strong>' . $name . '</strong>: ' . $value . PHP_EOL;
+                        //}
 
                         if ($order) {
                             $orderProduct = OrderProduct::findOne(['product_id' => $product->id, 'order_id' => $order->id]);
@@ -369,7 +428,8 @@ class CallbackqueryCommand extends SystemCommand
                             $keyboards[] = [
                                 new InlineKeyboardButton([
                                     'text' => '—',
-                                    'callback_data' => "spinner/{$order->id}/{$product->id}/down/catalog"
+                                    // 'callback_data' => "spinner/{$order->id}/{$product->id}/down/catalog"
+                                    'callback_data' => "query=productSpinner&order_id={$order->id}&product_id={$product->id}&type=down"
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '' . $orderProduct->quantity . ' шт.',
@@ -377,11 +437,12 @@ class CallbackqueryCommand extends SystemCommand
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '+',
-                                    'callback_data' => "spinner/{$order->id}/{$product->id}/up/catalog"
+                                    // 'callback_data' => "spinner/{$order->id}/{$product->id}/up/catalog",
+                                    'callback_data' => "query=productSpinner&order_id={$order->id}&product_id={$product->id}&type=up"
                                 ]),
                                 new InlineKeyboardButton([
                                     'text' => '❌',
-                                    'callback_data' => "cartDeleteInCatalog/{$order->id}/{$product->price}"
+                                    'callback_data' => "query=deleteInCart&product_id={$orderProduct->id}"
                                 ]),
                             ];
                             //   $keyboards[] = $this->telegram->executeCommand('cartproductquantity')->getKeywords();
@@ -396,9 +457,10 @@ class CallbackqueryCommand extends SystemCommand
 
                         $keyboards[] = $this->productAdminKeywords($chat_id, $product->id);
 
-
+                        echo Url::to($product->getImage()->getUrlToOrigin(), true) . PHP_EOL;
                         $dataPhoto = [
-                            'photo' => Url::to($product->getImage()->getUrl('800x800'), true),
+                            //'photo' => Url::to($product->getImage()->getUrl('800x800'), true),
+                            'photo' => Url::to($product->getImage()->getUrlToOrigin(), true),
                             'chat_id' => $chat_id,
                             'parse_mode' => 'HTML',
                             'caption' => $caption,
@@ -406,7 +468,7 @@ class CallbackqueryCommand extends SystemCommand
                                 'inline_keyboard' => $keyboards
                             ]),
                         ];
-                        Request::sendPhoto($dataPhoto);
+                        $reqPhoto = Request::sendPhoto($dataPhoto);
                     }
                 }
 
@@ -522,9 +584,5 @@ class CallbackqueryCommand extends SystemCommand
         return $this->_models;
     }
 
-    public function callbacktest($ccc)
-    {
-        // echo 'zzz';
-    }
 
 }

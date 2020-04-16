@@ -75,7 +75,8 @@ class CatalogproductquantityCommand extends SystemCommand
         $keyboards[] = [
             new InlineKeyboardButton([
                 'text' => '—',
-                'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/down/catalog"
+                //'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/down/catalog"
+                'callback_data' => "query=productSpinner&order_id={$this->order_id}&product_id={$this->product_id}&type=down"
             ]),
             new InlineKeyboardButton([
                 'text' => '' . $this->quantity . ' шт.',
@@ -83,11 +84,13 @@ class CatalogproductquantityCommand extends SystemCommand
             ]),
             new InlineKeyboardButton([
                 'text' => '+',
-                'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/up/catalog"
+               // 'callback_data' => "spinner/{$this->order_id}/{$this->product_id}/up/catalog"
+                'callback_data' => "query=productSpinner&order_id={$this->order_id}&product_id={$this->product_id}&type=up"
             ]),
             new InlineKeyboardButton([
                 'text' => '❌',
-                'callback_data' => "cartDeleteInCatalog/{$product->id}/{$product->price}"
+                //'callback_data' => "cartDeleteInCatalog/{$this->order_id}/{$this->product_id}"
+                'callback_data' => "query=deleteInCart&product_id={$product->id}"
             ]),
         ];
         if ($this->telegram->isAdmin($chat_id)) {

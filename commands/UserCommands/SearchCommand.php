@@ -13,6 +13,7 @@ namespace panix\mod\telegram\commands\UserCommands;
 
 use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Entities\InlineKeyboard;
+use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
 use Longman\TelegramBot\Entities\PhotoSize;
@@ -105,7 +106,7 @@ class SearchCommand extends UserCommand
         }
         $notes['status'] = false;
         $result = Request::emptyResponse();
-
+        echo $text;
         //State machine
         //Entrypoint of the machine state if given by the track
         //Every time a step is achieved the track is updated
@@ -137,21 +138,51 @@ class SearchCommand extends UserCommand
 
                     $count = $query->count();
 
-                    $data = [
-                        'chat_id' => $chat_id,
-                        'parse_mode' => 'Markdown',
-                        'text' => Yii::t('shop/default', 'SEARCH_RESULT', [
-                            'query' => '*'.$notes['query'].'*',
+
+                    if ($count) {
+                        $buttons[] = [
+                            new InlineKeyboardButton([
+                                'text' => Yii::t('telegram/command', 'SEARCH_RESULT_TOTAL', [
+                                    'count' => $count,
+                                ]),
+                                'callback_data' => "query=search&string={$notes['query']}"
+                            ])
+                        ];
+                        $data['chat_id'] = $chat_id;
+                        $data['parse_mode'] = 'Markdown';
+                        $data['text'] = $text;
+                        $data['reply_markup'] = $this->catalogKeyboards();
+
+                        $result2 = Request::sendMessage($data);
+
+                        $data = [];
+                        $data['chat_id'] = $chat_id;
+                        $data['parse_mode'] = 'Markdown';
+                        $data['text'] = Yii::t('telegram/command', 'SEARCH_RESULT', [
+                            'query' => '*' . $notes['query'] . '*',
+                        ]);
+
+                        $data['reply_markup'] = new InlineKeyboard(['inline_keyboard' => $buttons]);
+
+
+                        $result = Request::sendMessage($data);
+
+
+                    } else {
+                        $data = [];
+                        $data['chat_id'] = $chat_id;
+                        $data['parse_mode'] = 'Markdown';
+                        $data['text'] = Yii::t('shop/default', 'SEARCH_RESULT', [
                             'count' => $count,
-                        ]),
-                        'reply_markup' => $this->catalogKeyboards(),
-                    ];
-
+                            'query' => '*' . $notes['query'] . '*',
+                        ]);
+                        $data['reply_markup'] = $this->catalogKeyboards();
+                        $result = Request::sendMessage($data);
+                    }
                     $notes['status'] = ($count) ? true : false;
-
                     $this->conversation->update();
                     $this->conversation->stop();
-                    $result = Request::sendMessage($data);
+
 
                     break;
                 }
