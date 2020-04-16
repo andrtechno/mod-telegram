@@ -84,7 +84,13 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
     {
         return number_format($sum, 1, '.', ' ');
     }
+    public function errorMessage()
+    {
+        $data['chat_id'] = $this->getUpdate()->getMessage()->getChat()->getId();
+        $data['text'] = 'Ошибка';
 
+        return Request::sendMessage($data);
+    }
     public function catalogKeyboards()
     {
         $keyboards[] = [

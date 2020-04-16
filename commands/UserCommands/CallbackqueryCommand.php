@@ -11,7 +11,6 @@
 namespace panix\mod\telegram\commands\UserCommands;
 
 
-
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\Keyboard;
@@ -65,6 +64,9 @@ class CallbackqueryCommand extends SystemCommand
         $callback_query_id = $callback_query->getId();
         $callback_data = $callback_query->getData();
 
+       // if(YII_DEBUG){
+            echo 'Callback: '.$callback_data.PHP_EOL;
+        //}
         $data['callback_query_id'] = $callback_query_id;
         if ($callback_data == 'goHome') {
             return $this->telegram->executeCommand('start');
@@ -207,20 +209,16 @@ class CallbackqueryCommand extends SystemCommand
                 ])
                 ->executeCommand($command);
 
-        } elseif (preg_match('/^checkOut/iu', trim($callback_data), $match)) {
-            $result = $this->replyToChat(
-                'Введите',
-                [
-                    'parse_mode' => 'markdown',
-                    'reply_markup' => Keyboard::remove(['selective' => true]),
-                ]
-            );
-           return $this->telegram->executeCommand('checkout');
+        } elseif (preg_match('/checkOut/iu', trim($callback_data), $match)) {
+            parse_str($callback_data, $params);
+            if (isset($params['id'])) {
+                return $this->telegram->setCommandConfig('checkout', [
+                    'order_id' => $params['id'],
+                ])->executeCommand('checkout');
+            }
 
+            return $this->errorMessage();
 
-
-          //  return Request::emptyResponse();
-          //  return $this->telegram->getCommandObject('checkout')->execute();
         } elseif (preg_match('/^addCart\/([0-9]+)/iu', trim($callback_data), $match)) {
 
 
@@ -299,7 +297,7 @@ class CallbackqueryCommand extends SystemCommand
             $data = [
                 'callback_query_id' => $callback_query_id,
                 'text' => 'Это демо версия!',
-               // 'show_alert' => true,
+                // 'show_alert' => true,
                 'cache_time' => 100,
             ];
 
@@ -399,9 +397,8 @@ class CallbackqueryCommand extends SystemCommand
                         $keyboards[] = $this->productAdminKeywords($chat_id, $product->id);
 
 
-                        Yii::$app->urlManager->setHostInfo('https://bot.7roddom.org.ua');
                         $dataPhoto = [
-                            'photo' => Url::to($product->getImage()->getUrl(),true),
+                            'photo' => Url::to($product->getImage()->getUrl('800x800'), true),
                             'chat_id' => $chat_id,
                             'parse_mode' => 'HTML',
                             'caption' => $caption,
@@ -455,7 +452,6 @@ class CallbackqueryCommand extends SystemCommand
                     ]);
                 }
                 return Request::sendMessage($data);
-
 
 
             }

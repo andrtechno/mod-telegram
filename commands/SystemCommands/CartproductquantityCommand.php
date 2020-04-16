@@ -72,6 +72,7 @@ class CartproductquantityCommand extends SystemCommand
         $chat_id = $message->getChat()->getId();
         $order = Order::findOne($this->order_id);
         $keyboards[] = [
+
             new InlineKeyboardButton([
                 'text' => '—',
                 'callback_data' => "spinner/{$order->id}/{$this->product_id}/down/cart"
@@ -84,13 +85,18 @@ class CartproductquantityCommand extends SystemCommand
                 'text' => '+',
                 'callback_data' => "spinner/{$order->id}/{$this->product_id}/up/cart"
             ]),
+            new InlineKeyboardButton([
+                'text' => '❌',
+                'callback_data' => "cartDelete/{$this->product_id}"
+            ]),
         ];
         $keyboards[] = [
-            new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price), 'callback_data' => 'checkOut']),
+            new InlineKeyboardButton([
+                'text' => Yii::t('telegram/command', 'BUTTON_CHECKOUT', $order->total_price),
+                'callback_data' => 'query=checkOut&id=' . $order->id
+            ]),
         ];
-        $keyboards[] = [
-            new InlineKeyboardButton(['text' => '❌', 'callback_data' => "removeProductCart/{$this->product_id}"]),
-        ];
+
 
 
 
