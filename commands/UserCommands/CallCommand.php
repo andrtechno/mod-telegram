@@ -18,8 +18,8 @@ class CallCommand extends UserCommand
     protected $description = 'call number';
     protected $usage = '/call <number>';
     protected $version = '1.0.1';
-    public $enabled = true;
-    public $private_only = true;
+    public $enabled = false;
+    public $private_only = false;
     /**#@-*/
 
     /**

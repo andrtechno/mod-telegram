@@ -20,12 +20,12 @@ use Yii;
  *
  * Display an inline keyboard with a few buttons.
  */
-class ContactmeCommand extends UserCommand
+class ContactCommand extends UserCommand
 {
     /**
      * @var string
      */
-    protected $name = 'contactme';
+    protected $name = 'contact';
 
     /**
      * @var string
@@ -35,7 +35,7 @@ class ContactmeCommand extends UserCommand
     /**
      * @var string
      */
-    protected $usage = '/contactme';
+    protected $usage = '/contact';
 
     /**
      * @var string

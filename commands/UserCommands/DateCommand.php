@@ -29,6 +29,8 @@ class DateCommand extends UserCommand
     protected $usage = '/date <location>';
     protected $version = '1.3.0';
     public $enabled = true;
+    public $private_only=true;
+    public $show_in_help=false;
     /**#@-*/
 
     /**
@@ -50,7 +52,7 @@ class DateCommand extends UserCommand
      *
      * @var string
      */
-    private $google_api_key = '';
+    private $google_api_key = 'AIzaSyD5hoo5O0wYrtfLVZI1nrxBPC421fSu8DY';
 
     /**
      * Date format
@@ -78,6 +80,7 @@ class DateCommand extends UserCommand
         try {
             $response = $this->client->get($path, ['query' => $query]);
         } catch (RequestException $e) {
+
             throw new TelegramException($e->getMessage());
         }
 

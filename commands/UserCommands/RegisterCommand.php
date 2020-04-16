@@ -55,6 +55,7 @@ class RegisterCommand extends UserCommand
      * @var bool
      */
     protected $private_only = true;
+    protected $enabled = false;
 
     /**
      * Conversation Object

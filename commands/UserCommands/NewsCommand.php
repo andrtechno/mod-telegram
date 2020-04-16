@@ -41,6 +41,7 @@ class NewsCommand extends UserCommand
      * @var string
      */
     protected $version = '1.0';
+    public $enabled=false;
 
     // public $enabled = false;
 
