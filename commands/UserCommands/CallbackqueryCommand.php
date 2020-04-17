@@ -386,7 +386,7 @@ class CallbackqueryCommand extends SystemCommand
             ///
         } elseif (preg_match('/(productDelete|productUpdate|productSwitch)/iu', trim($callback_data), $match)) {
             parse_str($callback_data, $params);
-
+print_r($match);die;
 
             $data = [
                 'callback_query_id' => $callback_query_id,

@@ -59,6 +59,7 @@ class ProductremoveCommand extends AdminCommand
      * @var \Longman\TelegramBot\Conversation
      */
     protected $conversation;
+    public $product_id;
 
     /**
      * Command execute method
@@ -69,22 +70,31 @@ class ProductremoveCommand extends AdminCommand
     public function execute()
     {
         $message = $this->getMessage();
+        $update = $this->getUpdate();
+        if ($update->getCallbackQuery()) {
+            $callbackQuery = $update->getCallbackQuery();
+            $message = $callbackQuery->getMessage();
+            $chat = $message->getChat();
+            $user = $callbackQuery->getFrom();
+            parse_str($callbackQuery->getData(), $params);
+            echo $this->product_id.PHP_EOL;
+print_r($params);die;
+        } else {
+            $message = $this->getMessage();
+            $chat = $message->getChat();
+            $user = $message->getFrom();
 
-        $chat = $message->getChat();
-        $user = $message->getFrom();
-        $text = trim($message->getText(true));
+        }
         $chat_id = $chat->getId();
         $user_id = $user->getId();
+        $text = trim($message->getText(false));
         $data['chat_id'] = $chat_id;
+        //if ($text === '') {
+        //    $text = Yii::t('telegram/command','USAGE',$this->getUsage());
+        //    $data['text']=$text;
+       //     return Request::sendMessage($data);
+       // }
 
-        //Preparing Response
-
-
-        if ($chat->isGroupChat() || $chat->isSuperGroup()) {
-            //reply to message id is applied by default
-            //Force reply is applied by default so it can work with privacy on
-            $data['reply_markup'] = Keyboard::forceReply(['selective' => true]);
-        }
 
         //Conversation start
         $this->conversation = new Conversation($user_id, $chat_id, $this->getName());
@@ -101,14 +111,49 @@ class ProductremoveCommand extends AdminCommand
 
         $result = Request::emptyResponse();
         $product = null;
+
+
+
+
         //State machine
         //Entrypoint of the machine state if given by the track
         //Every time a step is achieved the track is updated
         switch ($state) {
             case 0:
+                if (!is_numeric($text)) {
 
-                if ($text !== '') {
+                }
+                /*if ($text === '' || !in_array($text, ['Да', 'Нет'], true)) {
                     $notes['state'] = 0;
+                    $notes['confirm']=false;
+                    $this->conversation->update();
+
+
+                    $data['reply_markup'] = (new Keyboard(['Да', 'Нет']))
+                        ->setResizeKeyboard(true)
+                        ->setOneTimeKeyboard(true)
+                        ->setSelective(true);
+
+                    $data['text'] = 'Укажите ID товара';
+                    if ($text !== '') {
+                        $data['text'] = 'ID товара должен быть числом:';
+                    }
+
+
+                    $result = Request::sendMessage($data);
+                    break;
+                }
+                $notes['confirm'] = true;
+
+                $text = '';*/
+
+
+
+            // no break
+            case 1:
+
+                if ($notes['confirm']) {
+                    $notes['state'] = 1;
                     if (!is_numeric($text)) {
                         $this->conversation->update();
 
@@ -121,7 +166,7 @@ class ProductremoveCommand extends AdminCommand
                     } else {
 
                         $this->conversation->update();
-                      //  echo $text;
+                        //  echo $text;
                         $product = Product::findOne($text);
 
                         if ($product) {
@@ -132,9 +177,9 @@ class ProductremoveCommand extends AdminCommand
                                 ->setSelective(true);
                             $result = Request::sendMessage($data);
                             break;
-                        }else{
+                        } else {
                             $data['text'] = 'Товар не найден';
-                              $result = Request::sendMessage($data);
+                            $result = Request::sendMessage($data);
 
                         }
                     }
@@ -147,36 +192,6 @@ class ProductremoveCommand extends AdminCommand
                 $text = '';
             // no break
 
-            case 1:
-
-print_r($notes);
-                if ($text === '' || !in_array($text, ['Yes', 'No'], true)) {
-                    $notes['state'] = 1;
-                    $this->conversation->update();
-
-
-                    $data['reply_markup'] = (new Keyboard(['Yes', 'No']))
-                        ->setResizeKeyboard(true)
-                        ->setOneTimeKeyboard(true)
-                        ->setSelective(true);
-
-                    $data['text'] = 'Подтвердите действие:';
-                    if ($text !== '') {
-                        $data['text'] = 'Выберите действие, на клавиатуры:';
-                    }
-
-
-                    $result = Request::sendMessage($data);
-                    break;
-                }
-
-                if ($text == 'No') {
-                    $notes['bool'] = 'No';
-                }
-                $notes['bool'] = $text;
-
-            //  $text = '';
-            // no break
             case 2:
                 $notes['state'] = 2;
                 $this->conversation->update();
