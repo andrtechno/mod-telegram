@@ -43,7 +43,7 @@ class CancelCommand extends SystemCommand
     public function execute()
     {
         // $text = 'No active conversation!';
-
+        $text = '';
         //Cancel current conversation if any
         $conversation = new Conversation(
             $this->getMessage()->getFrom()->getId(),
@@ -52,7 +52,7 @@ class CancelCommand extends SystemCommand
 
         if ($conversation_command = $conversation->getCommand()) {
             $conversation->cancel();
-            $text = '';
+
             if ($this->telegram->isAdmin($this->getMessage()->getFrom()->getId())) {
                 $text .= ucfirst($conversation_command) . ': ';
             }

@@ -489,13 +489,17 @@ print_r($match);die;
                             ];
                         }
 
-                        $keyboards[] = $this->productAdminKeywords($chat_id, $product);
+                        $keyboards[] = $this->productAdminKeywords($chat_id, $product->id);
 
-                        echo Url::to($product->getImage()->getUrlToOrigin(), true) . PHP_EOL;
+                      //  echo Url::to($product->getImage()->getUrlToOrigin(), true) . PHP_EOL;
                        // echo $product->getImage()->getPath();
+
+
+                        $image = $product->getImage()->getPathToOrigin();
+                        // $image = Url::to($product->getImage()->getUrlToOrigin(), true);
                         $dataPhoto = [
                             //'photo' => Url::to($product->getImage()->getUrl('800x800'), true),
-                            'photo' => Url::to($product->getImage()->getUrlToOrigin(), true),
+                            'photo' => $image,
                             'chat_id' => $chat_id,
                             'parse_mode' => 'HTML',
                             'caption' => $caption,
@@ -507,8 +511,8 @@ print_r($match);die;
                         if(!$reqPhoto->isOk()){
                             $errorCode = $reqPhoto->getErrorCode();
                             $description = $reqPhoto->getDescription();
-                            print_r($reqPhoto);
-                            $s = $this->notify("{$errorCode} {$description} ".Url::to($product->getImage()->getUrlToOrigin(), true),'error');
+                            //print_r($reqPhoto);
+                            $s = $this->notify("{$errorCode} {$description} ".$image,'error');
                         }
                     }
                 }
@@ -547,7 +551,7 @@ print_r($match);die;
                     $data['text'] = $begin . ' / ' . $pages->totalCount;
                 }
                 $data['disable_notification'] = false;
-
+                //todo добавить кнопку вернуться в каталог или еще чтото, после "Все!"
                 if ($pager->buttons) {
                     $keyboards2[] = $pager->buttons;
                     $data['reply_markup'] = new InlineKeyboard([

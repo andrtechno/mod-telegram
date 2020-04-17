@@ -35,22 +35,22 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
     }
 
 
-    public function productAdminKeywords($chat_id, $product)
+    public function productAdminKeywords($chat_id, $product_id)
     {
         $keyboards = [];
         if ($this->telegram->isAdmin($chat_id)) {
             $keyboards = [
                 new InlineKeyboardButton([
                     'text' => '✏',
-                    'callback_data' => 'query=productUpdate&id=' . $product->id
+                    'callback_data' => 'query=productUpdate&id=' . $product_id
                 ]),
                 new InlineKeyboardButton([
                     'text' => '👁',
-                    'callback_data' => 'query=productSwitch&id=' . $product->id
+                    'callback_data' => 'query=productSwitch&id=' . $product_id
                 ]),
                 new InlineKeyboardButton([
                     'text' => '❌',
-                    'callback_data' => 'query=productDelete&id=' . $product->id
+                    'callback_data' => 'query=productDelete&id=' . $product_id
                 ]),
             ];
         }
@@ -83,7 +83,7 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
 
     public function number_format($sum)
     {
-        return number_format($sum, 1, '.', ' ');
+        return number_format($sum, 2, '.', ' ');
     }
 
     public function errorMessage($message = null)
