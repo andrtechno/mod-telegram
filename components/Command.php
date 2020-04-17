@@ -35,22 +35,22 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
     }
 
 
-    public function productAdminKeywords($chat_id, $product_id)
+    public function productAdminKeywords($chat_id, $product)
     {
         $keyboards = [];
         if ($this->telegram->isAdmin($chat_id)) {
             $keyboards = [
                 new InlineKeyboardButton([
                     'text' => '✏',
-                    'callback_data' => 'query=productUpdate&id=' . $product_id
+                    'callback_data' => 'query=productUpdate&id=' . $product->id
                 ]),
                 new InlineKeyboardButton([
                     'text' => '👁',
-                    'callback_data' => 'query=productSwitch&id=' . $product_id
+                    'callback_data' => 'query=productSwitch&id=' . $product->id
                 ]),
                 new InlineKeyboardButton([
                     'text' => '❌',
-                    'callback_data' => 'query=productDelete&id=' . $product_id
+                    'callback_data' => 'query=productDelete&id=' . $product->id
                 ]),
             ];
         }
@@ -118,7 +118,7 @@ abstract class Command extends \Longman\TelegramBot\Commands\Command
             $data['chat_id'] = $update->getMessage()->getChat()->getId();
         }
         $data['parse_mode']='Markdown';
-        $data['text'] = $preText . ' `'.$message.'`';
+        $data['text'] = $preText . '`'.$message.'`';
         return Request::sendMessage($data);
     }
 

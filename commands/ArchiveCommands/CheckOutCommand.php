@@ -67,6 +67,7 @@ class CheckOutCommand extends SystemCommand
      * @var \Longman\TelegramBot\Conversation
      */
     protected $conversation;
+    public $id;
 
     /**
      * Command execute method
@@ -82,6 +83,7 @@ class CheckOutCommand extends SystemCommand
 
         if ($update->getCallbackQuery()) {
             $callbackQuery = $update->getCallbackQuery();
+
             $message = $callbackQuery->getMessage();
             //  $chat = $callbackQuery->getMessage()->getChat();
             //  $user = $message->getFrom();
@@ -89,6 +91,9 @@ class CheckOutCommand extends SystemCommand
             $user = $callbackQuery->getFrom();
             $chat_id = $chat->getId();
             $user_id = $user->getId();
+            parse_str($callbackQuery->getData(), $params);
+            $order = Order::find()->where(['id' => $params['id'], 'checkout' => 0])->one();
+
         } else {
             $message = $this->getMessage();
             $chat = $message->getChat();
@@ -96,18 +101,12 @@ class CheckOutCommand extends SystemCommand
 
             $chat_id = $chat->getId();
             $user_id = $user->getId();
+            $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
         }
 
+
         $data['chat_id'] = $chat_id;
-
-//print_r($this->getMessage());
-      //  $data['text'] = 'Оформдение заказа!!!';
-        //  $text = $data['text'];
-      //  Request::sendMessage($data);
-
         $text = trim($message->getText(true));
-       // echo $text;
-        $text='';
 
         /*$order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
         if (!$order || !$order->getProducts()->count()) {
@@ -118,212 +117,237 @@ class CheckOutCommand extends SystemCommand
 
         //Preparing Response
 
-
-        if ($chat->isGroupChat() || $chat->isSuperGroup()) {
-            //reply to message id is applied by default
-            //Force reply is applied by default so it can work with privacy on
-            $data['reply_markup'] = Keyboard::forceReply(['selective' => true]);
+        if ($text === '❌ Отмена') {
+            $this->telegram->executeCommand('cancel');
+            return Request::emptyResponse();
         }
 
-        //Conversation start
-        $this->conversation = new Conversation($user_id, $chat_id, $this->getName());
+        if ($order) {
 
-        $notes = &$this->conversation->notes;
-        !is_array($notes) && $notes = [];
+            if ($chat->isGroupChat() || $chat->isSuperGroup()) {
+                //reply to message id is applied by default
+                //Force reply is applied by default so it can work with privacy on
+                $data['reply_markup'] = Keyboard::forceReply(['selective' => true]);
+            }
 
-        //cache data from the tracking session if any
-        $state = 0;
-        if (isset($notes['state'])) {
-            $state = $notes['state'];
-        }
+            //Conversation start
+            $this->conversation = new Conversation($user_id, $chat_id, $this->getName());
+
+            $notes = &$this->conversation->notes;
+            !is_array($notes) && $notes = [];
+
+            //cache data from the tracking session if any
+            $state = 0;
+            if (isset($notes['state'])) {
+                $state = $notes['state'];
+            }
 
 
-        $result = Request::emptyResponse();
+            $result = Request::emptyResponse();
 
-        //State machine
-        //Entrypoint of the machine state if given by the track
-        //Every time a step is achieved the track is updated
-        switch ($state) {
-            case 0:
 
-                if ($text === '') {
-                    $notes['state'] = 0;
-                    $this->conversation->update();
-                    //print_r($user);
-                    if ($user->getFirstName() && $user->getLastName()) {
-                        // $data['text'] = $user->getFirstName() . ' ' . $user->getLastName();
-                        $data['text'] = 'Введите Ваше имя или веберите из клавиатуры';
-                        //  $text = $data['text'];
+            //State machine
+            //Entrypoint of the machine state if given by the track
+            //Every time a step is achieved the track is updated
+            switch ($state) {
+                case 0:
+                    if ($text === '' || !in_array($text, ['➡ Продолжить', '❌ Отмена'], true)) {
+                        $notes['state'] = 0;
+                        $this->conversation->update();
 
-                        $data['reply_markup'] = (new Keyboard([$user->getFirstName() . ' ' . $user->getLastName(),'Отмена']))
+                        $data['reply_markup'] = (new Keyboard(['➡ Продолжить', '❌ Отмена']))
                             ->setResizeKeyboard(true)
                             ->setOneTimeKeyboard(true)
                             ->setSelective(true);
 
+                        $data['text'] = 'Продолжить:';
+                        if ($text !== '') {
+                            $data['text'] = 'Выберите вариант, на клавиатуры:';
+                        }
+
                         $result = Request::sendMessage($data);
                         break;
+                    }
+                    if ($text === '➡ Продолжить') {
+                        $notes['confirm'] = $text;
+                        $text = '';
                     } else {
-                        $data['text'] = 'ФИО:';
-                        $data['reply_markup'] = Keyboard::remove(['selective' => true]);
-                        $result = Request::sendMessage($data);
-                        break;
+                        return $this->telegram->executeCommand('cancel');
                     }
-                }
+                case 1:
+                    if ($text === '' || $notes['confirm'] == '➡ Продолжить') {
+                        $notes['state'] = 1;
+                        $this->conversation->update();
 
-                $notes['name'] = $text;
-                $text = '';
-            // no break
-            case 1:
-                if($text == 'Отмена'){
-                    $this->conversation->cancel();
-                    return $this->telegram->getCommandObject('cancel');
-                }
-                $delivery = Delivery::find()->all();
-                $deliveryList = [];
-                $keyboards = [];
-                foreach ($delivery as $item) {
-                    $deliveryList[$item->id] = $item->name;
-                    $keyboards[] = new KeyboardButton(['text' => $item->name]);
-                }
-                $keyboards[] = new KeyboardButton(['text' => 'Отмена']);
-                $keyboards = array_chunk($keyboards, 2);
+                        $data['reply_markup'] = (new Keyboard([$user->getFirstName() . ' ' . $user->getLastName(), 'Отмена']))
+                            ->setResizeKeyboard(true)
+                            ->setOneTimeKeyboard(true)
+                            ->setSelective(true);
 
-
-                $buttons = (new Keyboard(['keyboard' => $keyboards]))
-                    ->setResizeKeyboard(true)
-                    ->setOneTimeKeyboard(true)
-                    ->setSelective(true);
-
-
-                if ($text === '' || !in_array($text, $deliveryList, true)) {
-                    $notes['state'] = 1;
-                    $this->conversation->update();
-
-                    $data['reply_markup'] = $buttons;
-
-                    $data['text'] = 'Выберите вариант доставки:';
-                    if ($text !== '') {
-                        $data['text'] = 'Выберите вариант доставки, на клавиатуры:';
-                    }
-
-                    $result = Request::sendMessage($data);
-                    break;
-                }
-
-                $notes['delivery'] = $text;
-                $notes['delivery_id'] = array_search($text, $deliveryList);
-            // no break
-            case 2:
-
-                $payments = Payment::find()->all();
-                $paymentList = [];
-                $keyboards = [];
-                foreach ($payments as $k => $item) {
-                    $paymentList[$item->id] = $item->name;
-                    $keyboards[] = new KeyboardButton(['text' => $item->name]);
-                }
-                $keyboards = array_chunk($keyboards, 2);
-
-                $buttons = (new Keyboard(['keyboard' => $keyboards]))
-                    ->setResizeKeyboard(true)
-                    ->setOneTimeKeyboard(true)
-                    ->setSelective(true);
-
-                if ($text === '' || !in_array($text, $paymentList, true)) {
-                    $notes['state'] = 2;
-                    $this->conversation->update();
-
-                    $data['reply_markup'] = $buttons;
-
-                    $data['text'] = 'Выберите вариант оплаты:';
-                    if ($text !== '') {
-                        $data['text'] = 'Выберите вариант оплаты, на клавиатуры:';
-                    }
-
-                    $result = Request::sendMessage($data);
-                    break;
-                }
-
-                $notes['payment'] = $text;
-                $notes['payment_id'] = array_search($text, $paymentList);
-            // no break
-            case 3:
-                if ($message->getContact() === null) {
-                    $notes['state'] = 3;
-                    $this->conversation->update();
-
-                    $data['reply_markup'] = (new Keyboard(
-                        (new KeyboardButton('📞 Оставить конакты'))->setRequestContact(true)
-                    ))
-                        ->setOneTimeKeyboard(true)
-                        ->setResizeKeyboard(true)
-                        ->setSelective(true);
-
-                    $data['text'] = 'Ваши контактные данные:';
-
-                    $result = Request::sendMessage($data);
-                    break;
-                }
-
-                $notes['phone_number'] = $message->getContact()->getPhoneNumber();
-
-            // no break
-            case 4:
-                $this->conversation->update();
-                $content = '✅ Ваш заказ успешно оформлен' . PHP_EOL;
-                $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
-                if ($order) {
-                    if ($order->products) {
-                        foreach ($order->products as $product) {
-                            $content .= '<strong>' . $product->name . '</strong>: ' . $product->price . '' . PHP_EOL;
+                        $data['text'] = 'Ваше имя:';
+                        if (empty($text)) {
+                            $result = Request::sendMessage($data);
+                            break;
                         }
                     }
-                }
-                $content .= 'Суммка заказа: ' . $order->total_price . '' . PHP_EOL;
-                unset($notes['state']);
-                foreach ($notes as $k => $v) {
-                    $content .= PHP_EOL . '<strong>' . ucfirst($k) . '</strong>: ' . $v;
-                }
+                    $notes['name'] = $text;
+                    $text = '';
+                // no break
+                case 2:
 
-                $order->delivery = $notes['delivery'];
-                $order->payment = $notes['payment'];
-                $order->delivery_id = $notes['delivery_id'];
-                $order->payment_id = $notes['payment_id'];
-                $order->checkout = 1;
-                $order->save();
-
-                $data['parse_mode'] = 'HTML';
-
-
-                $keyboards[] = [
-                    new KeyboardButton(['text' => '🏠 Начало']),
-                    new KeyboardButton(['text' => '🛍 Каталог']),
-                    new KeyboardButton(['text' => '📦 Мои заказы'])
-                ];
-
-                $data['reply_markup'] = (new Keyboard([
-                    'keyboard' => $keyboards
-                ]))->setResizeKeyboard(true)->setOneTimeKeyboard(true)->setSelective(true);
-
-                $data['text'] = $content;
-                $result = Request::sendMessage($data);
+                    $delivery = Delivery::find()->all();
+                    $deliveryList = [];
+                    $keyboards = [];
+                    foreach ($delivery as $item) {
+                        $deliveryList[$item->id] = $item->name;
+                        $keyboards[] = new KeyboardButton($item->name);
+                    }
+                    $keyboards[] = new KeyboardButton('❌ Отмена');
+                    $keyboards = array_chunk($keyboards, 2);
 
 
-                if ($result->isOk()) {
-                    $inlineKeyboards[] = [
-                        new InlineKeyboardButton(['text' => Yii::t('telegram/command','BUTTON_PAY',$order->total_price), 'callback_data' => "payment/{$order->id}"]),
-                    ];
-                    $data['reply_markup'] = new InlineKeyboard([
-                        'inline_keyboard' => $inlineKeyboards
-                    ]);
-                    $data['text'] = '🙍🏼‍♀ Наш менеджер свяжеться с вами!';
+                    $buttons = (new Keyboard(['keyboard' => $keyboards]))
+                        ->setResizeKeyboard(true)
+                        ->setOneTimeKeyboard(true)
+                        ->setSelective(true);
+
+
+                    if ($text === '' || !in_array($text, $deliveryList, true)) {
+                        $notes['state'] = 2;
+                        $this->conversation->update();
+
+                        $data['reply_markup'] = $buttons;
+
+                        $data['text'] = 'Выберите вариант доставки:';
+                        if ($text !== '') {
+                            $data['text'] = 'Выберите вариант доставки, на клавиатуры:';
+                        }
+
+                        $result = Request::sendMessage($data);
+                        break;
+                    }
+
+                    $notes['delivery'] = $text;
+                    $notes['delivery_id'] = array_search($text, $deliveryList);
+                // no break
+                case 3:
+
+                    $payments = Payment::find()->all();
+                    $paymentList = [];
+                    $keyboards = [];
+                    foreach ($payments as $k => $item) {
+                        $paymentList[$item->id] = $item->name;
+                        $keyboards[] = new KeyboardButton(['text' => $item->name]);
+                    }
+                    $keyboards[] = new KeyboardButton('❌ Отмена');
+                    $keyboards = array_chunk($keyboards, 2);
+
+                    $buttons = (new Keyboard(['keyboard' => $keyboards]))
+                        ->setResizeKeyboard(true)
+                        ->setOneTimeKeyboard(true)
+                        ->setSelective(true);
+
+                    if ($text === '' || !in_array($text, $paymentList, true)) {
+                        $notes['state'] = 3;
+                        $this->conversation->update();
+
+                        $data['reply_markup'] = $buttons;
+
+                        $data['text'] = 'Выберите вариант оплаты:';
+                        if ($text !== '') {
+                            $data['text'] = 'Выберите вариант оплаты, на клавиатуры:';
+                        }
+
+                        $result = Request::sendMessage($data);
+                        break;
+                    }
+
+                    $notes['payment'] = $text;
+                    $notes['payment_id'] = array_search($text, $paymentList);
+                // no break
+                case 4:
+                    if ($message->getContact() === null) {
+                        $notes['state'] = 4;
+                        $this->conversation->update();
+
+                        $data['reply_markup'] = (new Keyboard(
+                            (new KeyboardButton('📞 Оставить контакты'))->setRequestContact(true),
+                            new KeyboardButton('❌ Отмена')
+                        ))
+                            ->setOneTimeKeyboard(true)
+                            ->setResizeKeyboard(true)
+                            ->setSelective(true);
+
+                        $data['text'] = 'Ваши контактные данные:';
+
+                        $result = Request::sendMessage($data);
+                        break;
+                    }
+
+                    $notes['phone_number'] = $message->getContact()->getPhoneNumber();
+
+                // no break
+                case 5:
+                    $this->conversation->update();
+                    $content = '*✅ Ваш заказ успешно оформлен*' . PHP_EOL . PHP_EOL;
+                    $order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
+                    if ($order) {
+                        $products = $order->products;
+                        if ($products) {
+                            foreach ($products as $product) {
+                                $content .= '*' . $product->name . ' (' . $product->quantity . ' шт.)*: ' . $this->number_format($product->price) . ' грн.' . PHP_EOL;
+                            }
+                        }
+                    }
+
+                    unset($notes['state']);
+                    //foreach ($notes as $k => $v) {
+                    //    $content .= PHP_EOL . '*' . ucfirst($k) . '*: ' . $v;
+                    //}
+
+                    $content .= PHP_EOL . '*Имя*: ' . $notes['name'];
+                    $content .= PHP_EOL . '*Телефон*: ' . $notes['phone_number'] . PHP_EOL;
+
+                    $content .= PHP_EOL . '*Доставка*: ' . $notes['delivery'];
+                    $content .= PHP_EOL . '*Оплата*: ' . $notes['payment'];
+
+                    $content .= PHP_EOL . PHP_EOL . 'Сумма заказа: *' . $this->number_format($order->total_price) . '* грн.';
+
+                    $order->delivery = $notes['delivery'];
+                    $order->payment = $notes['payment'];
+                    $order->delivery_id = $notes['delivery_id'];
+                    $order->payment_id = $notes['payment_id'];
+                    $order->checkout = 1;
+                    $order->save();
+
+                    $data['parse_mode'] = 'Markdown';
+                    $data['reply_markup'] = $this->homeKeyboards();
+                    $data['text'] = $content;
                     $result = Request::sendMessage($data);
-                }
 
-                $this->conversation->stop();
-                break;
+
+                    if ($result->isOk()) {
+                        $inlineKeyboards[] = [
+                            new InlineKeyboardButton(['text' => Yii::t('telegram/command', 'BUTTON_PAY', $this->number_format($order->total_price)), 'callback_data' => "payment/{$order->id}"]),
+                        ];
+                        $data['reply_markup'] = new InlineKeyboard([
+                            'inline_keyboard' => $inlineKeyboards
+                        ]);
+                        $data['text'] = '🙍🏼‍♀ Наш менеджер свяжеться с вами!';
+                        $result = Request::sendMessage($data);
+                    }
+
+                    $this->conversation->stop();
+                    break;
+            }
+        } else {
+            $data['text'] = 'Уже оформлен!';
+            $data['reply_markup'] = $this->startKeyboards();
+
+            $result = Request::sendMessage($data);
         }
-
         return $result;
     }
+
+
 }

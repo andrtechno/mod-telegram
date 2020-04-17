@@ -12,9 +12,9 @@ namespace panix\mod\telegram\commands\UserCommands;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
+use panix\mod\telegram\components\UserCommand;
 
 /**
  * User "/weather" command
@@ -28,7 +28,9 @@ class WeatherCommand extends UserCommand
     protected $description = 'Show weather by location';
     protected $usage = '/weather <location>';
     protected $version = '1.1.0';
-    public $enabled = false;
+    public $enabled = true;
+    public $show_in_help=false;
+    public $private_only=true;
     /**#@-*/
 
     /**
@@ -80,24 +82,20 @@ class WeatherCommand extends UserCommand
 
             //http://openweathermap.org/weather-conditions
             $conditions = [
-                'clear'        => ' ☀️',
-                'clouds'       => ' ☁️',
-                'rain'         => ' ☔',
-                'drizzle'      => ' ☔',
-                'thunderstorm' => ' ⚡️',
-                'snow'         => ' ❄️',
+                'clear'        => ' ☀ ',
+                'clouds'       => ' ☁ ',
+                'rain'         => ' ☔ ',
+                'drizzle'      => ' ☔ ',
+                'thunderstorm' => ' ⚡ ',
+                'snow'         => ' ❄ ',
             ];
             $conditions_now = strtolower($data['weather'][0]['main']);
 
-            return sprintf(
-                'The temperature in %1$s (%2$s) is %3$s°C' . "\n" .
-                'Current conditions are: %4$s%5$s',
-                $data['name'], //city
-                $data['sys']['country'], //country
-                $data['main']['temp'], //temperature
-                $data['weather'][0]['description'], //description of weather
-                (isset($conditions[$conditions_now])) ? $conditions[$conditions_now] : ''
-            );
+
+            $text = 'Температура в '.$data['name'].' ('.$data['sys']['country'].') '.round($data['main']['temp']).'°C'.PHP_EOL;
+            $text .= 'Текущие условия: '.$data['weather'][0]['description'].' '.((isset($conditions[$conditions_now])) ? $conditions[$conditions_now] : '');
+
+            return $text;
         } catch (\Exception $e) {
             return false;
         }
@@ -118,13 +116,13 @@ class WeatherCommand extends UserCommand
                     $text = $this->getWeatherString($weather_data);
                 }
                 if (!$text) {
-                    $text = 'Cannot find weather for location: ' . $location;
+                    $text = 'Не могу найти погоду для местоположения: ' . $location;
                 }
             } else {
-                $text = 'You must specify location in format: /weather <city>';
+                $text = 'Вы должны указать местоположение в формате: /weather <city>';
             }
         } else {
-            $text = 'OpenWeatherMap API key not defined.';
+            $text = 'OpenWeatherMap API key не определено.';
         }
 
         $data = [

@@ -16,16 +16,16 @@ use panix\mod\telegram\components\UserCommand;
 use Yii;
 
 /**
- * User "/contact" command
+ * User "/contacts" command
  *
  * Display an inline keyboard with a few buttons.
  */
-class ContactCommand extends UserCommand
+class ContactsCommand extends UserCommand
 {
     /**
      * @var string
      */
-    protected $name = 'contact';
+    protected $name = 'contacts';
 
     /**
      * @var string
@@ -35,7 +35,7 @@ class ContactCommand extends UserCommand
     /**
      * @var string
      */
-    protected $usage = '/contact';
+    protected $usage = '/contacts';
 
     /**
      * @var string

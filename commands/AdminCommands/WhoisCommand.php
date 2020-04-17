@@ -139,8 +139,18 @@ class WhoisCommand extends AdminCommand
                         $text .= 'Username: @' . $username . PHP_EOL;
                     }
 
-                    $text .= 'First time seen: ' . $created_at . PHP_EOL;
-                    $text .= 'Последния активность: ' . $updated_at . PHP_EOL;
+
+
+                    $created_at = new \DateTime($created_at, new \DateTimeZone('Europe/Kiev'));
+                    $created_at2 = $created_at->format('Y-m-d H:i:s');
+
+
+                    $updated_at = new \DateTime($updated_at, new \DateTimeZone('Europe/Kiev'));
+                    $updated_at2 = $updated_at->format('Y-m-d H:i:s');
+
+
+                    $text .= 'Впервые увидел: ' . $created_at2 . PHP_EOL;
+                    $text .= 'Последния активность: ' . $updated_at2 . PHP_EOL;
 
                     //Code from Whoami command
                     $limit    = 10;
@@ -174,7 +184,7 @@ class WhoisCommand extends AdminCommand
                     $text = 'Чат ID: ' . $user_id . (!empty($old_id) ? ' (previously: ' . $old_id . ')' : '') . PHP_EOL;
                     $text .= 'Тип: ' . ucfirst($chat->getType()) . PHP_EOL;
                     $text .= 'Title: ' . $chat->getTitle() . PHP_EOL;
-                    $text .= 'First time added to group: ' . $created_at . PHP_EOL;
+                    $text .= 'Впервые добавлено в группу: ' . $created_at . PHP_EOL;
                     $text .= 'Последния активность: ' . $updated_at . PHP_EOL;
                 }
             } elseif (is_array($results) && count($results) > 1) {

@@ -33,7 +33,7 @@ class IndexController extends Controller
 // Define all IDs of admin users in this array (leave as empty array if not used)
       //  $admin_users = [812367093];
       //  $admin_users2 = explode(',', Yii::$app->settings->get('telegram', 'bot_admins'));
-        Yii::$app->urlManager->setHostInfo('https://bot.7roddom.org.ua');
+        Yii::$app->urlManager->setHostInfo('https://yii2.pixelion.com.ua');
         $commands_paths = [
 
             __DIR__ . '/AdminCommands',
@@ -76,6 +76,9 @@ class IndexController extends Controller
                 sleep(2);
                 // Create Telegram API object
 
+                $telegram->setCommandConfig('weather', [
+                    'owm_api_key' => '41b3ffa90fad3fb24efcd8f32c6102fa',
+                ]);
 
                 // Here you can set some command specific parameters
                 // e.g. Google geocode/timezone api key for /date command
@@ -86,49 +89,9 @@ class IndexController extends Controller
 
                 // Handle telegram getUpdates request
                 $server_response = $telegram->handleGetUpdates();
-
+               // $telegram->useGetUpdatesWithoutDatabase(true);
+               // print_r($server_response);die;
                 if ($server_response->isOk()) {
-
-                    foreach ($server_response->getResult() as $result) {
-                        $message = $result->getMessage();
-                        if ($message) {
-                            $text = $message->getText();
-                            // $preg = preg_match('/^(\/catalog)\s([0-9]+)/', trim($message->getText()), $match);
-
-                            //
-                           /* if (preg_match('/^(\x{1F6CD})/iu', trim($text), $match)) { //cart emoji
-                                $telegram->executeCommand('cart');
-                            } elseif (preg_match('/^(\x{1F4C2})/iu', trim($text), $match)) { //folder emoji
-                                $telegram->executeCommand('catalog');
-                            } elseif (preg_match('/^(\x{1F3E0})/iu', trim($text), $match)) { //home emoji
-                                $telegram->executeCommand('start');
-                                $telegram->executeCommand('cancel');
-
-                            } elseif (trim($text) == 'Отмена') {
-                                $telegram->executeCommand('cancel');
-                            } elseif (preg_match('/^(\x{2753})/iu', trim($text), $match)) { //help emoji
-                                // $telegram->executeCommand('help');
-                            } elseif (preg_match('/^(\x{1F4E2})/iu', trim($text), $match)) { //news emoji
-                                  $telegram->executeCommand('news');
-                            } elseif (preg_match('/^(\x{1F4E6})/iu', trim($text), $match)) { //my carts emoji
-                                //  $telegram->executeCommand('help');
-                            } elseif (preg_match('/^(\x{260E}|\x{1F4DE})/iu', trim($text), $match)) { //phone emoji
-                                  $telegram->executeCommand('call');
-                            } elseif (preg_match('/^(\x{2709})/iu', trim($text), $match)) { //feedback emoji
-                                $telegram->executeCommand('feedback');
-                            } elseif (preg_match('/^(\x{1F4E6})/iu', trim($text), $match)) { //package emoji
-                                $telegram->executeCommand('history');
-                            } elseif (preg_match('/^(\x{2699})/iu', trim($text), $match)) { //gear emoji
-                                $telegram->executeCommand('settings');
-                            } elseif (preg_match('/^(\x{1F50E})/iu', trim($text), $match)) { //search emoji
-                                $telegram->executeCommand('search');
-
-                              //  $telegram->setCommandConfig('catalog', ['category_id' => '20']);
-                              //  $telegram->executeCommand('catalog');
-                            }*/
-                        }
-
-                    }
                     $update_count = count($server_response->getResult());
                     echo $i.': '.date('Y-m-d H:i:s', time()) . ' - Processed ' . $update_count . ' updates' . PHP_EOL;
                 } else {

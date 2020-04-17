@@ -11,7 +11,7 @@
 namespace panix\mod\telegram\commands\AdminCommands;
 
 
-use Longman\TelegramBot\Commands\AdminCommand;
+
 use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Entities\Keyboard;
 use Longman\TelegramBot\Entities\KeyboardButton;
@@ -20,6 +20,7 @@ use panix\engine\CMS;
 use panix\mod\shop\models\Category;
 use panix\mod\shop\models\Product;
 use panix\mod\shop\models\ProductType;
+use panix\mod\telegram\components\AdminCommand;
 use Yii;
 
 /**

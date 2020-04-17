@@ -489,9 +489,10 @@ class CallbackqueryCommand extends SystemCommand
                             ];
                         }
 
-                        $keyboards[] = $this->productAdminKeywords($chat_id, $product->id);
+                        $keyboards[] = $this->productAdminKeywords($chat_id, $product);
 
                         echo Url::to($product->getImage()->getUrlToOrigin(), true) . PHP_EOL;
+                       // echo $product->getImage()->getPath();
                         $dataPhoto = [
                             //'photo' => Url::to($product->getImage()->getUrl('800x800'), true),
                             'photo' => Url::to($product->getImage()->getUrlToOrigin(), true),
@@ -503,6 +504,12 @@ class CallbackqueryCommand extends SystemCommand
                             ]),
                         ];
                         $reqPhoto = Request::sendPhoto($dataPhoto);
+                        if(!$reqPhoto->isOk()){
+                            $errorCode = $reqPhoto->getErrorCode();
+                            $description = $reqPhoto->getDescription();
+                            print_r($reqPhoto);
+                            $s = $this->notify("{$errorCode} {$description} ".Url::to($product->getImage()->getUrlToOrigin(), true),'error');
+                        }
                     }
                 }
 

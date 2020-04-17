@@ -78,9 +78,18 @@ class GenericmessageCommand extends SystemCommand
         }
 
         $text = trim($this->getMessage()->getText());
-
-
-
+/*
+        $results = Request::sendToActiveChats(
+            'sendMessage', // Callback function to execute (see Request.php methods)
+            ['text' => 'Hey! Check out the new features!!'], // Param to evaluate the request
+            [
+                'groups'      => true,
+                'supergroups' => true,
+                'channels'    => false,
+                'users'       => true,
+            ]
+        );
+*/
         /*$message = $this->getMessage();
 
         //You can use $command as param
