@@ -175,7 +175,7 @@ class CheckOutCommand extends SystemCommand
 
                         $data['text'] = 'Продолжить:';
                         if ($text !== '') {
-                            $data['text'] = 'Выберите вариант, на клавиатуры:';
+                            $data['text'] = 'Выберите вариант, на клавиатуре:';
                         }
 
                         $result = Request::sendMessage($data);
@@ -243,7 +243,7 @@ class CheckOutCommand extends SystemCommand
 
                         $data['text'] = 'Выберите вариант доставки:';
                         if ($text !== '') {
-                            $data['text'] = 'Выберите вариант доставки, на клавиатуры:';
+                            $data['text'] = 'Выберите вариант доставки, на клавиатуре:';
                         }
 
                         $result = Request::sendMessage($data);
@@ -284,7 +284,7 @@ class CheckOutCommand extends SystemCommand
 
                         $data['text'] = 'Выберите вариант оплаты:';
                         if ($text !== '') {
-                            $data['text'] = 'Выберите вариант оплаты, на клавиатуры:';
+                            $data['text'] = 'Выберите вариант оплаты, на клавиатуре:';
                         }
 
                         $result = Request::sendMessage($data);

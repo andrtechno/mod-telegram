@@ -147,7 +147,7 @@ class CheckOutCommand extends SystemCommand
                     $notes['state'] = 0;
                     $this->conversation->update();
                     if ($user->getFirstName() && $user->getLastName()) {
-                        $data['text'] = 'Введите Ваше имя или веберите из клавиатуры';
+                        $data['text'] = 'Введите Ваше имя или веберите из клавиатуре';
                         $data['reply_markup'] = (new Keyboard([$user->getFirstName() . ' ' . $user->getLastName(), 'Отмена']))
                             ->setResizeKeyboard(true)
                             ->setOneTimeKeyboard(true)
@@ -206,7 +206,7 @@ class CheckOutCommand extends SystemCommand
 
                     $data['text'] = 'Выберите вариант доставки:';
                     if ($text !== '') {
-                        $data['text'] = 'Выберите вариант доставки, на клавиатуры:';
+                        $data['text'] = 'Выберите вариант доставки, на клавиатуре:';
                     }
 
                     $result = Request::sendMessage($data);
@@ -241,7 +241,7 @@ class CheckOutCommand extends SystemCommand
 
                     $data['text'] = 'Выберите вариант оплаты:';
                     if ($text !== '') {
-                        $data['text'] = 'Выберите вариант оплаты, на клавиатуры:';
+                        $data['text'] = 'Выберите вариант оплаты, на клавиатуре:';
                     }
 
                     $result = Request::sendMessage($data);

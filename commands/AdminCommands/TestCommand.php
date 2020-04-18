@@ -132,7 +132,7 @@ class TestCommand extends AdminCommand
 
                     $data['text'] = 'Выберите тип товара:';
                     if ($text !== '') {
-                        $data['text'] = 'Выберите тип товара, на клавиатуры:';
+                        $data['text'] = 'Выберите тип товара, на клавиатуре:';
                     }
 
                     $result = Request::sendMessage($data);
@@ -217,7 +217,7 @@ $a->title;
 
                     $data['text'] = 'Выберите категорию:';
                     if ($text !== '') {
-                        $data['text'] = 'Выберите категорию, на клавиатуры:';
+                        $data['text'] = 'Выберите категорию, на клавиатуре:';
                     }
 
                     $result = Request::sendMessage($data);

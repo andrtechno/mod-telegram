@@ -155,7 +155,7 @@ class Productremove1Command extends AdminCommand
 
                     $data['text'] = 'Подтвердите действие:';
                     if ($text !== '') {
-                        $data['text'] = 'Выберите действие, на клавиатуры:';
+                        $data['text'] = 'Выберите действие, на клавиатуре:';
                     }
 
 

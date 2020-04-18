@@ -181,10 +181,11 @@ class SearchResultCommand extends SystemCommand
 
                 $keyboards[] = $this->productAdminKeywords($chat_id, $product->id);
 
-
+                $image = $product->getImage()->getPathToOrigin();
+                //Url::to($product->getImage()->getUrlToOrigin(),true),
                 $dataPhoto = [
 
-                    'photo' => Url::to($product->getImage()->getUrlToOrigin(),true),
+                    'photo' => $image,
                     //'photo'=>'https://www.meme-arsenal.com/memes/50569ac974c29121ff9075e45a334942.jpg',
                    // 'photo' => Url::to($product->getImage()->getUrl('800x800'), true),
                     'chat_id' => $chat_id,
