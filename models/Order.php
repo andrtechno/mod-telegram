@@ -121,9 +121,9 @@ class Order extends \yii\db\ActiveRecord
             $ordered_product->quantity = $quantity;
          //   $ordered_product->sku = $product->sku;
             $ordered_product->price = $price;
-            $ordered_product->save();
-
+            return $ordered_product->save();
         }
+        return false;
     }
 
 }

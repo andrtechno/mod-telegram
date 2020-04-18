@@ -63,8 +63,10 @@ class CatalogproductquantityCommand extends SystemCommand
             $this->order_id = NULL;
         }
         $update = $this->getUpdate();
-        if ($update->getCallbackQuery()) {
-            $message = $update->getCallbackQuery()->getMessage();
+        $callback_query = $update->getCallbackQuery();
+        if ($callback_query) {
+            $message = $callback_query->getMessage();
+            $callback_query_id = $callback_query->getId();
         } else {
             $message = $this->getMessage();
         }
@@ -104,6 +106,13 @@ class CatalogproductquantityCommand extends SystemCommand
             'inline_keyboard' => $keyboards
         ]);
 
+        $data = [
+            'callback_query_id' => $callback_query_id,
+            'text' => '✅ Товар успешно добавлен в корзину',
+            'show_alert' => false,
+            'cache_time' => 0,
+        ];
+        $notify = Request::answerCallbackQuery($data);
 
         return Request::editMessageReplyMarkup($dataEdit);
     }

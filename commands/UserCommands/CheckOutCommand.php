@@ -108,8 +108,8 @@ class CheckOutCommand extends SystemCommand
         $data['chat_id'] = $chat_id;
         $text = trim($message->getText(true));
 
-        /*$order = Order::find()->where(['client_id' => $user_id, 'checkout' => 0])->one();
-        if (!$order || !$order->getProducts()->count()) {
+
+        /*if (!$order || !$order->getProducts()->count()) {
             $data['text'] = Yii::$app->settings->get('telegram', 'empty_cart_text');
             $data['reply_markup'] = $this->startKeyboards();
              return Request::sendMessage($data);
@@ -124,7 +124,20 @@ class CheckOutCommand extends SystemCommand
 
 
         if ($order) {
+            if (!$order->getProducts()->count()) {
+                // $data['reply_markup'] = $this->startKeyboards();
+                //  return $this->notify(Yii::$app->settings->get('telegram', 'empty_cart_text'),'info');
 
+
+                $data_edit = [
+                    'chat_id' => $chat_id,
+                    'message_id' => $message->getMessageId(),
+                    'text' => Yii::$app->settings->get('telegram', 'empty_cart_text'),
+                ];
+                return Request::editMessageText($data_edit);
+
+
+            }
             if ($chat->isGroupChat() || $chat->isSuperGroup()) {
                 //reply to message id is applied by default
                 //Force reply is applied by default so it can work with privacy on
@@ -176,8 +189,8 @@ class CheckOutCommand extends SystemCommand
                     }
                 case 1:
                     username:
-                    if($text == '⬅ Назад'){
-                        $text='';
+                    if ($text == '⬅ Назад') {
+                        $text = '';
                     }
                     if ($text === '' || $notes['confirm'] === '➡ Продолжить') {
                         $notes['state'] = 1;
@@ -200,7 +213,7 @@ class CheckOutCommand extends SystemCommand
                 case 2:
                     delivery:
                     if ($text === '⬅ Назад') {
-                        $text='';
+                        $text = '';
                         goto username;
                     }
                     $delivery = Delivery::find()->all();
@@ -243,7 +256,7 @@ class CheckOutCommand extends SystemCommand
                 case 3:
                     payment:
                     if ($text === '⬅ Назад') {
-                        $text='';
+                        $text = '';
                         goto delivery;
                     }
                     $payments = Payment::find()->all();
@@ -284,7 +297,7 @@ class CheckOutCommand extends SystemCommand
                 case 4:
                     contact:
                     if ($text === '⬅ Назад') {
-                        $text='';
+                        $text = '';
                         goto payment;
                     }
                     if ($message->getContact() === null) {

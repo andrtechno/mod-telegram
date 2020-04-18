@@ -191,6 +191,14 @@ class CallbackqueryCommand extends SystemCommand
                 if ($orderProduct->order)
                     $orderProduct->order->updateTotalPrice();
 
+                $data = [
+                    'callback_query_id' => $callback_query_id,
+                    'text' => 'Товар убран из корзины',
+                    'show_alert' => false,
+                    'cache_time' => 0,
+                ];
+                $notify = Request::answerCallbackQuery($data);
+
                 return Request::editMessageReplyMarkup($dataEdit);
             }
             return $this->errorMessage();
@@ -251,7 +259,7 @@ class CallbackqueryCommand extends SystemCommand
                     ])
                     ->executeCommand($command);
             }
-            return $this->notify('Товара ранее был удален и корзины','info');
+            return $this->notify('Товара ранее был удален и корзины', 'info');
 
         } elseif (preg_match('/checkOut/iu', trim($callback_data), $match)) {
             parse_str($callback_data, $params);
@@ -285,14 +293,24 @@ class CallbackqueryCommand extends SystemCommand
             }
 
 
-            $order->addProduct($product, $quantity, $product->price);
+            $add = $order->addProduct($product, $quantity, $product->price);
+            if ($add) {
+               /* $data = [
+                    'callback_query_id' => $callback_query_id,
+                    'text' => 'Товар успешно добавлен в корзину',
+                    'show_alert' => false,
+                    'cache_time' => 0,
+                ];
+                $notify = Request::answerCallbackQuery($data);*/
 
-            $this->telegram->setCommandConfig('catalogproductquantity', [
-                'product_id' => $product->id,
-                'order_id' => $order->id,
-                'quantity' => $quantity
-            ]);
-            return $this->telegram->executeCommand('catalogproductquantity');
+                $this->telegram->setCommandConfig('catalogproductquantity', [
+                    'product_id' => $product->id,
+                    'order_id' => $order->id,
+                    'quantity' => $quantity
+                ]);
+                return $this->telegram->executeCommand('catalogproductquantity');
+            }
+            return Request::emptyResponse();
 
 
         } elseif (preg_match('/^addCart2\/([0-9]+)/iu', trim($callback_data), $match)) {
@@ -386,7 +404,8 @@ class CallbackqueryCommand extends SystemCommand
             ///
         } elseif (preg_match('/(productDelete|productUpdate|productSwitch)/iu', trim($callback_data), $match)) {
             parse_str($callback_data, $params);
-print_r($match);die;
+            print_r($match);
+
 
             $data = [
                 'callback_query_id' => $callback_query_id,
@@ -491,8 +510,8 @@ print_r($match);die;
 
                         $keyboards[] = $this->productAdminKeywords($chat_id, $product->id);
 
-                      //  echo Url::to($product->getImage()->getUrlToOrigin(), true) . PHP_EOL;
-                       // echo $product->getImage()->getPath();
+                        //  echo Url::to($product->getImage()->getUrlToOrigin(), true) . PHP_EOL;
+                        // echo $product->getImage()->getPath();
 
 
                         $image = $product->getImage()->getPathToOrigin();
@@ -508,11 +527,11 @@ print_r($match);die;
                             ]),
                         ];
                         $reqPhoto = Request::sendPhoto($dataPhoto);
-                        if(!$reqPhoto->isOk()){
+                        if (!$reqPhoto->isOk()) {
                             $errorCode = $reqPhoto->getErrorCode();
                             $description = $reqPhoto->getDescription();
                             //print_r($reqPhoto);
-                            $s = $this->notify("{$errorCode} {$description} ".$image,'error');
+                            $s = $this->notify("{$errorCode} {$description} " . $image, 'error');
                         }
                     }
                 }
