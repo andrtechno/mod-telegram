@@ -15,13 +15,15 @@ class Api extends \Longman\TelegramBot\Telegram
     protected $version = '1.0.0';
     private $config = [];
 
-    public function __construct()
+    public function __construct($api_key,$bot_username='')
     {
         $this->config = Yii::$app->settings->get('telegram');
         //  echo TB_BASE_PATH.PHP_EOL;
         // echo TB_BASE_COMMANDS_PATH.PHP_EOL;
-        $api_key = $this->config->api_token;
-        $bot_username = $this->config->bot_name;
+        if(!$api_key)
+            $api_key = $this->config->api_token;
+        if(!$bot_username)
+            $bot_username = $this->config->bot_name;
         parent::__construct($api_key, $bot_username);
         $this->enableAdmins();
 
